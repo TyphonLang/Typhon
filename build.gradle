@@ -3,7 +3,6 @@ apply plugin: 'edu.sc.seis.launch4j'
 apply plugin: 'antlr'
 apply plugin: 'jacoco'
 apply plugin: 'com.jfrog.bintray'
-apply plugin: 'maven'
 
 group = 'info.iconmaster'
 version = '0.1.0'

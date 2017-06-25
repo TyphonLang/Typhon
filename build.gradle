@@ -56,4 +56,3 @@ jacocoTestReport {
         html.destination "${buildDir}/reports/coverage"
     }
 }
-*/

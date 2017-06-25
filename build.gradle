@@ -2,6 +2,8 @@ apply plugin: 'java'
 apply plugin: 'edu.sc.seis.launch4j'
 apply plugin: 'antlr'
 apply plugin: 'jacoco'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven'
 
 group = 'info.iconmaster'
 version = '0.1.0'
@@ -27,6 +29,7 @@ buildscript {
 	}
 	dependencies {
 		classpath 'gradle.plugin.edu.sc.seis.gradle:launch4j:1.6.1'
+		classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
 	}
 }
 
@@ -54,5 +57,21 @@ jacocoTestReport {
         xml.enabled true
         csv.enabled false
         html.destination "${buildDir}/reports/coverage"
+    }
+}
+
+bintray {
+    user = project.property('bintrayUser')
+    key = project.property('bintrayApiKey')
+    configurations = ['archives']
+    
+    pkg {
+        repo = 'maven'
+        name = name
+        
+        version {
+	        name = version
+	        released  = new Date()
+	    }
     }
 }

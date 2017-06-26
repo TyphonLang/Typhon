@@ -2,6 +2,7 @@ apply plugin: 'java'
 apply plugin: 'edu.sc.seis.launch4j'
 apply plugin: 'antlr'
 apply plugin: 'jacoco'
+apply plugin: 'maven'
 
 group = 'info.iconmaster'
 version = '0.1.0'
@@ -14,7 +15,6 @@ repositories {
 }
 
 dependencies {
-	compile 'org.slf4j:slf4j-api:1.7.21'
 	testCompile 'junit:junit:4.12'
 	antlr "org.antlr:antlr4:4.5"
 }
@@ -27,6 +27,7 @@ buildscript {
 	}
 	dependencies {
 		classpath 'gradle.plugin.edu.sc.seis.gradle:launch4j:1.6.1'
+		classpath 'org.apache.maven.wagon:wagon-http:2.2'
 	}
 }
 
@@ -54,5 +55,13 @@ jacocoTestReport {
         xml.enabled true
         csv.enabled false
         html.destination "${buildDir}/reports/coverage"
+    }
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        repository(url: "https://api.bintray.com/maven/iconmaster5326/maven/typhon/;publish=1") {
+            authentication(userName: project.property('bintrayUser'), password: project.property('bintrayApiKey'))
+        }
     }
 }

@@ -1,1 +1,4 @@
 language: java
+script:
+- chmod +x ./gradlew
+- ./gradlew check

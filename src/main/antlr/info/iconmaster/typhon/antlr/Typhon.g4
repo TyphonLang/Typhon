@@ -122,8 +122,8 @@ STRING: '"' (~["\\] | '\\' .)* '"';
 CHAR: '\'' (~['\\] | '\\' .) '\'';
 DOC_COMMENT: '/**' (BLOCK_COMMENT | DOC_COMMENT | .)*? '*/';
 
-WHITESPACE: [ \t\r\n]+ -> skip;
-COMMENT: '//' (BLOCK_COMMENT | DOC_COMMENT | ~[\r\n])* [\r\n] -> skip;
-BLOCK_COMMENT: '/*' ((BLOCK_COMMENT | DOC_COMMENT | ~'*') (BLOCK_COMMENT | DOC_COMMENT | .)*?)? '*/' -> skip;
+WHITESPACE: [ \t\r\n]+ -> channel(HIDDEN);
+COMMENT: '//' (BLOCK_COMMENT | DOC_COMMENT | ~[\r\n])* [\r\n] -> channel(HIDDEN);
+BLOCK_COMMENT: '/*' ((BLOCK_COMMENT | DOC_COMMENT | ~'*') (BLOCK_COMMENT | DOC_COMMENT | .)*?)? '*/' -> channel(HIDDEN);
 
 UNKNOWN_TOKEN: .+?;

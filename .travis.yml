@@ -1,4 +1,2 @@
 language: java
-script:
-- chmod +x ./gradlew
-- ./gradlew check
+before_install: chmod +x ./gradlew

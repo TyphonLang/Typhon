@@ -61,7 +61,7 @@ jacocoTestReport {
 uploadArchives {
     repositories.mavenDeployer {
         repository(url: "https://api.bintray.com/maven/iconmaster5326/maven/typhon/;publish=1") {
-            authentication(userName: project.property('bintrayUser'), password: project.property('bintrayApiKey'))
+            authentication(userName: project.hasProperty('bintrayUser') ? project.property('bintrayUser') : '', password: project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : '')
         }
     }
 }

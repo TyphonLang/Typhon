@@ -4,7 +4,7 @@ import info.iconmaster.typhon.util.CommandLineHelper.Result;
 import info.iconmaster.typhon.util.CommandLineHelper.UnknownOptionException;
 
 public class Typhon {
-	public static final String VERSION = "${TYPHON_VERSION}";
+	public static final String VERSION = "@TYPHON_VERSION@";
 	
 	public static void main(String[] args) {
 		try {

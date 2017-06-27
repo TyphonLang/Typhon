@@ -44,6 +44,7 @@ public class TestGrammar extends TyphonTest {
 			new CaseValid("{}"),
 			new CaseValid("{0;1;}"),
 			new CaseValid("@a @b {}"),
+			new CaseValid("@a(b) {}"),
 			//classDecl
 			new CaseValid("class x {}"),
 			new CaseValid("class x {var y;}"),

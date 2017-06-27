@@ -1,7 +1,12 @@
 package info.iconmaster.typhon;
 
+import java.io.File;
+
+import info.iconmaster.typhon.compiler.TyphonSourceReader;
+import info.iconmaster.typhon.language.Package;
 import info.iconmaster.typhon.util.CommandLineHelper.Result;
 import info.iconmaster.typhon.util.CommandLineHelper.UnknownOptionException;
+import info.iconmaster.typhon.util.FileUtils;
 
 public class Typhon {
 	public static final String VERSION = "@TYPHON_VERSION@";
@@ -26,6 +31,22 @@ public class Typhon {
 				TyphonCommandLine.CMD_PARSER.printUsage(System.err);
 				return;
 			}
+			
+			TyphonInput tni = new TyphonInput();
+			for (String fileName : options.positionalArguments) {
+				File file = new File(fileName);
+				if (!file.exists()) {
+					System.err.println("error: file or folder '"+fileName+"' does not exist");
+					return;
+				}
+				tni.inputFiles.addAll(FileUtils.getAllFiles(file, FileUtils.FILTER_TYPHON_FILES));
+			}
+			
+			for (File file : tni.inputFiles) {
+				Package pkg = TyphonSourceReader.parseFile(tni, file);
+				tni.inputPackages.add(pkg);
+			}
+			
 		} catch (UnknownOptionException e) {
 			System.err.println("error: "+e.getMessage());
 			System.err.println();

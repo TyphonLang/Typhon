@@ -36,15 +36,6 @@ launch4j {
 	headerType = "console"
 }
 
-jar {
-    manifest {
-        attributes 'Main-Class': mainClass
-    }
-    
-    // uncomment the next line if you want a standalone jar
-    // from configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) }
-}
-
 generateGrammarSource {
     arguments += ["-visitor", "-package", "info.iconmaster.typhon.antlr"]
 }
@@ -64,4 +55,27 @@ uploadArchives {
             authentication(userName: project.hasProperty('bintrayUser') ? project.property('bintrayUser') : '', password: project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : '')
         }
     }
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': mainClass
+    }
+    
+    // uncomment the next line if you want a standalone jar
+    // from configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    manifest {
+        attributes 'Main-Class': mainClass
+    }
+    
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+	archives jar
+    archives sourcesJar
 }

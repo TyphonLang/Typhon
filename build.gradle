@@ -4,10 +4,15 @@ apply plugin: 'antlr'
 apply plugin: 'jacoco'
 apply plugin: 'maven'
 
+// variables
+
 group = 'info.iconmaster'
 version = '0.1.0'
 
 def mainClass = 'info.iconmaster.typhon.Typhon'
+def processedSrcDir = "${buildDir}/generated-src/java/main"
+
+// define sources
 
 repositories {
 	jcenter()
@@ -31,14 +36,20 @@ buildscript {
 	}
 }
 
+// define Launch4J settings
+
 launch4j {
 	mainClassName = mainClass
 	headerType = "console"
 }
 
+// define ANTLR settings
+
 generateGrammarSource {
     arguments += ["-visitor", "-package", "info.iconmaster.typhon.antlr"]
 }
+
+// add code coverage support
 
 jacocoTestReport {
     group = "Reporting"
@@ -49,6 +60,8 @@ jacocoTestReport {
     }
 }
 
+// add Bintray support
+
 uploadArchives {
     repositories.mavenDeployer {
         repository(url: "https://api.bintray.com/maven/iconmaster5326/maven/typhon/;publish=1") {
@@ -56,6 +69,8 @@ uploadArchives {
         }
     }
 }
+
+// define artifacts - the .class and .java JARS
 
 jar {
     manifest {
@@ -78,4 +93,23 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 artifacts {
 	archives jar
     archives sourcesJar
+}
+
+// prepare sources beforehand by replacing infomation in the .java files such as the Typhon version
+
+sourceSets.main.java {
+	srcDirs = [processedSrcDir]
+}
+
+task prepareSources(type: Copy) {
+    from 'src/main/java'
+    into processedSrcDir
+    
+	expand([
+		TYPHON_VERSION: version,
+	])
+}
+
+compileJava {
+    dependsOn prepareSources
 }

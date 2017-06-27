@@ -9,5 +9,6 @@
 /.settings/
 /bin/
 /build/
+/lib/
 /.classpath
 /.project

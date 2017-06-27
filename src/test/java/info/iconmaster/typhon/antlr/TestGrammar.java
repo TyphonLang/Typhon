@@ -20,7 +20,7 @@ public class TestGrammar extends TyphonTest {
 			//methodDecl
 			new CaseValid("void main() {}"),
 			new CaseValid("void main() {0;1;}"),
-			new CaseValid("/**doc*/ @a @b void main() {}"),
+			new CaseValid("/**doc*/ void @a @b main() {}"),
 			new CaseInvalid("void main() {};"),
 			new CaseInvalid("main() {}"),
 			//methodStubDecl
@@ -28,7 +28,7 @@ public class TestGrammar extends TyphonTest {
 			new CaseValid("void main(var x);"),
 			new CaseValid("void main(var x, var y);"),
 			new CaseValid("void main<T>();"),
-			new CaseValid("/**doc*/ @a @b void main();"),
+			new CaseValid("/**doc*/ void @a @b main();"),
 			new CaseInvalid("void main()"),
 			new CaseInvalid("main();"),
 			//fieldDecl
@@ -36,7 +36,7 @@ public class TestGrammar extends TyphonTest {
 			new CaseValid("int x = 3;"),
 			new CaseValid("int x, y = 3;"),
 			new CaseValid("int x, y = 3, 4;"),
-			new CaseValid("/**doc*/ @a @b int x;"),
+			new CaseValid("/**doc*/ int @a @b x;"),
 			new CaseValid("int x; int y; int z;"),
 			new CaseInvalid("var x"),
 			new CaseInvalid("var x, y"),
@@ -393,10 +393,6 @@ public class TestGrammar extends TyphonTest {
 			//nullStat
 			new CaseValid(";", (parser)->{parser.stat();}),
 			new CaseInvalid(";;;", (parser)->{parser.stat();}),
-			//assignLvalue
-			new CaseValid("x", (parser)->{parser.assignLvalue();}),
-			new CaseValid("@a @b x", (parser)->{parser.assignLvalue();}),
-			new CaseInvalid("var x", (parser)->{parser.assignLvalue();}),
 			//forLvalue
 			new CaseValid("var x", (parser)->{parser.forLvalue();}),
 			new CaseValid("@a @b var x", (parser)->{parser.forLvalue();}),
@@ -474,6 +470,11 @@ public class TestGrammar extends TyphonTest {
 			new CaseValid("<var>", (parser)->{parser.templateInst();}),
 			new CaseValid("<var,var,var>", (parser)->{parser.templateInst();}),
 			new CaseInvalid("<1>", (parser)->{parser.templateInst();}),
+			//paramName
+			new CaseValid("x", (parser)->{parser.paramName();}),
+			new CaseValid("@a @b x", (parser)->{parser.paramName();}),
+			new CaseInvalid("3", (parser)->{parser.paramName();}),
+			new CaseInvalid("@a @b 3", (parser)->{parser.paramName();}),
 			//paramDecl
 			new CaseValid("var x", (parser)->{parser.paramDecl();}),
 			new CaseValid("var x = 3", (parser)->{parser.paramDecl();}),

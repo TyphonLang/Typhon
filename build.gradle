@@ -94,26 +94,3 @@ artifacts {
 	archives jar
     archives sourcesJar
 }
-
-// prepare sources beforehand by replacing infomation in the .java files such as the Typhon version
-
-task prepareClasses(type: Copy, dependsOn: classes) {
-    from "${buildDir}/classes"
-    into "${buildDir}/processed-classes"
-    
-	filter { String line ->
-		line.replace '@TYPHON_VERSION@', version
-	}
-}
-
-jar {
-    dependsOn prepareClasses
-    from "${buildDir}/processed-classes/main"
-    exclude "${buildDir}/classes/main"
-}
-
-sourcesJar {
-	dependsOn prepareClasses
-	from "${buildDir}/processed-classes/main"
-	exclude "${buildDir}/classes/main"
-}

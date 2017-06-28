@@ -43,10 +43,9 @@ public class Typhon {
 			}
 			
 			for (File file : tni.inputFiles) {
-				Package pkg = TyphonSourceReader.parseFile(tni, file);
-				tni.inputPackages.add(pkg);
+				Package p = TyphonSourceReader.parseFile(tni, file);
+				tni.inputPackages.add(p);
 			}
-			
 		} catch (UnknownOptionException e) {
 			System.err.println("error: "+e.getMessage());
 			System.err.println();

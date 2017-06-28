@@ -27,12 +27,13 @@ public class TyphonSourceReader {
 	
 	public static Package parseFile(TyphonInput tni, File file) {
 		try {
-			TyphonLexer lexer = new TyphonLexer(new ANTLRFileStream(file.getName()));
+			TyphonLexer lexer = new TyphonLexer(new ANTLRFileStream(file.getPath()));
 			TyphonParser parser = new TyphonParser(new CommonTokenStream(lexer));
 			RootContext root = parser.root();
 			return readPackage(tni, new SourceInfo(root), null, null, root.tnDecls);
 		} catch (IOException e) {
 			// TODO: handle errors
+			e.printStackTrace();
 			return null;
 		}
 	}

@@ -30,7 +30,7 @@ public class Package extends TyphonLanguageEntity {
 	}
 	
 	public Package(Package parent, SourceInfo source) {
-		super(parent.tni, source);
+		super(parent != null ? parent.tni : null, source);
 		setParent(parent);
 	}
 	
@@ -39,6 +39,8 @@ public class Package extends TyphonLanguageEntity {
 			this.parent.subpackages.remove(this);
 		}
 		this.parent = parent;
-		parent.subpackages.add(this);
+		if (this.parent != null) {
+			parent.subpackages.add(this);
+		}
 	}
 }

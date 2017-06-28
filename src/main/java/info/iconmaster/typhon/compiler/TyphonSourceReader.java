@@ -16,9 +16,11 @@ import info.iconmaster.typhon.antlr.TyphonLexer;
 import info.iconmaster.typhon.antlr.TyphonParser;
 import info.iconmaster.typhon.antlr.TyphonParser.DeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.PackageDeclContext;
+import info.iconmaster.typhon.antlr.TyphonParser.RootContext;
 import info.iconmaster.typhon.antlr.TyphonParser.SimplePackageDeclContext;
 import info.iconmaster.typhon.language.Package;
 import info.iconmaster.typhon.util.Box;
+import info.iconmaster.typhon.util.SourceInfo;
 
 public class TyphonSourceReader {
 	private TyphonSourceReader() {}
@@ -27,21 +29,22 @@ public class TyphonSourceReader {
 		try {
 			TyphonLexer lexer = new TyphonLexer(new ANTLRFileStream(file.getName()));
 			TyphonParser parser = new TyphonParser(new CommonTokenStream(lexer));
-			return readPackage(tni, null, null, parser.root().tnDecls);
+			RootContext root = parser.root();
+			return readPackage(tni, new SourceInfo(root), null, null, root.tnDecls);
 		} catch (IOException e) {
 			// TODO: handle errors
+			return null;
 		}
-		return new Package(tni);
 	}
 	
 	public static Package parseString(TyphonInput tni, String input) {
 		TyphonLexer lexer = new TyphonLexer(new ANTLRInputStream(input));
 		TyphonParser parser = new TyphonParser(new CommonTokenStream(lexer));
-		return readPackage(tni, null, tni.corePackage, parser.root().tnDecls);
+		return readPackage(tni, new SourceInfo("<unknown>", 0, input.length()-1), null, tni.corePackage, parser.root().tnDecls);
 	}
 	
-	public static Package readPackage(TyphonInput tni, String name, Package parent, List<DeclContext> decls) {
-		Package result = new Package(parent);
+	public static Package readPackage(TyphonInput tni, SourceInfo source, String name, Package parent, List<DeclContext> decls) {
+		Package result = new Package(parent, source == null? parent.source : source);
 		result.name = name;
 		
 		// TODO: actually parse packageNames fully
@@ -49,29 +52,29 @@ public class TyphonSourceReader {
 		Box<Boolean> doneVisiting = new Box<>(false);
 		TyphonBaseVisitor<Void> visitor = new TyphonBaseVisitor<Void>() {
 			@Override
-			public Void visitPackageDecl(PackageDeclContext ctx) {
-				List<String> names = ctx.tnName.tnName.stream().map((name)->name.getText()).collect(Collectors.toCollection(()->new ArrayList<>()));
+			public Void visitPackageDecl(PackageDeclContext decl) {
+				List<String> names = decl.tnName.tnName.stream().map((name)->name.getText()).collect(Collectors.toCollection(()->new ArrayList<>()));
 				String lastName = names.remove(names.size()-1);
 				Package base = result;
 				for (String name : names) {
-					base = readPackage(tni, name, base, new ArrayList<>());
+					base = readPackage(tni, new SourceInfo(decl), name, base, new ArrayList<>());
 				}
 				
-				readPackage(tni, lastName, base, ctx.tnDecls);
+				readPackage(tni, new SourceInfo(decl), lastName, base, decl.tnDecls);
 				return null;
 			}
 			
 			@Override
-			public Void visitSimplePackageDecl(SimplePackageDeclContext ctx) {
-				List<String> names = ctx.tnName.tnName.stream().map((name)->name.getText()).collect(Collectors.toCollection(()->new ArrayList<>()));
+			public Void visitSimplePackageDecl(SimplePackageDeclContext decl) {
+				List<String> names = decl.tnName.tnName.stream().map((name)->name.getText()).collect(Collectors.toCollection(()->new ArrayList<>()));
 				String lastName = names.remove(names.size()-1);
 				Package base = result;
 				for (String name : names) {
-					base = readPackage(tni, name, base, new ArrayList<>());
+					base = readPackage(tni, new SourceInfo(decl), name, base, new ArrayList<>());
 				}
 				
 				List<DeclContext> remainingDecls = decls.subList(declIndex.data+1, decls.size());
-				readPackage(tni, lastName, base, remainingDecls);
+				readPackage(tni, new SourceInfo(decl), lastName, base, remainingDecls);
 				doneVisiting.data = true;
 				return null;
 			}

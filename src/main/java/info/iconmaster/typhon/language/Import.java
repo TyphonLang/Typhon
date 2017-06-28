@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import info.iconmaster.typhon.TyphonInput;
+import info.iconmaster.typhon.util.SourceInfo;
 
 public abstract class Import extends TyphonLanguageEntity {
 	public Package resolvedTo;
@@ -13,11 +14,19 @@ public abstract class Import extends TyphonLanguageEntity {
 		super(input);
 	}
 	
+	public Import(TyphonInput input, SourceInfo source) {
+		super(input, source);
+	}
+
 	public static class PackageImport extends Import {
 		public List<String> packageName = new ArrayList<>();
 		
 		public PackageImport(TyphonInput input) {
 			super(input);
+		}
+		
+		public PackageImport(TyphonInput input, SourceInfo source) {
+			super(input, source);
 		}
 	}
 	
@@ -26,6 +35,10 @@ public abstract class Import extends TyphonLanguageEntity {
 		
 		public RawImport(TyphonInput input) {
 			super(input);
+		}
+		
+		public RawImport(TyphonInput input, SourceInfo source) {
+			super(input, source);
 		}
 	}
 }

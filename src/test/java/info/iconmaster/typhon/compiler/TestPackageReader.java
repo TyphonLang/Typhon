@@ -231,6 +231,42 @@ public class TestPackageReader extends TyphonTest {
 			Assert.assertTrue(s.imports.isEmpty());
 			Assert.assertEquals(0, s.subpackages.size());
 			Assert.assertTrue(s.types.isEmpty());
+		}),new CaseValid("package q;", (p)->{
+			Assert.assertEquals(1, p.subpackages.size());
+			
+			Assert.assertNotNull(p.source);
+			Assert.assertEquals(0, p.source.begin);
+			Assert.assertEquals(9, p.source.end);
+			Assert.assertEquals("<unknown>", p.source.file);
+			
+			Package q = p.subpackages.get(0);
+			
+			Assert.assertNotNull(q.source);
+			Assert.assertEquals(0, q.source.begin);
+			Assert.assertEquals(9, q.source.end);
+			Assert.assertEquals("<unknown>", q.source.file);
+		}),new CaseValid("package q {package r;}", (p)->{
+			Assert.assertEquals(1, p.subpackages.size());
+			
+			Assert.assertNotNull(p.source);
+			Assert.assertEquals(0, p.source.begin);
+			Assert.assertEquals(21, p.source.end);
+			Assert.assertEquals("<unknown>", p.source.file);
+			
+			Package q = p.subpackages.get(0);
+			Assert.assertEquals(1, q.subpackages.size());
+			
+			Assert.assertNotNull(q.source);
+			Assert.assertEquals(0, q.source.begin);
+			Assert.assertEquals(21, q.source.end);
+			Assert.assertEquals("<unknown>", q.source.file);
+			
+			Package r = q.subpackages.get(0);
+			
+			Assert.assertNotNull(r.source);
+			Assert.assertEquals(11, r.source.begin);
+			Assert.assertEquals(20, r.source.end);
+			Assert.assertEquals("<unknown>", r.source.file);
 		}));
 	}
     

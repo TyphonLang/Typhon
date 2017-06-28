@@ -5,6 +5,7 @@ import java.util.List;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.types.Type;
+import info.iconmaster.typhon.util.SourceInfo;
 
 public class Package extends TyphonLanguageEntity {
 	public Package parent;
@@ -21,6 +22,15 @@ public class Package extends TyphonLanguageEntity {
 	
 	public Package(Package parent) {
 		super(parent.tni);
+		setParent(parent);
+	}
+	
+	public Package(TyphonInput tni, SourceInfo source) {
+		super(tni, source);
+	}
+	
+	public Package(Package parent, SourceInfo source) {
+		super(parent.tni, source);
 		setParent(parent);
 	}
 	

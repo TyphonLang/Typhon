@@ -5,7 +5,7 @@ public class SystemType extends Type {
 	String name;
 
 	public SystemType(String name, Type parent) {
-		super(parent.tni);
+		super(parent.tni, parent.source);
 		this.name = name;
 		this.parent = parent;
 	}

@@ -82,7 +82,11 @@ public class TyphonSourceReader {
 			}
 		});
 		
-		return readPackage(tni, new SourceInfo(0, input.length()-1), null, tni.corePackage, parser.root().tnDecls);
+		try {
+			return readPackage(tni, new SourceInfo(0, input.length()-1), null, tni.corePackage, parser.root().tnDecls);
+		} catch (ParseCancellationException e) {
+			return new Package(tni.corePackage, new SourceInfo(0, input.length()-1));
+		}
 	}
 	
 	public static Package readPackage(TyphonInput tni, SourceInfo source, String name, Package parent, List<DeclContext> decls) {

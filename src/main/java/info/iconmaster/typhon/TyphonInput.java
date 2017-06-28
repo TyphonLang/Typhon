@@ -11,5 +11,5 @@ public class TyphonInput {
 	public List<File> inputFiles = new ArrayList<>();
 	public List<Package> inputPackages = new ArrayList<>();
 	
-	public CorePackage corePackage = new CorePackage();
+	public CorePackage corePackage = new CorePackage(this);
 }

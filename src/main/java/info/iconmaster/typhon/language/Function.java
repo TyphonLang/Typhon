@@ -1,5 +1,9 @@
 package info.iconmaster.typhon.language;
 
-public class Function {
+import info.iconmaster.typhon.TyphonInput;
 
+public class Function extends TyphonLanguageEntity {
+	public Function(TyphonInput input) {
+		super(input);
+	}
 }

@@ -31,7 +31,7 @@ public class TyphonSourceReader {
 		} catch (IOException e) {
 			// TODO: handle errors
 		}
-		return new Package();
+		return new Package(tni);
 	}
 	
 	public static Package parseString(TyphonInput tni, String input) {
@@ -41,9 +41,8 @@ public class TyphonSourceReader {
 	}
 	
 	public static Package readPackage(TyphonInput tni, String name, Package parent, List<DeclContext> decls) {
-		Package result = new Package();
-		
-		result.name = name; result.parent = parent; parent.subpackages.add(result);
+		Package result = new Package(parent);
+		result.name = name;
 		
 		// TODO: actually parse packageNames fully
 		Box<Integer> declIndex = new Box<>(0);

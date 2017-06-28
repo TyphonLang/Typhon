@@ -1,5 +1,11 @@
 package info.iconmaster.typhon.language;
 
-public class Field {
+import info.iconmaster.typhon.TyphonInput;
+
+public class Field extends TyphonLanguageEntity {
 	String name;
+
+	public Field(TyphonInput input) {
+		super(input);
+	}
 }

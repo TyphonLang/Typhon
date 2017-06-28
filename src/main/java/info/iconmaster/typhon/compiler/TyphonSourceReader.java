@@ -4,11 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.RuleNode;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonBaseVisitor;
@@ -51,14 +51,28 @@ public class TyphonSourceReader {
 		TyphonBaseVisitor<Void> visitor = new TyphonBaseVisitor<Void>() {
 			@Override
 			public Void visitPackageDecl(PackageDeclContext ctx) {
-				readPackage(tni, ctx.tnName.getText(), result, ctx.tnDecls);
+				List<String> names = ctx.tnName.tnName.stream().map((name)->name.getText()).collect(Collectors.toCollection(()->new ArrayList<>()));
+				String lastName = names.remove(names.size()-1);
+				Package base = result;
+				for (String name : names) {
+					base = readPackage(tni, name, base, new ArrayList<>());
+				}
+				
+				readPackage(tni, lastName, base, ctx.tnDecls);
 				return null;
 			}
 			
 			@Override
 			public Void visitSimplePackageDecl(SimplePackageDeclContext ctx) {
+				List<String> names = ctx.tnName.tnName.stream().map((name)->name.getText()).collect(Collectors.toCollection(()->new ArrayList<>()));
+				String lastName = names.remove(names.size()-1);
+				Package base = result;
+				for (String name : names) {
+					base = readPackage(tni, name, base, new ArrayList<>());
+				}
+				
 				List<DeclContext> remainingDecls = decls.subList(declIndex.data+1, decls.size());
-				readPackage(tni, ctx.tnName.getText(), result, remainingDecls);
+				readPackage(tni, lastName, base, remainingDecls);
 				doneVisiting.data = true;
 				return null;
 			}

@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import info.iconmaster.typhon.errors.TyphonError;
 import info.iconmaster.typhon.language.CorePackage;
 import info.iconmaster.typhon.language.Package;
 
@@ -12,4 +13,6 @@ public class TyphonInput {
 	public List<Package> inputPackages = new ArrayList<>();
 	
 	public CorePackage corePackage = new CorePackage(this);
+	
+	public List<TyphonError> errors = new ArrayList<>();
 }

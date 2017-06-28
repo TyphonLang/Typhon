@@ -1,8 +1,12 @@
 package info.iconmaster.typhon;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Scanner;
+import java.util.regex.Pattern;
 
 import info.iconmaster.typhon.compiler.TyphonSourceReader;
+import info.iconmaster.typhon.errors.TyphonError;
 import info.iconmaster.typhon.language.Package;
 import info.iconmaster.typhon.util.CommandLineHelper.Result;
 import info.iconmaster.typhon.util.CommandLineHelper.UnknownOptionException;
@@ -43,9 +47,58 @@ public class Typhon {
 			}
 			
 			for (File file : tni.inputFiles) {
-				Package p = TyphonSourceReader.parseFile(tni, file);
-				tni.inputPackages.add(p);
+				Package p;
+				try {
+					p = TyphonSourceReader.parseFile(tni, file);
+					tni.inputPackages.add(p);
+				} catch (IOException e) {
+					System.err.println("error: cannot read input file '"+file.getName()+"': "+e.getMessage());
+					return;
+				}
 			}
+			
+			// check for errors
+			
+			if (!tni.errors.isEmpty()) {
+				for (TyphonError error : tni.errors) {
+					System.err.println(error);
+					
+					File file = new File(error.source.file);
+					if (error.source.file != null && file.exists()) {
+						try {
+							//String text = new String(Files.readAllBytes(file.toPath()));
+							//System.out.println(text.substring(40,42));
+							
+							Scanner scanner = new Scanner(file);
+							scanner.useDelimiter("[\r\n]");
+							Pattern pattern = Pattern.compile("[^\r\n]*[\r\n]*", Pattern.DOTALL | Pattern.MULTILINE);
+							int offset = 0;
+							
+							while (scanner.hasNext()) {
+								String line = scanner.next();
+								offset += line.length() + 1;
+								
+								if (offset > error.source.begin) {
+									System.err.println("\t"+line.replace('\t', ' '));
+									
+									int curPos = offset-error.source.begin;
+									System.err.print('\t');
+									for (int i = 0; i < curPos; i++) {
+										System.err.print(' ');
+									}
+									System.err.println('^');
+									
+									break;
+								}
+							}
+						} catch (IOException e) {
+							// ignore; we don't need location information THAT badly
+						}
+					}
+				}
+				return;
+			}
+			
 		} catch (UnknownOptionException e) {
 			System.err.println("error: "+e.getMessage());
 			System.err.println();

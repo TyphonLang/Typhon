@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
 public class SourceInfo {
-	public String file;
+	public String file = "<unknown>";
 	public int begin,end;
 	
 	public SourceInfo(int begin, int end) {
@@ -63,6 +63,6 @@ public class SourceInfo {
 	
 	@Override
 	public String toString() {
-		return (file == null?"<unknown>":file)+": "+begin+"-"+end;
+		return file+": "+begin+"-"+end;
 	}
 }

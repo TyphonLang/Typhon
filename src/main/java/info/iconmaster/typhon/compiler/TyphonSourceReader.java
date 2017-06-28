@@ -8,7 +8,13 @@ import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonBaseVisitor;
@@ -18,6 +24,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.DeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.PackageDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.RootContext;
 import info.iconmaster.typhon.antlr.TyphonParser.SimplePackageDeclContext;
+import info.iconmaster.typhon.errors.SyntaxError;
 import info.iconmaster.typhon.language.Package;
 import info.iconmaster.typhon.util.Box;
 import info.iconmaster.typhon.util.SourceInfo;
@@ -25,23 +32,57 @@ import info.iconmaster.typhon.util.SourceInfo;
 public class TyphonSourceReader {
 	private TyphonSourceReader() {}
 	
-	public static Package parseFile(TyphonInput tni, File file) {
+	public static Package parseFile(TyphonInput tni, File file) throws IOException {
 		try {
 			TyphonLexer lexer = new TyphonLexer(new ANTLRFileStream(file.getPath()));
 			TyphonParser parser = new TyphonParser(new CommonTokenStream(lexer));
+			
+			parser.setErrorHandler(new BailErrorStrategy());
+			parser.removeErrorListeners();
+			parser.addErrorListener(new BaseErrorListener() {
+				@Override
+				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+					SourceInfo source;
+					if (offendingSymbol instanceof Token) {
+						Token token = ((Token)offendingSymbol);
+						source = new SourceInfo(token);
+					} else {
+						source = new SourceInfo(file.getPath(), -1, -1);
+					}
+					
+					tni.errors.add(new SyntaxError(source, msg));
+				}
+			});
+			
 			RootContext root = parser.root();
 			return readPackage(tni, new SourceInfo(root), null, null, root.tnDecls);
-		} catch (IOException e) {
-			// TODO: handle errors
-			e.printStackTrace();
-			return null;
+		} catch (ParseCancellationException e) {
+			return new Package(tni.corePackage, new SourceInfo(file.getPath(), 0, (int) file.length()-1));
 		}
 	}
 	
 	public static Package parseString(TyphonInput tni, String input) {
 		TyphonLexer lexer = new TyphonLexer(new ANTLRInputStream(input));
 		TyphonParser parser = new TyphonParser(new CommonTokenStream(lexer));
-		return readPackage(tni, new SourceInfo("<unknown>", 0, input.length()-1), null, tni.corePackage, parser.root().tnDecls);
+		
+		parser.setErrorHandler(new BailErrorStrategy());
+		parser.removeErrorListeners();
+		parser.addErrorListener(new BaseErrorListener() {
+			@Override
+			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+				SourceInfo source;
+				if (offendingSymbol instanceof Token) {
+					Token token = ((Token)offendingSymbol);
+					source = new SourceInfo(token);
+				} else {
+					source = new SourceInfo(-1, -1);
+				}
+				
+				tni.errors.add(new SyntaxError(source, msg));
+			}
+		});
+		
+		return readPackage(tni, new SourceInfo(0, input.length()-1), null, tni.corePackage, parser.root().tnDecls);
 	}
 	
 	public static Package readPackage(TyphonInput tni, SourceInfo source, String name, Package parent, List<DeclContext> decls) {

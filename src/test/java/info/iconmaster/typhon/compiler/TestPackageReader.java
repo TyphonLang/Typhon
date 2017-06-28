@@ -25,6 +25,108 @@ public class TestPackageReader extends TyphonTest {
 			Assert.assertTrue(p.imports.isEmpty());
 			Assert.assertTrue(p.subpackages.isEmpty());
 			Assert.assertTrue(p.types.isEmpty());
+		}),new CaseValid("package q;", (p)->{
+			Assert.assertNull(p.name);
+			Assert.assertNotNull(p.parent);
+			
+			Assert.assertTrue(p.fields.isEmpty());
+			Assert.assertTrue(p.functions.isEmpty());
+			Assert.assertTrue(p.imports.isEmpty());
+			Assert.assertEquals(1, p.subpackages.size());
+			Assert.assertTrue(p.types.isEmpty());
+			
+			Package q = p.subpackages.get(0);
+			
+			Assert.assertEquals("q", q.name);
+			Assert.assertEquals(p, q.parent);
+			
+			Assert.assertTrue(q.fields.isEmpty());
+			Assert.assertTrue(q.functions.isEmpty());
+			Assert.assertTrue(q.imports.isEmpty());
+			Assert.assertTrue(q.subpackages.isEmpty());
+			Assert.assertTrue(q.types.isEmpty());
+		}),new CaseValid("package q {}", (p)->{
+			Assert.assertNull(p.name);
+			Assert.assertNotNull(p.parent);
+			
+			Assert.assertTrue(p.fields.isEmpty());
+			Assert.assertTrue(p.functions.isEmpty());
+			Assert.assertTrue(p.imports.isEmpty());
+			Assert.assertEquals(1, p.subpackages.size());
+			Assert.assertTrue(p.types.isEmpty());
+			
+			Package q = p.subpackages.get(0);
+			
+			Assert.assertEquals("q", q.name);
+			Assert.assertEquals(p, q.parent);
+			
+			Assert.assertTrue(q.fields.isEmpty());
+			Assert.assertTrue(q.functions.isEmpty());
+			Assert.assertTrue(q.imports.isEmpty());
+			Assert.assertTrue(q.subpackages.isEmpty());
+			Assert.assertTrue(q.types.isEmpty());
+		}),new CaseValid("package q; package r;", (p)->{
+			Assert.assertNull(p.name);
+			Assert.assertNotNull(p.parent);
+			
+			Assert.assertTrue(p.fields.isEmpty());
+			Assert.assertTrue(p.functions.isEmpty());
+			Assert.assertTrue(p.imports.isEmpty());
+			Assert.assertEquals(1, p.subpackages.size());
+			Assert.assertTrue(p.types.isEmpty());
+			
+			Package q = p.subpackages.get(0);
+			
+			Assert.assertEquals("q", q.name);
+			Assert.assertEquals(p, q.parent);
+			
+			Assert.assertTrue(q.fields.isEmpty());
+			Assert.assertTrue(q.functions.isEmpty());
+			Assert.assertTrue(q.imports.isEmpty());
+			Assert.assertEquals(1, q.subpackages.size());
+			Assert.assertTrue(q.types.isEmpty());
+			
+			Package r = q.subpackages.get(0);
+			
+			Assert.assertEquals("r", r.name);
+			Assert.assertEquals(q, r.parent);
+			
+			Assert.assertTrue(r.fields.isEmpty());
+			Assert.assertTrue(r.functions.isEmpty());
+			Assert.assertTrue(r.imports.isEmpty());
+			Assert.assertEquals(0, r.subpackages.size());
+			Assert.assertTrue(r.types.isEmpty());
+		}),new CaseValid("package q {package r {}}", (p)->{
+			Assert.assertNull(p.name);
+			Assert.assertNotNull(p.parent);
+			
+			Assert.assertTrue(p.fields.isEmpty());
+			Assert.assertTrue(p.functions.isEmpty());
+			Assert.assertTrue(p.imports.isEmpty());
+			Assert.assertEquals(1, p.subpackages.size());
+			Assert.assertTrue(p.types.isEmpty());
+			
+			Package q = p.subpackages.get(0);
+			
+			Assert.assertEquals("q", q.name);
+			Assert.assertEquals(p, q.parent);
+			
+			Assert.assertTrue(q.fields.isEmpty());
+			Assert.assertTrue(q.functions.isEmpty());
+			Assert.assertTrue(q.imports.isEmpty());
+			Assert.assertEquals(1, q.subpackages.size());
+			Assert.assertTrue(q.types.isEmpty());
+			
+			Package r = q.subpackages.get(0);
+			
+			Assert.assertEquals("r", r.name);
+			Assert.assertEquals(q, r.parent);
+			
+			Assert.assertTrue(r.fields.isEmpty());
+			Assert.assertTrue(r.functions.isEmpty());
+			Assert.assertTrue(r.imports.isEmpty());
+			Assert.assertEquals(0, r.subpackages.size());
+			Assert.assertTrue(r.types.isEmpty());
 		}));
 	}
     

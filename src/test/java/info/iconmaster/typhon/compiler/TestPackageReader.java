@@ -26,6 +26,18 @@ public class TestPackageReader extends TyphonTest {
 			Assert.assertTrue(p.imports.isEmpty());
 			Assert.assertTrue(p.subpackages.isEmpty());
 			Assert.assertTrue(p.types.isEmpty());
+		}),new CaseValid("\n", (p)->{
+			Assert.assertNull(p.name);
+			Assert.assertNotNull(p.parent);
+			
+			Assert.assertNull(p.parent.name);
+			Assert.assertNull(p.parent.parent);
+			
+			Assert.assertTrue(p.fields.isEmpty());
+			Assert.assertTrue(p.functions.isEmpty());
+			Assert.assertTrue(p.imports.isEmpty());
+			Assert.assertTrue(p.subpackages.isEmpty());
+			Assert.assertTrue(p.types.isEmpty());
 		}),new CaseValid("package q;", (p)->{
 			Assert.assertNull(p.name);
 			Assert.assertNotNull(p.parent);
@@ -269,8 +281,13 @@ public class TestPackageReader extends TyphonTest {
 			Assert.assertEquals(20, r.source.end);
 			Assert.assertEquals("<unknown>", r.source.file);
 		}),
-		new CaseInvalid("x", 0, 1)
-		);
+		new CaseInvalid("x", 0, 1),
+		new CaseInvalid("aaa", 2, 3),
+		new CaseInvalid("a.a", 1, 1),
+		new CaseInvalid("package", 6, 7),
+		new CaseInvalid("package 1", 8, 8),
+		new CaseInvalid("package\n1", 8, 8),
+		new CaseInvalid("package\n\n1", 9, 9));
 	}
     
     private static class CaseValid implements Runnable {

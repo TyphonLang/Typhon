@@ -8,6 +8,7 @@ import org.junit.runners.Parameterized;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.TyphonTest;
+import info.iconmaster.typhon.errors.TyphonError;
 import info.iconmaster.typhon.language.Package;
 
 public class TestPackageReader extends TyphonTest {
@@ -267,7 +268,9 @@ public class TestPackageReader extends TyphonTest {
 			Assert.assertEquals(11, r.source.begin);
 			Assert.assertEquals(20, r.source.end);
 			Assert.assertEquals("<unknown>", r.source.file);
-		}));
+		}),
+		new CaseInvalid("x", 0, 1)
+		);
 	}
     
     private static class CaseValid implements Runnable {
@@ -283,6 +286,28 @@ public class TestPackageReader extends TyphonTest {
 		public void run() {
 			TyphonInput tni = new TyphonInput();
 			test.accept(TyphonSourceReader.parseString(tni, input));
+		}
+    }
+    
+    private static class CaseInvalid implements Runnable {
+    	String input;
+    	int begin,end;
+    	
+		public CaseInvalid(String input, int begin, int end) {
+			this.input = input;
+			this.begin = begin;
+			this.end = end;
+		}
+		
+		@Override
+		public void run() {
+			TyphonInput tni = new TyphonInput();
+			TyphonSourceReader.parseString(tni, input);
+			Assert.assertEquals("Input '"+input+"': Incorrect number of errors:", 1, tni.errors.size());
+			TyphonError error = tni.errors.get(0);
+			Assert.assertNotNull("Input '"+input+"': Source was null:", error.source);
+			Assert.assertEquals("Input '"+input+"': Begin was incorrect:", begin, error.source.begin);
+			Assert.assertEquals("Input '"+input+"': End was incorrect:", end, error.source.end);
 		}
     }
 }

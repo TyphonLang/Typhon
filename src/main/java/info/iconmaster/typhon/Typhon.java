@@ -66,9 +66,6 @@ public class Typhon {
 					File file = new File(error.source.file);
 					if (error.source.file != null && file.exists()) {
 						try {
-							//String text = new String(Files.readAllBytes(file.toPath()));
-							//System.out.println(text.substring(40,42));
-							
 							Scanner scanner = new Scanner(file);
 							scanner.useDelimiter("[\r\n]");
 							int offset = 0;

@@ -71,7 +71,6 @@ public class Typhon {
 							
 							Scanner scanner = new Scanner(file);
 							scanner.useDelimiter("[\r\n]");
-							Pattern pattern = Pattern.compile("[^\r\n]*[\r\n]*", Pattern.DOTALL | Pattern.MULTILINE);
 							int offset = 0;
 							
 							while (scanner.hasNext()) {

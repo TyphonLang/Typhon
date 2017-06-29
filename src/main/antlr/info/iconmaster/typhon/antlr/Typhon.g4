@@ -34,7 +34,7 @@ type:
 types: tnTypes+=type | '(' (tnTypes+=type (',' tnTypes+=type)*)? ')';
 
 expr:
-	tnLhs=expr (tnOp='.'|tnOp='?.') tnValue=WORD																	#memberExpr
+	tnLhs=expr (tnOp='.'|tnOp='?.'|tnOp='::') tnValue=WORD															#memberExpr
 |	tnCallee=expr tnTemplate=templateInst? '(' tnArgs=argsDecl ')'													#funcCallExpr
 |	tnCallee=expr tnTemplate=templateInst? '[' tnArgs=argsDecl ']'													#indexCallExpr
 |	tnLhs=expr 'as' tnRhs=type																						#castExpr
@@ -46,7 +46,7 @@ expr:
 |	tnLhs=expr '??' tnRhs=expr																						#nullCoalesceExpr
 |	tnLhs=expr (tnOp='<'|tnOp='>'|tnOp='<='|tnOp='>=') tnRhs=expr													#relOpsExpr
 |	tnLhs=expr 'is' tnRhs=type																						#isExpr
-|	tnLhs=expr (tnOp='=='|tnOp='!=') tnRhs=expr																		#eqOpsExpr
+|	tnLhs=expr (tnOp='=='|tnOp='!='|tnOp='==='|tnOp='!==') tnRhs=expr												#eqOpsExpr
 |	tnLhs=expr (tnOp='&&'|tnOp='||') tnRhs=expr																		#logicOpsExpr
 |	tnAnnots+=annotation* 'throw' tnArg=expr																		#throwExpr
 |	tnIf=expr '?' tnThen=expr ':' tnElse=expr																		#terneryOpExpr

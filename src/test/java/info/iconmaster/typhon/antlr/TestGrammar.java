@@ -143,7 +143,8 @@ public class TestGrammar extends TyphonTest {
 			//memberExpr
 			new CaseValid("a.b", (parser)->{parser.expr();}),
 			new CaseValid("a?.b", (parser)->{parser.expr();}),
-			new CaseValid("a.b?.c.d", (parser)->{parser.expr();}),
+			new CaseValid("a::b", (parser)->{parser.expr();}),
+			new CaseValid("a.b?.c::d", (parser)->{parser.expr();}),
 			new CaseValid("'a'.b", (parser)->{parser.expr();}),
 			new CaseInvalid("a.'b'", (parser)->{parser.expr();}),
 			//funcCallExpr
@@ -204,6 +205,9 @@ public class TestGrammar extends TyphonTest {
 			//eqOpsExpr
 			new CaseValid("1==1", (parser)->{parser.expr();}),
 			new CaseValid("1!=1", (parser)->{parser.expr();}),
+			new CaseValid("1===1", (parser)->{parser.expr();}),
+			new CaseValid("1!==1", (parser)->{parser.expr();}),
+			new CaseValid("!1!==!1", (parser)->{parser.expr();}),
 			//logicOpsExpr
 			new CaseValid("true && false", (parser)->{parser.expr();}),
 			new CaseValid("true || false", (parser)->{parser.expr();}),
@@ -405,9 +409,10 @@ public class TestGrammar extends TyphonTest {
 			new CaseInvalid("catch x {}", (parser)->{parser.catchBlock();}),
 			new CaseInvalid("catch var x,y {}", (parser)->{parser.catchBlock();}),
 			//caseBlock
-			new CaseValid("1 {}", (parser)->{parser.caseBlock();}),
-			new CaseValid("1,2,3 {}", (parser)->{parser.caseBlock();}),
-			new CaseInvalid("{}", (parser)->{parser.caseBlock();}),
+			new CaseValid("case 1 {}", (parser)->{parser.caseBlock();}),
+			new CaseValid("case 1,2,3 {}", (parser)->{parser.caseBlock();}),
+			new CaseValid("@a @b case 1 {}", (parser)->{parser.caseBlock();}),
+			new CaseInvalid("case {}", (parser)->{parser.caseBlock();}),
 			//memberLvalue
 			new CaseValid("a.b", (parser)->{parser.lvalue();}),
 			new CaseValid("a.b.c.d", (parser)->{parser.lvalue();}),

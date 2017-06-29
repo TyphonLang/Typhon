@@ -70,7 +70,7 @@ public class TyphonSourceReader {
 			});
 			
 			RootContext root = parser.root();
-			return readPackage(tni, new SourceInfo(root), "", null, root.tnDecls);
+			return readPackage(tni, new SourceInfo(root), "", tni.corePackage, root.tnDecls);
 		} catch (ParseCancellationException e) {
 			return new Package(new SourceInfo(file.getPath(), 0, (int) file.length()-1), "", tni.corePackage);
 		}

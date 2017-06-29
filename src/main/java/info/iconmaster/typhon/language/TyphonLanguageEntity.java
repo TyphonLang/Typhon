@@ -15,12 +15,12 @@ import info.iconmaster.typhon.util.SourceInfo;
  */
 public class TyphonLanguageEntity {
 	/**
-	 * The compilation options used to produce this object.
+	 * The compilation options used to produce this object. Cannot be null.
 	 */
 	public TyphonInput tni;
 	
 	/**
-	 * The source information for this object.
+	 * The source information for this object. May be null.
 	 */
 	public SourceInfo source;
 	

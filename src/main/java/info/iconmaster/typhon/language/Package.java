@@ -53,6 +53,11 @@ public class Package extends TyphonLanguageEntity {
 	private Map<String, Type> types = new HashMap<>();
 	
 	/**
+	 * The static initializer blocks in this package.
+	 */
+	private List<StaticInitBlock> staticInitBlocks = new ArrayList<>();
+	
+	/**
 	 * The annotations this package exposes, grouped by name.
 	 */
 	private Map<String, List<AnnotationDefinition>> definedAnnots = new HashMap<>();
@@ -63,7 +68,7 @@ public class Package extends TyphonLanguageEntity {
 	}
 
 	public Package(String name, Package parent) {
-		super(parent.tni);
+		super(parent.tni, parent.source);
 		this.name = name;
 		setParent(parent);
 	}
@@ -74,7 +79,7 @@ public class Package extends TyphonLanguageEntity {
 	}
 
 	public Package(SourceInfo source, String name, Package parent) {
-		super(parent != null ? parent.tni : null, source);
+		super(parent.tni, source);
 		this.name = name;
 		setParent(parent);
 	}
@@ -392,5 +397,32 @@ public class Package extends TyphonLanguageEntity {
 	 */
 	public List<AnnotationDefinition> getAnnotDefsWithName(String name) {
 		return definedAnnots.get(name);
+	}
+
+	/**
+	 * Adds a static init block.
+	 * 
+	 * @param b
+	 */
+	public void addStaticInitBlock(StaticInitBlock b) {
+		staticInitBlocks.add(b);
+	}
+
+	/**
+	 * Removes a static init block.
+	 * @param b
+	 */
+	public void removeStaticInitBlock(StaticInitBlock b) {
+		staticInitBlocks.remove(b);
+	}
+
+	/**
+	 * Lists the static init blocks.
+	 * Do not modify the list this function returns!
+	 * 
+	 * @return
+	 */
+	public List<StaticInitBlock> getStaticInitBlocks() {
+		return staticInitBlocks;
 	}
 }

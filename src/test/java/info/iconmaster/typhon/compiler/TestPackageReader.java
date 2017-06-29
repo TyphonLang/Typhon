@@ -1,6 +1,7 @@
 package info.iconmaster.typhon.compiler;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Consumer;
 
 import org.junit.Assert;
@@ -280,6 +281,47 @@ public class TestPackageReader extends TyphonTest {
 			Assert.assertEquals(11, r.source.begin);
 			Assert.assertEquals(20, r.source.end);
 			Assert.assertEquals("<unknown>", r.source.file);
+		}),new CaseValid("package q {} package r {}", (p)->{
+			Assert.assertEquals("", p.getName());
+			Assert.assertNotNull(p.getParent());
+			
+			Assert.assertEquals(0, p.getFields().size());
+			Assert.assertEquals(0, p.getFunctions().size());
+			Assert.assertEquals(0, p.getImports().size());
+			Assert.assertEquals(2, p.getSubpackges().size());
+			Assert.assertEquals(0, p.getTypes().size());
+			
+			List<Package> ps = p.getSubpackges();
+			Assert.assertTrue(ps.stream().anyMatch((pp)->pp.getName().equals("q")));
+			Assert.assertTrue(ps.stream().anyMatch((pp)->pp.getName().equals("r")));
+			Assert.assertTrue(ps.stream().allMatch((pp)->pp.getSubpackges().size() == 0));
+		}),new CaseValid("package q {} package q {}", (p)->{
+			Assert.assertEquals("", p.getName());
+			Assert.assertNotNull(p.getParent());
+			
+			Assert.assertEquals(0, p.getFields().size());
+			Assert.assertEquals(0, p.getFunctions().size());
+			Assert.assertEquals(0, p.getImports().size());
+			Assert.assertEquals(2, p.getSubpackges().size());
+			Assert.assertEquals(0, p.getTypes().size());
+			
+			List<Package> ps = p.getSubpackges();
+			Assert.assertTrue(ps.stream().allMatch((pp)->pp.getName().equals("q")));
+			Assert.assertTrue(ps.stream().allMatch((pp)->pp.getSubpackges().size() == 0));
+		}),new CaseValid("package q {package r {}} package q {package r {}}", (p)->{
+			Assert.assertEquals("", p.getName());
+			Assert.assertNotNull(p.getParent());
+			
+			Assert.assertEquals(0, p.getFields().size());
+			Assert.assertEquals(0, p.getFunctions().size());
+			Assert.assertEquals(0, p.getImports().size());
+			Assert.assertEquals(2, p.getSubpackges().size());
+			Assert.assertEquals(0, p.getTypes().size());
+			
+			List<Package> ps = p.getSubpackges();
+			Assert.assertTrue(ps.stream().allMatch((pp)->pp.getName().equals("q")));
+			Assert.assertTrue(ps.stream().allMatch((pp)->pp.getSubpackges().size() == 1));
+			Assert.assertTrue(ps.stream().allMatch((pp)->pp.getSubpackges().get(0).getName().equals("r")));
 		}),
 		new CaseInvalid("x", 0, 1),
 		new CaseInvalid("aaa", 2, 3),

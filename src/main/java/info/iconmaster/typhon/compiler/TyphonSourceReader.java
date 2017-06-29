@@ -20,11 +20,15 @@ import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonBaseVisitor;
 import info.iconmaster.typhon.antlr.TyphonLexer;
 import info.iconmaster.typhon.antlr.TyphonParser;
+import info.iconmaster.typhon.antlr.TyphonParser.AnnotationContext;
+import info.iconmaster.typhon.antlr.TyphonParser.ArgDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.PackageDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.RootContext;
 import info.iconmaster.typhon.antlr.TyphonParser.SimplePackageDeclContext;
 import info.iconmaster.typhon.errors.SyntaxError;
+import info.iconmaster.typhon.language.Annotation;
+import info.iconmaster.typhon.language.Argument;
 import info.iconmaster.typhon.language.Package;
 import info.iconmaster.typhon.util.Box;
 import info.iconmaster.typhon.util.SourceInfo;
@@ -136,7 +140,8 @@ public class TyphonSourceReader {
 					base = readPackage(tni, new SourceInfo(decl), name, base, new ArrayList<>());
 				}
 				
-				readPackage(tni, new SourceInfo(decl), lastName, base, decl.tnDecls);
+				Package p = readPackage(tni, new SourceInfo(decl), lastName, base, decl.tnDecls);
+				p.getAnnots().addAll(readAnnots(tni, decl.tnAnnots));
 				return null;
 			}
 			
@@ -150,7 +155,8 @@ public class TyphonSourceReader {
 				}
 				
 				List<DeclContext> remainingDecls = decls.subList(declIndex.data+1, decls.size());
-				readPackage(tni, new SourceInfo(decl), lastName, base, remainingDecls);
+				Package p = readPackage(tni, new SourceInfo(decl), lastName, base, remainingDecls);
+				p.getAnnots().addAll(readAnnots(tni, decl.tnAnnots));
 				doneVisiting.data = true;
 				return null;
 			}
@@ -163,5 +169,31 @@ public class TyphonSourceReader {
 		}
 		
 		return result;
+	}
+	
+	/**
+	 * Translates ANTLR rules for annotations into Typhon annotations.
+	 * 
+	 * @param tni
+	 * @param annots The list of annotation rules. Cannot be null.
+	 * @return A list representing the ANTLR annotations given as input.
+	 */
+	public static List<Annotation> readAnnots(TyphonInput tni, List<AnnotationContext> annots) {
+		return annots.stream().map((rule)->{
+			Annotation annot = new Annotation(tni, new SourceInfo(rule));
+			
+			annot.setRawData(rule.tnName);
+			if (rule.tnArgs != null)
+			for (ArgDeclContext argRule : rule.tnArgs.tnArgs) {
+				Argument arg = new Argument(tni, new SourceInfo(argRule));
+				
+				if (argRule.tnKey != null) arg.setLabel(argRule.tnKey.getText());
+				arg.setRawData(argRule.tnValue);
+				
+				annot.getArgs().add(arg);
+			}
+			
+			return annot;
+		}).collect(Collectors.toCollection(()->new ArrayList<>()));
 	}
 }

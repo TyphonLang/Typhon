@@ -4,13 +4,23 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
 import org.junit.Assert;
 import org.junit.runners.Parameterized;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.TyphonTest;
+import info.iconmaster.typhon.antlr.TyphonLexer;
+import info.iconmaster.typhon.antlr.TyphonParser;
+import info.iconmaster.typhon.antlr.TyphonParser.RootContext;
 import info.iconmaster.typhon.errors.TyphonError;
+import info.iconmaster.typhon.language.Annotation;
 import info.iconmaster.typhon.language.Package;
+import info.iconmaster.typhon.util.SourceInfo;
 
 /**
  * Tests <tt>{@link TyphonSourceReader}.readPackage()</tt>.
@@ -328,6 +338,48 @@ public class TestPackageReader extends TyphonTest {
 			Assert.assertTrue(ps.stream().allMatch((pp)->pp.getName().equals("q")));
 			Assert.assertTrue(ps.stream().allMatch((pp)->pp.getSubpackges().size() == 1));
 			Assert.assertTrue(ps.stream().allMatch((pp)->pp.getSubpackges().get(0).getName().equals("r")));
+		}),new CaseValid("@a package q;", (p)->{
+			Assert.assertEquals(1, p.getSubpackges().size());
+			
+			Package q = p.getSubpackges().get(0);
+			Assert.assertEquals(1, q.getAnnots().size());
+			
+			Annotation a = q.getAnnots().get(0);
+			Assert.assertNotNull(a.getRawDefinition());
+			Assert.assertEquals("a", a.getRawDefinition().getText());
+		}),new CaseValid("@a @b package q;", (p)->{
+			Assert.assertEquals(1, p.getSubpackges().size());
+			
+			Package q = p.getSubpackges().get(0);
+			Assert.assertEquals(2, q.getAnnots().size());
+			
+			List<Annotation> as = q.getAnnots();
+			Assert.assertTrue(as.stream().anyMatch((a)->a.getRawDefinition().getText().equals("a")));
+			Assert.assertTrue(as.stream().anyMatch((a)->a.getRawDefinition().getText().equals("b")));
+		}),new CaseValid("@a() @b() package q;", (p)->{
+			Assert.assertEquals(1, p.getSubpackges().size());
+			
+			Package q = p.getSubpackges().get(0);
+			Assert.assertEquals(2, q.getAnnots().size());
+			
+			List<Annotation> as = q.getAnnots();
+			Assert.assertTrue(as.stream().anyMatch((a)->a.getRawDefinition().getText().equals("a")));
+			Assert.assertTrue(as.stream().anyMatch((a)->a.getRawDefinition().getText().equals("b")));
+		}),new CaseValid("@a() package q.r.s;", (p)->{
+			Assert.assertEquals(1, p.getSubpackges().size());
+			
+			Package q = p.getSubpackges().get(0);
+			Assert.assertEquals(0, q.getAnnots().size());
+			
+			Package r = q.getSubpackges().get(0);
+			Assert.assertEquals(0, r.getAnnots().size());
+			
+			Package s = r.getSubpackges().get(0);
+			Assert.assertEquals(1, s.getAnnots().size());
+			
+			Annotation a = s.getAnnots().get(0);
+			Assert.assertNotNull(a.getRawDefinition());
+			Assert.assertEquals("a", a.getRawDefinition().getText());
 		}),
 		new CaseInvalid("x", 0, 1),
 		new CaseInvalid("aaa", 2, 3),
@@ -350,7 +402,23 @@ public class TestPackageReader extends TyphonTest {
 		@Override
 		public void run() {
 			TyphonInput tni = new TyphonInput();
+			
+			// test it via parseString
 			test.accept(TyphonSourceReader.parseString(tni, input));
+			
+			// test it via readPackage
+			TyphonLexer lexer = new TyphonLexer(new ANTLRInputStream(input));
+			TyphonParser parser = new TyphonParser(new CommonTokenStream(lexer));
+			parser.removeErrorListeners();
+			parser.addErrorListener(new BaseErrorListener() {
+				@Override
+				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+					Assert.fail("parse of '"+input+"' failed: "+msg);
+				}
+			});
+			
+			RootContext root = parser.root();
+			test.accept(TyphonSourceReader.readPackage(tni, new SourceInfo(root), "", tni.corePackage, root.tnDecls));
 		}
     }
     

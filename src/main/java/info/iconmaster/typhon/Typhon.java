@@ -12,9 +12,24 @@ import info.iconmaster.typhon.util.CommandLineHelper.Result;
 import info.iconmaster.typhon.util.CommandLineHelper.UnknownOptionException;
 import info.iconmaster.typhon.util.FileUtils;
 
+/**
+ * Contains basic constants and the main command line routine.
+ * 
+ * @author iconmaster
+ *
+ */
 public class Typhon {
+	/**
+	 * The version of the Typhon compiler.
+	 * TODO: fix the build script to replace TYPHON_VERSION with the correct value
+	 */
 	public static final String VERSION = "@TYPHON_VERSION@";
 	
+	/**
+	 * The main function.
+	 * 
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		try {
 			Result options = TyphonCommandLine.CMD_PARSER.parseCommandLine(args);

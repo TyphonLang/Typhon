@@ -12,6 +12,12 @@ import info.iconmaster.typhon.TyphonTest;
 import info.iconmaster.typhon.errors.TyphonError;
 import info.iconmaster.typhon.language.Package;
 
+/**
+ * Tests <tt>{@link TyphonSourceReader}.readPackage()</tt>.
+ * 
+ * @author iconmaster
+ *
+ */
 public class TestPackageReader extends TyphonTest {
 	@Parameterized.Parameters
     public static Collection<Object[]> data() {

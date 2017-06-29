@@ -5,6 +5,12 @@ import org.junit.runner.Runner;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.Parameterized;
 
+/**
+ * The test runner for {@link TyphonTest}.
+ * 
+ * @author iconmaster
+ *
+ */
 @Ignore
 public class TyphonTestRunner extends Parameterized {
 	public TyphonTestRunner(Class<?> klass) throws Throwable {

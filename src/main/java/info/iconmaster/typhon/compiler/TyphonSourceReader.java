@@ -29,9 +29,24 @@ import info.iconmaster.typhon.language.Package;
 import info.iconmaster.typhon.util.Box;
 import info.iconmaster.typhon.util.SourceInfo;
 
+/**
+ * This class handles the translation of declarations into the respective language entities.
+ * Use this as the first step for translating Typhon text into Typhon code.
+ * 
+ * @author iconmaster
+ *
+ */
 public class TyphonSourceReader {
 	private TyphonSourceReader() {}
 	
+	/**
+	 * Reads a source file, and translates it into a Typhon package.
+	 * 
+	 * @param tni
+	 * @param file
+	 * @return The package the source file encodes.
+	 * @throws IOException If the file cannot be read.
+	 */
 	public static Package parseFile(TyphonInput tni, File file) throws IOException {
 		try {
 			TyphonLexer lexer = new TyphonLexer(new ANTLRFileStream(file.getPath()));
@@ -61,6 +76,13 @@ public class TyphonSourceReader {
 		}
 	}
 	
+	/**
+	 * Reads a source string, and translates it into a Typhon package.
+	 * 
+	 * @param tni
+	 * @param input
+	 * @return The package the input encodes.
+	 */
 	public static Package parseString(TyphonInput tni, String input) {
 		TyphonLexer lexer = new TyphonLexer(new ANTLRInputStream(input));
 		TyphonParser parser = new TyphonParser(new CommonTokenStream(lexer));
@@ -89,10 +111,19 @@ public class TyphonSourceReader {
 		}
 	}
 	
+	/**
+	 * Translates an ANTLR rule for a package into a Typhon package.
+	 * 
+	 * @param tni
+	 * @param source Where in the source code a package occurs.
+	 * @param name The name of the package. Cannot be null.
+	 * @param parent The parent package. Cannot be null. Use <tt>tni.corePackage</tt> when you want a base-level package.
+	 * @param decls The ANTLR rules for the declarations in this package.
+	 * @return The package representing the ANTLR rules given as input.
+	 */
 	public static Package readPackage(TyphonInput tni, SourceInfo source, String name, Package parent, List<DeclContext> decls) {
 		Package result = new Package(source == null? parent.source : source, name, parent);
 		
-		// TODO: actually parse packageNames fully
 		Box<Integer> declIndex = new Box<>(0);
 		Box<Boolean> doneVisiting = new Box<>(false);
 		TyphonBaseVisitor<Void> visitor = new TyphonBaseVisitor<Void>() {

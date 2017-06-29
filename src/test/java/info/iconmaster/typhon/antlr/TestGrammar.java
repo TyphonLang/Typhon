@@ -13,6 +13,12 @@ import org.junit.runners.Parameterized;
 
 import info.iconmaster.typhon.TyphonTest;
 
+/**
+ * Tests the ANTLR grammar.
+ * 
+ * @author iconmaster
+ *
+ */
 public class TestGrammar extends TyphonTest {
 	@Parameterized.Parameters
     public static Collection<Object[]> data() {

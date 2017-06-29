@@ -7,19 +7,19 @@ import info.iconmaster.typhon.tnil.CodeBlock;
 import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.util.SourceInfo;
 
-public class Field extends TyphonLanguageEntity {
+public class Parameter extends TyphonLanguageEntity {
 	public String name;
 	public Type type;
-	public CodeBlock value;
+	public CodeBlock defaultValue;
 	
 	public TypeContext rawType;
-	public ExprContext rawValue;
+	public ExprContext rawDefaultValue;
 	
-	public Field(TyphonInput input) {
+	public Parameter(TyphonInput input) {
 		super(input);
 	}
-	
-	public Field(TyphonInput input, SourceInfo source) {
+
+	public Parameter(TyphonInput input, SourceInfo source) {
 		super(input, source);
 	}
 }

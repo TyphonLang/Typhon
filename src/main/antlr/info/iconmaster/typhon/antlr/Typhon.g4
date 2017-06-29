@@ -67,26 +67,26 @@ expr:
 exprs: tnExprs+=expr | '(' (tnExprs+=expr (',' tnExprs+=expr)*)? ')';
 
 stat:
-	tnAnnots+=annotation* 'return' (tnValues+=expr (',' tnValues+=expr)*)? ';'																					#retStat
-|	tnDoc=DOC_COMMENT? tnType=type tnNames+=paramName (',' tnNames+=paramName)* ('=' tnValues+=expr (',' tnValues+=expr)*)? ';'	#defStat
-|	tnLvals+=lvalue (',' tnLvals+=lvalue)* ('=' tnValues+=expr (',' tnValues+=expr)*)? ';'										#assignStat
-|	tnLvals+=lvalue (',' tnLvals+=lvalue)* (tnOp='+='|tnOp='-='|tnOp='*='|tnOp='/='|tnOp='%=') tnRval=expr ';'					#comboAssignStat
-|	tnAnnots+=annotation* 'if' tnIfExpr=expr tnIfBlock=block	('elseif' tnElseifExprs+=expr tnElseifBlocks+=block)* ('else' tnElseBlock=block)?					#ifStat
-|	tnAnnots+=annotation* 'for' tnLvals+=forLvalue (',' tnLvals+=forLvalue)* ':' tnExpr=expr tnBlock=block														#forStat
-|	tnAnnots+=annotation* 'while' tnExpr=expr tnBlock=block																										#whileStat
-|	tnAnnots+=annotation* 'repeat' tnBlock=block 'until' tnExpr=expr ';'																							#repeatStat
-|	tnAnnots+=annotation* 'try' tnTryBlock=block tnCatchBlocks+=catchBlock*																						#tryStat
-|	tnAnnots+=annotation* 'break' tnLabel=WORD? ';'																												#breakStat
-|	tnAnnots+=annotation* 'continue' tnLabel=WORD? ';'																											#contStat
-|	tnAnnots+=annotation* 'switch' tnExpr=expr ('<' tnLabel=WORD '>')? '{' ('case' tnCaseBlocks+=caseBlock)* ('default' tnDefaultBlock=block)? '}'				#switchStat
-|	tnAnnots+=annotation* tnGlobalAnnot=globalAnnotation																					#globalAnnotStat
-|	tnExpr=expr ';'																															#exprStat
-|	tnAnnots+=annotation* tnBlock=block																										#blockStat
-|	';'																																		#nullStat
+	tnAnnots+=annotation* 'return' (tnValues+=expr (',' tnValues+=expr)*)? ';'																							#retStat
+|	tnDoc=DOC_COMMENT? tnType=type tnNames+=paramName (',' tnNames+=paramName)* ('=' tnValues+=expr (',' tnValues+=expr)*)? ';'											#defStat
+|	tnLvals+=lvalue (',' tnLvals+=lvalue)* ('=' tnValues+=expr (',' tnValues+=expr)*)? ';'																				#assignStat
+|	tnLvals+=lvalue (',' tnLvals+=lvalue)* (tnOp='+='|tnOp='-='|tnOp='*='|tnOp='/='|tnOp='%=') tnRval=expr ';'															#comboAssignStat
+|	tnAnnots+=annotation* 'if' tnIfExpr=expr tnIfBlock=block	('elseif' tnElseifExprs+=expr tnElseifBlocks+=block)* ('else' tnElseBlock=block)?						#ifStat
+|	tnAnnots+=annotation* 'for' tnLvals+=forLvalue (',' tnLvals+=forLvalue)* ':' tnExpr=expr tnBlock=block																#forStat
+|	tnAnnots+=annotation* 'while' tnExpr=expr tnBlock=block																												#whileStat
+|	tnAnnots+=annotation* 'repeat' tnBlock=block 'until' tnExpr=expr ';'																								#repeatStat
+|	tnAnnots+=annotation* 'try' tnTryBlock=block tnCatchBlocks+=catchBlock*																								#tryStat
+|	tnAnnots+=annotation* 'break' tnLabel=WORD? ';'																														#breakStat
+|	tnAnnots+=annotation* 'continue' tnLabel=WORD? ';'																													#contStat
+|	tnAnnots+=annotation* 'switch' tnExpr=expr ('<' tnLabel=WORD '>')? '{' tnCaseBlocks+=caseBlock* (tnDefaultAnnots+=annotation* 'default' tnDefaultBlock=block)? '}'	#switchStat
+|	tnAnnots+=annotation* tnGlobalAnnot=globalAnnotation																												#globalAnnotStat
+|	tnExpr=expr ';'																																						#exprStat
+|	tnAnnots+=annotation* tnBlock=block																																	#blockStat
+|	';'																																									#nullStat
 ;
 forLvalue: tnAnnots+=annotation* tnType=type tnName=WORD;
 catchBlock: tnAnnots+=annotation* 'catch' tnType=type tnName=WORD tnBlock=block;
-caseBlock: tnExprs+=expr (',' tnExprs+=expr)* tnBlock=block;
+caseBlock: tnAnnots+=annotation* 'case' tnExprs+=expr (',' tnExprs+=expr)* tnBlock=block;
 
 lvalue:
 	tnLhs=expr (tnOp='.'|tnOp='?.') tnRhs=lvalue	#memberLvalue

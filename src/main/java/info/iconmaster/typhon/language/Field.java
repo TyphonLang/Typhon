@@ -22,4 +22,41 @@ public class Field extends TyphonLanguageEntity {
 	public Field(TyphonInput input, SourceInfo source) {
 		super(input, source);
 	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public Type getType() {
+		return type;
+	}
+
+	public void setType(Type type) {
+		this.type = type;
+	}
+
+	public CodeBlock getValue() {
+		return value;
+	}
+
+	public void setValue(CodeBlock value) {
+		this.value = value;
+	}
+	
+	public void setRawData(TypeContext rawType, ExprContext rawValue) {
+		this.rawType = rawType;
+		this.rawValue = rawValue;
+	}
+
+	public TypeContext getRawType() {
+		return rawType;
+	}
+
+	public ExprContext getRawValue() {
+		return rawValue;
+	}
 }

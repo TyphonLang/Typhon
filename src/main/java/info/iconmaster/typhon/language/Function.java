@@ -14,16 +14,16 @@ import info.iconmaster.typhon.util.SourceInfo;
 
 public class Function extends TyphonLanguageEntity {
 	private String name;
-	public List<Type> retType = new ArrayList<>();
-	public List<TemplateType> template = new ArrayList<>();
-	public List<Parameter> params = new ArrayList<>();
-	public CodeBlock code;
+	private List<Type> retType = new ArrayList<>();
+	private List<TemplateType> template = new ArrayList<>();
+	private List<Parameter> params = new ArrayList<>();
+	private CodeBlock code;
 	
-	public List<TypeContext> rawRetType;
+	private List<TypeContext> rawRetType;
 	
-	public Form form;
-	public List<StatContext> rawCodeBlockForm;
-	public ExprContext rawCodeExprForm;
+	private Form form;
+	private List<StatContext> rawCodeBlockForm;
+	private ExprContext rawCodeExprForm;
 	
 	public static enum Form {
 		BLOCK,
@@ -44,5 +44,66 @@ public class Function extends TyphonLanguageEntity {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public List<Type> getRetType() {
+		return retType;
+	}
+
+	public void setRetType(List<Type> retType) {
+		this.retType = retType;
+	}
+
+	public List<TemplateType> getTemplate() {
+		return template;
+	}
+
+	public void setTemplate(List<TemplateType> template) {
+		this.template = template;
+	}
+
+	public List<Parameter> getParams() {
+		return params;
+	}
+
+	public void setParams(List<Parameter> params) {
+		this.params = params;
+	}
+
+	public CodeBlock getCode() {
+		return code;
+	}
+
+	public void setCode(CodeBlock code) {
+		this.code = code;
+	}
+
+	public List<TypeContext> getRawRetType() {
+		return rawRetType;
+	}
+
+	public Form getForm() {
+		return form;
+	}
+
+	public List<StatContext> getRawCodeBlockForm() {
+		return rawCodeBlockForm;
+	}
+
+	public ExprContext getRawCodeExprForm() {
+		return rawCodeExprForm;
+	}
+	
+	public void setRawData(List<TypeContext> rawRetType, Form form, Object rawCode) {
+		this.rawRetType = rawRetType;
+		this.form = form;
+		
+		if (rawCode instanceof List) {
+			this.rawCodeBlockForm = ((List)rawCode);
+		} else if (rawCode instanceof ExprContext) {
+			this.rawCodeExprForm = ((ExprContext)rawCode);
+		} else {
+			throw new IllegalArgumentException("rawCode must be either List<StatContext> or ExprContext");
+		}
 	}
 }

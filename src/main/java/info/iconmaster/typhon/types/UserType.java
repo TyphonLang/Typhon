@@ -4,8 +4,8 @@ import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.util.SourceInfo;
 
 public class UserType extends Type {
-	Type parent;
-	String name;
+	private Type parent;
+	private String name;
 
 	public UserType(String name, Type parent) {
 		super(parent.tni, parent.source);
@@ -28,5 +28,17 @@ public class UserType extends Type {
 	@Override
 	public String getName() {
 		return name;
+	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public Type getParent() {
+		return parent;
+	}
+
+	public void setParent(Type parent) {
+		this.parent = parent;
 	}
 }

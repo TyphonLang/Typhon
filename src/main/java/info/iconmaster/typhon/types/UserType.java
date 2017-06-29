@@ -72,13 +72,6 @@ public class UserType extends Type {
 	public String getName() {
 		return name;
 	}
-	
-	/**
-	 * @param name The new name of this type.
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
 
 	/**
 	 * @return The parent type. Cannot be null.

@@ -85,12 +85,14 @@ public class Function extends TyphonLanguageEntity {
 		EXPR,
 	}
 	
-	public Function(TyphonInput input) {
+	public Function(TyphonInput input, String name) {
 		super(input);
+		this.name = name;
 	}
 	
-	public Function(TyphonInput input, SourceInfo source) {
+	public Function(TyphonInput input, SourceInfo source, String name) {
 		super(input, source);
+		this.name = name;
 	}
 	
 	/**
@@ -98,13 +100,6 @@ public class Function extends TyphonLanguageEntity {
 	 */
 	public String getName() {
 		return name;
-	}
-
-	/**
-	 * @param name The new name of this function. Must be a valid Typhon identifier. May be null.
-	 */
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	/**

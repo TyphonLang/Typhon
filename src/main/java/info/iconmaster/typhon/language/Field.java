@@ -39,12 +39,14 @@ public class Field extends TyphonLanguageEntity {
 	 */
 	public ExprContext rawValue;
 	
-	public Field(TyphonInput input) {
+	public Field(TyphonInput input, String name) {
 		super(input);
+		this.name = name;
 	}
 	
-	public Field(TyphonInput input, SourceInfo source) {
+	public Field(TyphonInput input, SourceInfo source, String name) {
 		super(input, source);
+		this.name = name;
 	}
 	
 	/**
@@ -52,13 +54,6 @@ public class Field extends TyphonLanguageEntity {
 	 */
 	public String getName() {
 		return name;
-	}
-
-	/**
-	 * @param name The new name of this field. Must be a valid Typhon identifier.
-	 */
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	/**

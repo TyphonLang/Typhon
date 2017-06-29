@@ -45,13 +45,6 @@ public class SystemType extends Type {
 	}
 	
 	/**
-	 * @param name The new name of this type.
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
-	
-	/**
 	 * @return The parent type. Cannot be null.
 	 */
 	public TypeRef getParentType() {

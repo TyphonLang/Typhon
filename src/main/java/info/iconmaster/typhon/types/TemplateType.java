@@ -38,24 +38,19 @@ public class TemplateType extends Type {
 	 */
 	private TypeContext rawDefaultValue;
 	
-	public TemplateType(TyphonInput input) {
+	public TemplateType(TyphonInput input, String name) {
 		super(input);
+		this.name = name;
 	}
 	
-	public TemplateType(TyphonInput input, SourceInfo source) {
+	public TemplateType(TyphonInput input, SourceInfo source, String name) {
 		super(input, source);
+		this.name = name;
 	}
 
 	@Override
 	public String getName() {
 		return name;
-	}
-
-	/**
-	 * @param name The new name of the type.
-	 */
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	/**

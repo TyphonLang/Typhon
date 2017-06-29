@@ -19,6 +19,7 @@ import info.iconmaster.typhon.antlr.TyphonParser;
 import info.iconmaster.typhon.antlr.TyphonParser.RootContext;
 import info.iconmaster.typhon.errors.TyphonError;
 import info.iconmaster.typhon.language.Annotation;
+import info.iconmaster.typhon.language.Function;
 import info.iconmaster.typhon.language.Package;
 import info.iconmaster.typhon.util.SourceInfo;
 
@@ -380,6 +381,27 @@ public class TestPackageReader extends TyphonTest {
 			Annotation a = s.getAnnots().get(0);
 			Assert.assertNotNull(a.getRawDefinition());
 			Assert.assertEquals("a", a.getRawDefinition().getText());
+		}),new CaseValid("void f() {}", (p)->{
+			Assert.assertEquals(1, p.getFunctions().size());
+			
+			Function f = p.getFunctions().get(0);
+			Assert.assertEquals("f", f.getName());
+		}),new CaseValid("package q; void f() {}", (p)->{
+			Assert.assertEquals(1, p.getSubpackges().size());
+			
+			Package q = p.getSubpackges().get(0);
+			Assert.assertEquals(1, q.getFunctions().size());
+			
+			Function f = q.getFunctions().get(0);
+			Assert.assertEquals("f", f.getName());
+		}),new CaseValid("package q { void f() {} }", (p)->{
+			Assert.assertEquals(1, p.getSubpackges().size());
+			
+			Package q = p.getSubpackges().get(0);
+			Assert.assertEquals(1, q.getFunctions().size());
+			
+			Function f = q.getFunctions().get(0);
+			Assert.assertEquals("f", f.getName());
 		}),
 		new CaseInvalid("x", 0, 1),
 		new CaseInvalid("aaa", 2, 3),

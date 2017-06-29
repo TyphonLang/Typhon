@@ -3,6 +3,8 @@ package info.iconmaster.typhon.language;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.antlr.v4.runtime.ParserRuleContext;
+
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.StatContext;
@@ -61,13 +63,9 @@ public class Function extends TyphonLanguageEntity {
 	
 	/**
 	 * The ANTLR rule representing the function's code, if the function is of BLOCK form.
+	 * Check the form to see what this list contains.
 	 */
-	private List<StatContext> rawCodeBlockForm;
-	
-	/**
-	 * The ANTLR rule representing the function's code, if the function is of EXPR form.
-	 */
-	private ExprContext rawCodeExprForm;
+	private List<?> rawCode;
 	
 	/**
 	 * This represents how the function was declared.
@@ -152,17 +150,10 @@ public class Function extends TyphonLanguageEntity {
 	}
 
 	/**
-	 * @return The ANTLR rule representing the function's code, if the function is of BLOCK form.
+	 * @return The ANTLR rule representing the function's code. Check the form to see what this list contains.
 	 */
-	public List<StatContext> getRawCodeBlockForm() {
-		return rawCodeBlockForm;
-	}
-
-	/**
-	 * @return The ANTLR rule representing the function's code, if the function is of EXPR form.
-	 */
-	public ExprContext getRawCodeExprForm() {
-		return rawCodeExprForm;
+	public List<?> getRawCode() {
+		return rawCode;
 	}
 	
 	/**
@@ -173,16 +164,16 @@ public class Function extends TyphonLanguageEntity {
 	 * @param rawCode The ANTLR rule representing the function's code. Either a {@link List}<{@link StatContext}> or an {@link ExprContext}.
 	 * @throws IllegalArgumentException If rawCode is not a valid type, given the form supplied.
 	 */
-	public void setRawData(List<TypeContext> rawRetType, Form form, Object rawCode) {
+	public void setRawData(List<TypeContext> rawRetType, Form form, List<?> rawCode) {
 		this.rawRetType = rawRetType;
 		this.form = form;
 		
 		if (this.form == Form.BLOCK && rawCode instanceof List) {
-			this.rawCodeBlockForm = ((List)rawCode);
-		} else if (this.form == Form.EXPR && rawCode instanceof ExprContext) {
-			this.rawCodeExprForm = ((ExprContext)rawCode);
+			this.rawCode = ((List)rawCode);
+		} else if (this.form == Form.EXPR && rawCode instanceof List) {
+			this.rawCode = ((List)rawCode);
 		} else {
-			throw new IllegalArgumentException("rawCode must be either List<StatContext> or ExprContext");
+			throw new IllegalArgumentException("rawCode must be either List<StatContext> or List<ExprContext>");
 		}
 	}
 	

@@ -3,6 +3,7 @@ package info.iconmaster.typhon.compiler;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,13 +24,25 @@ import info.iconmaster.typhon.antlr.TyphonParser;
 import info.iconmaster.typhon.antlr.TyphonParser.AnnotationContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ArgDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DeclContext;
+import info.iconmaster.typhon.antlr.TyphonParser.ExprsContext;
+import info.iconmaster.typhon.antlr.TyphonParser.MethodDeclContext;
+import info.iconmaster.typhon.antlr.TyphonParser.MultiTypesContext;
 import info.iconmaster.typhon.antlr.TyphonParser.PackageDeclContext;
+import info.iconmaster.typhon.antlr.TyphonParser.ParamDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.RootContext;
 import info.iconmaster.typhon.antlr.TyphonParser.SimplePackageDeclContext;
+import info.iconmaster.typhon.antlr.TyphonParser.SingleTypesContext;
+import info.iconmaster.typhon.antlr.TyphonParser.TemplateDeclContext;
+import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
+import info.iconmaster.typhon.antlr.TyphonParser.TypesContext;
+import info.iconmaster.typhon.antlr.TyphonParser.VoidTypesContext;
 import info.iconmaster.typhon.errors.SyntaxError;
 import info.iconmaster.typhon.language.Annotation;
 import info.iconmaster.typhon.language.Argument;
+import info.iconmaster.typhon.language.Function;
 import info.iconmaster.typhon.language.Package;
+import info.iconmaster.typhon.language.Parameter;
+import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.util.Box;
 import info.iconmaster.typhon.util.SourceInfo;
 
@@ -160,6 +173,14 @@ public class TyphonSourceReader {
 				doneVisiting.data = true;
 				return null;
 			}
+			
+			@Override
+			public Void visitMethodDecl(MethodDeclContext ctx) {
+				Function f = readFunction(tni, ctx);
+				result.addFunction(f);
+				
+				return null;
+			}
 		};
 		
 		for (DeclContext decl : decls) {
@@ -175,11 +196,11 @@ public class TyphonSourceReader {
 	 * Translates ANTLR rules for annotations into Typhon annotations.
 	 * 
 	 * @param tni
-	 * @param annots The list of annotation rules. Cannot be null.
+	 * @param rules The list of annotation rules. Cannot be null.
 	 * @return A list representing the ANTLR annotations given as input.
 	 */
-	public static List<Annotation> readAnnots(TyphonInput tni, List<AnnotationContext> annots) {
-		return annots.stream().map((rule)->{
+	public static List<Annotation> readAnnots(TyphonInput tni, List<AnnotationContext> rules) {
+		return rules.stream().map((rule)->{
 			Annotation annot = new Annotation(tni, new SourceInfo(rule));
 			
 			annot.setRawData(rule.tnName);
@@ -195,5 +216,60 @@ public class TyphonSourceReader {
 			
 			return annot;
 		}).collect(Collectors.toCollection(()->new ArrayList<>()));
+	}
+	
+	public static Function readFunction(TyphonInput tni, MethodDeclContext rule) {
+		Function f = new Function(tni, new SourceInfo(rule), rule.tnName.getText());
+		
+		if (rule.tnFunc.tnArgs != null) {
+			f.getParams().addAll(readParams(tni, rule.tnFunc.tnArgs.tnArgs));
+		}
+		if (rule.tnFunc.tnTemplate != null) {
+			f.getTemplate().addAll(readTemplateParams(tni, rule.tnFunc.tnTemplate.tnArgs));
+		}
+		
+		if (rule.tnFunc.tnBlockForm != null) {
+			f.setRawData(readTypes(rule.tnRetType), Function.Form.BLOCK, rule.tnFunc.tnBlockForm.tnBlock);
+		} else if (rule.tnFunc.tnExprForm != null) {
+			f.setRawData(readTypes(rule.tnRetType), Function.Form.EXPR, rule.tnFunc.tnExprForm.tnExprs);
+		}
+		
+		f.getAnnots().addAll(readAnnots(tni, rule.tnAnnots));
+		return f;
+	}
+	
+	public static List<Parameter> readParams(TyphonInput tni, List<ParamDeclContext> rules) {
+		return rules.stream().map((rule)->{
+			Parameter p = new Parameter(tni, new SourceInfo(rule));
+			
+			p.setName(rule.tnName.getText());
+			p.setRawData(rule.tnType, rule.tnDefaultValue);
+			
+			p.getAnnots().addAll(readAnnots(tni, rule.tnAnnots));
+			return p;
+		}).collect(Collectors.toCollection(()->new ArrayList<>()));
+	}
+	
+	public static List<TemplateType> readTemplateParams(TyphonInput tni, List<TemplateDeclContext> rules) {
+		return rules.stream().map((rule)->{
+			TemplateType t = new TemplateType(tni, new SourceInfo(rule), rule.tnName.getText());
+			
+			t.setRawData(rule.tnBaseType, rule.tnDefaultType);
+			
+			t.getAnnots().addAll(readAnnots(tni, rule.tnAnnots));
+			return t;
+		}).collect(Collectors.toCollection(()->new ArrayList<>()));
+	}
+	
+	public static List<TypeContext> readTypes(TypesContext rule) {
+		if (rule instanceof SingleTypesContext) {
+			return Arrays.asList(((SingleTypesContext)rule).tnType);
+		} else if (rule instanceof MultiTypesContext) {
+			return ((MultiTypesContext)rule).tnTypes;
+		} else if (rule instanceof VoidTypesContext) {
+			return new ArrayList<>();
+		} else {
+			throw new IllegalArgumentException("Unknown subclass of TypesContext");
+		}
 	}
 }

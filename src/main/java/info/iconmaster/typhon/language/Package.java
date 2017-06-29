@@ -18,6 +18,7 @@ public class Package extends TyphonLanguageEntity {
 	private Map<String, List<Package>> subpackages = new HashMap<>();
 	private List<Import> imports = new ArrayList<>();
 	private Map<String, Type> types = new HashMap<>();
+	private Map<String, List<AnnotationDefinition>> definedAnnots = new HashMap<>();
 
 	public Package(TyphonInput tni, String name) {
 		super(tni);
@@ -137,6 +138,10 @@ public class Package extends TyphonLanguageEntity {
 		return new ArrayList<>(fields.values());
 	}
 
+	public Field getField(String name) {
+		return fields.get(name);
+	}
+
 	public void addType(Type t) {
 		if (t.getName() == null)
 			throw new NullPointerException("Cannot add a type without a name");
@@ -153,7 +158,48 @@ public class Package extends TyphonLanguageEntity {
 		return new ArrayList<>(types.values());
 	}
 
+	public void addImport(Import i) {
+		imports.add(i);
+	}
+
+	public void removeImport(Import i) {
+		imports.remove(i);
+	}
+
 	public List<Import> getImports() {
 		return imports;
+	}
+
+	public void addAnnotDef(AnnotationDefinition f) {
+		List<AnnotationDefinition> a;
+		if (definedAnnots.containsKey(f.getName())) {
+			a = definedAnnots.get(f.getName());
+		} else {
+			a = new ArrayList<>();
+			definedAnnots.put(f.getName(), a);
+		}
+
+		a.add(f);
+	}
+
+	public void removeAnnotDef(AnnotationDefinition f) {
+		if (definedAnnots.containsKey(f.getName())) {
+			List<AnnotationDefinition> a = definedAnnots.get(f.getName());
+			a.remove(f);
+			if (a.isEmpty()) {
+				definedAnnots.remove(f.getName());
+			}
+		}
+	}
+
+	public List<AnnotationDefinition> getAnnotDefs() {
+		return new ArrayList<>(definedAnnots.values().stream().reduce(new ArrayList<>(), (l1, l2) -> {
+			l1.addAll(l2);
+			return l1;
+		}));
+	}
+
+	public List<AnnotationDefinition> getAnnotDefsWithName(String name) {
+		return definedAnnots.get(name);
 	}
 }

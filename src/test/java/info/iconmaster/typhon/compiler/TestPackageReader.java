@@ -15,266 +15,266 @@ public class TestPackageReader extends TyphonTest {
 	@Parameterized.Parameters
     public static Collection<Object[]> data() {
 		return TyphonTest.makeData(new CaseValid("", (p)->{
-			Assert.assertNull(p.name);
-			Assert.assertNotNull(p.parent);
+			Assert.assertEquals("", p.getName());
+			Assert.assertNotNull(p.getParent());
 			
-			Assert.assertNull(p.parent.name);
-			Assert.assertNull(p.parent.parent);
+			Assert.assertEquals("core", p.getParent().getName());
+			Assert.assertNull(p.getParent().getParent());
 			
-			Assert.assertTrue(p.fields.isEmpty());
-			Assert.assertTrue(p.functions.isEmpty());
-			Assert.assertTrue(p.imports.isEmpty());
-			Assert.assertTrue(p.subpackages.isEmpty());
-			Assert.assertTrue(p.types.isEmpty());
+			Assert.assertEquals(0, p.getFields().size());
+			Assert.assertEquals(0, p.getFunctions().size());
+			Assert.assertEquals(0, p.getImports().size());
+			Assert.assertEquals(0, p.getSubpackges().size());
+			Assert.assertEquals(0, p.getTypes().size());
 		}),new CaseValid("\n", (p)->{
-			Assert.assertNull(p.name);
-			Assert.assertNotNull(p.parent);
+			Assert.assertEquals("", p.getName());
+			Assert.assertNotNull(p.getParent());
 			
-			Assert.assertNull(p.parent.name);
-			Assert.assertNull(p.parent.parent);
+			Assert.assertEquals("core", p.getParent().getName());
+			Assert.assertNull(p.getParent().getParent());
 			
-			Assert.assertTrue(p.fields.isEmpty());
-			Assert.assertTrue(p.functions.isEmpty());
-			Assert.assertTrue(p.imports.isEmpty());
-			Assert.assertTrue(p.subpackages.isEmpty());
-			Assert.assertTrue(p.types.isEmpty());
+			Assert.assertEquals(0, p.getFields().size());
+			Assert.assertEquals(0, p.getFunctions().size());
+			Assert.assertEquals(0, p.getImports().size());
+			Assert.assertEquals(0, p.getSubpackges().size());
+			Assert.assertEquals(0, p.getTypes().size());
 		}),new CaseValid("package q;", (p)->{
-			Assert.assertNull(p.name);
-			Assert.assertNotNull(p.parent);
+			Assert.assertEquals("", p.getName());
+			Assert.assertNotNull(p.getParent());
 			
-			Assert.assertTrue(p.fields.isEmpty());
-			Assert.assertTrue(p.functions.isEmpty());
-			Assert.assertTrue(p.imports.isEmpty());
-			Assert.assertEquals(1, p.subpackages.size());
-			Assert.assertTrue(p.types.isEmpty());
+			Assert.assertEquals(0, p.getFields().size());
+			Assert.assertEquals(0, p.getFunctions().size());
+			Assert.assertEquals(0, p.getImports().size());
+			Assert.assertEquals(1, p.getSubpackges().size());
+			Assert.assertEquals(0, p.getTypes().size());
 			
-			Package q = p.subpackages.get(0);
+			Package q = p.getSubpackges().get(0);
 			
-			Assert.assertEquals("q", q.name);
-			Assert.assertEquals(p, q.parent);
+			Assert.assertEquals("q", q.getName());
+			Assert.assertEquals(p, q.getParent());
 			
-			Assert.assertTrue(q.fields.isEmpty());
-			Assert.assertTrue(q.functions.isEmpty());
-			Assert.assertTrue(q.imports.isEmpty());
-			Assert.assertTrue(q.subpackages.isEmpty());
-			Assert.assertTrue(q.types.isEmpty());
+			Assert.assertEquals(0, q.getFields().size());
+			Assert.assertEquals(0, q.getFunctions().size());
+			Assert.assertEquals(0, q.getImports().size());
+			Assert.assertEquals(0, q.getSubpackges().size());
+			Assert.assertEquals(0, q.getTypes().size());
 		}),new CaseValid("package q {}", (p)->{
-			Assert.assertNull(p.name);
-			Assert.assertNotNull(p.parent);
+			Assert.assertEquals("", p.getName());
+			Assert.assertNotNull(p.getParent());
 			
-			Assert.assertTrue(p.fields.isEmpty());
-			Assert.assertTrue(p.functions.isEmpty());
-			Assert.assertTrue(p.imports.isEmpty());
-			Assert.assertEquals(1, p.subpackages.size());
-			Assert.assertTrue(p.types.isEmpty());
+			Assert.assertEquals(0, p.getFields().size());
+			Assert.assertEquals(0, p.getFunctions().size());
+			Assert.assertEquals(0, p.getImports().size());
+			Assert.assertEquals(1, p.getSubpackges().size());
+			Assert.assertEquals(0, p.getTypes().size());
 			
-			Package q = p.subpackages.get(0);
+			Package q = p.getSubpackges().get(0);
 			
-			Assert.assertEquals("q", q.name);
-			Assert.assertEquals(p, q.parent);
+			Assert.assertEquals("q", q.getName());
+			Assert.assertEquals(p, q.getParent());
 			
-			Assert.assertTrue(q.fields.isEmpty());
-			Assert.assertTrue(q.functions.isEmpty());
-			Assert.assertTrue(q.imports.isEmpty());
-			Assert.assertTrue(q.subpackages.isEmpty());
-			Assert.assertTrue(q.types.isEmpty());
+			Assert.assertEquals(0, q.getFields().size());
+			Assert.assertEquals(0, q.getFunctions().size());
+			Assert.assertEquals(0, q.getImports().size());
+			Assert.assertEquals(0, q.getSubpackges().size());
+			Assert.assertEquals(0, q.getTypes().size());
 		}),new CaseValid("package q; package r;", (p)->{
-			Assert.assertNull(p.name);
-			Assert.assertNotNull(p.parent);
+			Assert.assertEquals("", p.getName());
+			Assert.assertNotNull(p.getParent());
 			
-			Assert.assertTrue(p.fields.isEmpty());
-			Assert.assertTrue(p.functions.isEmpty());
-			Assert.assertTrue(p.imports.isEmpty());
-			Assert.assertEquals(1, p.subpackages.size());
-			Assert.assertTrue(p.types.isEmpty());
+			Assert.assertEquals(0, p.getFields().size());
+			Assert.assertEquals(0, p.getFunctions().size());
+			Assert.assertEquals(0, p.getImports().size());
+			Assert.assertEquals(1, p.getSubpackges().size());
+			Assert.assertEquals(0, p.getTypes().size());
 			
-			Package q = p.subpackages.get(0);
+			Package q = p.getSubpackges().get(0);
 			
-			Assert.assertEquals("q", q.name);
-			Assert.assertEquals(p, q.parent);
+			Assert.assertEquals("q", q.getName());
+			Assert.assertEquals(p, q.getParent());
 			
-			Assert.assertTrue(q.fields.isEmpty());
-			Assert.assertTrue(q.functions.isEmpty());
-			Assert.assertTrue(q.imports.isEmpty());
-			Assert.assertEquals(1, q.subpackages.size());
-			Assert.assertTrue(q.types.isEmpty());
+			Assert.assertEquals(0, q.getFields().size());
+			Assert.assertEquals(0, q.getFunctions().size());
+			Assert.assertEquals(0, q.getImports().size());
+			Assert.assertEquals(1, q.getSubpackges().size());
+			Assert.assertEquals(0, q.getTypes().size());
 			
-			Package r = q.subpackages.get(0);
+			Package r = q.getSubpackges().get(0);
 			
-			Assert.assertEquals("r", r.name);
-			Assert.assertEquals(q, r.parent);
+			Assert.assertEquals("r", r.getName());
+			Assert.assertEquals(q, r.getParent());
 			
-			Assert.assertTrue(r.fields.isEmpty());
-			Assert.assertTrue(r.functions.isEmpty());
-			Assert.assertTrue(r.imports.isEmpty());
-			Assert.assertEquals(0, r.subpackages.size());
-			Assert.assertTrue(r.types.isEmpty());
+			Assert.assertEquals(0, r.getFields().size());
+			Assert.assertEquals(0, r.getFunctions().size());
+			Assert.assertEquals(0, r.getImports().size());
+			Assert.assertEquals(0, r.getSubpackges().size());
+			Assert.assertEquals(0, r.getTypes().size());
 		}),new CaseValid("package q {package r {}}", (p)->{
-			Assert.assertNull(p.name);
-			Assert.assertNotNull(p.parent);
+			Assert.assertEquals("", p.getName());
+			Assert.assertNotNull(p.getParent());
 			
-			Assert.assertTrue(p.fields.isEmpty());
-			Assert.assertTrue(p.functions.isEmpty());
-			Assert.assertTrue(p.imports.isEmpty());
-			Assert.assertEquals(1, p.subpackages.size());
-			Assert.assertTrue(p.types.isEmpty());
+			Assert.assertEquals(0, p.getFields().size());
+			Assert.assertEquals(0, p.getFunctions().size());
+			Assert.assertEquals(0, p.getImports().size());
+			Assert.assertEquals(1, p.getSubpackges().size());
+			Assert.assertEquals(0, p.getTypes().size());
 			
-			Package q = p.subpackages.get(0);
+			Package q = p.getSubpackges().get(0);
 			
-			Assert.assertEquals("q", q.name);
-			Assert.assertEquals(p, q.parent);
+			Assert.assertEquals("q", q.getName());
+			Assert.assertEquals(p, q.getParent());
 			
-			Assert.assertTrue(q.fields.isEmpty());
-			Assert.assertTrue(q.functions.isEmpty());
-			Assert.assertTrue(q.imports.isEmpty());
-			Assert.assertEquals(1, q.subpackages.size());
-			Assert.assertTrue(q.types.isEmpty());
+			Assert.assertEquals(0, q.getFields().size());
+			Assert.assertEquals(0, q.getFunctions().size());
+			Assert.assertEquals(0, q.getImports().size());
+			Assert.assertEquals(1, q.getSubpackges().size());
+			Assert.assertEquals(0, q.getTypes().size());
 			
-			Package r = q.subpackages.get(0);
+			Package r = q.getSubpackges().get(0);
 			
-			Assert.assertEquals("r", r.name);
-			Assert.assertEquals(q, r.parent);
+			Assert.assertEquals("r", r.getName());
+			Assert.assertEquals(q, r.getParent());
 			
-			Assert.assertTrue(r.fields.isEmpty());
-			Assert.assertTrue(r.functions.isEmpty());
-			Assert.assertTrue(r.imports.isEmpty());
-			Assert.assertEquals(0, r.subpackages.size());
-			Assert.assertTrue(r.types.isEmpty());
+			Assert.assertEquals(0, r.getFields().size());
+			Assert.assertEquals(0, r.getFunctions().size());
+			Assert.assertEquals(0, r.getImports().size());
+			Assert.assertEquals(0, r.getSubpackges().size());
+			Assert.assertEquals(0, r.getTypes().size());
 		}),new CaseValid("package q.r;", (p)->{
-			Assert.assertNull(p.name);
-			Assert.assertNotNull(p.parent);
+			Assert.assertEquals("", p.getName());
+			Assert.assertNotNull(p.getParent());
 			
-			Assert.assertTrue(p.fields.isEmpty());
-			Assert.assertTrue(p.functions.isEmpty());
-			Assert.assertTrue(p.imports.isEmpty());
-			Assert.assertEquals(1, p.subpackages.size());
-			Assert.assertTrue(p.types.isEmpty());
+			Assert.assertEquals(0, p.getFields().size());
+			Assert.assertEquals(0, p.getFunctions().size());
+			Assert.assertEquals(0, p.getImports().size());
+			Assert.assertEquals(1, p.getSubpackges().size());
+			Assert.assertEquals(0, p.getTypes().size());
 			
-			Package q = p.subpackages.get(0);
+			Package q = p.getSubpackges().get(0);
 			
-			Assert.assertEquals("q", q.name);
-			Assert.assertEquals(p, q.parent);
+			Assert.assertEquals("q", q.getName());
+			Assert.assertEquals(p, q.getParent());
 			
-			Assert.assertTrue(q.fields.isEmpty());
-			Assert.assertTrue(q.functions.isEmpty());
-			Assert.assertTrue(q.imports.isEmpty());
-			Assert.assertEquals(1, q.subpackages.size());
-			Assert.assertTrue(q.types.isEmpty());
+			Assert.assertEquals(0, q.getFields().size());
+			Assert.assertEquals(0, q.getFunctions().size());
+			Assert.assertEquals(0, q.getImports().size());
+			Assert.assertEquals(1, q.getSubpackges().size());
+			Assert.assertEquals(0, q.getTypes().size());
 			
-			Package r = q.subpackages.get(0);
+			Package r = q.getSubpackges().get(0);
 			
-			Assert.assertEquals("r", r.name);
-			Assert.assertEquals(q, r.parent);
+			Assert.assertEquals("r", r.getName());
+			Assert.assertEquals(q, r.getParent());
 			
-			Assert.assertTrue(r.fields.isEmpty());
-			Assert.assertTrue(r.functions.isEmpty());
-			Assert.assertTrue(r.imports.isEmpty());
-			Assert.assertEquals(0, r.subpackages.size());
-			Assert.assertTrue(r.types.isEmpty());
+			Assert.assertEquals(0, r.getFields().size());
+			Assert.assertEquals(0, r.getFunctions().size());
+			Assert.assertEquals(0, r.getImports().size());
+			Assert.assertEquals(0, r.getSubpackges().size());
+			Assert.assertEquals(0, r.getTypes().size());
 		}),new CaseValid("package q.r {}", (p)->{
-			Assert.assertNull(p.name);
-			Assert.assertNotNull(p.parent);
+			Assert.assertEquals("", p.getName());
+			Assert.assertNotNull(p.getParent());
 			
-			Assert.assertTrue(p.fields.isEmpty());
-			Assert.assertTrue(p.functions.isEmpty());
-			Assert.assertTrue(p.imports.isEmpty());
-			Assert.assertEquals(1, p.subpackages.size());
-			Assert.assertTrue(p.types.isEmpty());
+			Assert.assertEquals(0, p.getFields().size());
+			Assert.assertEquals(0, p.getFunctions().size());
+			Assert.assertEquals(0, p.getImports().size());
+			Assert.assertEquals(1, p.getSubpackges().size());
+			Assert.assertEquals(0, p.getTypes().size());
 			
-			Package q = p.subpackages.get(0);
+			Package q = p.getSubpackges().get(0);
 			
-			Assert.assertEquals("q", q.name);
-			Assert.assertEquals(p, q.parent);
+			Assert.assertEquals("q", q.getName());
+			Assert.assertEquals(p, q.getParent());
 			
-			Assert.assertTrue(q.fields.isEmpty());
-			Assert.assertTrue(q.functions.isEmpty());
-			Assert.assertTrue(q.imports.isEmpty());
-			Assert.assertEquals(1, q.subpackages.size());
-			Assert.assertTrue(q.types.isEmpty());
+			Assert.assertEquals(0, q.getFields().size());
+			Assert.assertEquals(0, q.getFunctions().size());
+			Assert.assertEquals(0, q.getImports().size());
+			Assert.assertEquals(1, q.getSubpackges().size());
+			Assert.assertEquals(0, q.getTypes().size());
 			
-			Package r = q.subpackages.get(0);
+			Package r = q.getSubpackges().get(0);
 			
-			Assert.assertEquals("r", r.name);
-			Assert.assertEquals(q, r.parent);
+			Assert.assertEquals("r", r.getName());
+			Assert.assertEquals(q, r.getParent());
 			
-			Assert.assertTrue(r.fields.isEmpty());
-			Assert.assertTrue(r.functions.isEmpty());
-			Assert.assertTrue(r.imports.isEmpty());
-			Assert.assertEquals(0, r.subpackages.size());
-			Assert.assertTrue(r.types.isEmpty());
+			Assert.assertEquals(0, r.getFields().size());
+			Assert.assertEquals(0, r.getFunctions().size());
+			Assert.assertEquals(0, r.getImports().size());
+			Assert.assertEquals(0, r.getSubpackges().size());
+			Assert.assertEquals(0, r.getTypes().size());
 		}),new CaseValid("package q.r.s {}", (p)->{
-			Assert.assertNull(p.name);
-			Assert.assertNotNull(p.parent);
+			Assert.assertEquals("", p.getName());
+			Assert.assertNotNull(p.getParent());
 			
-			Assert.assertTrue(p.fields.isEmpty());
-			Assert.assertTrue(p.functions.isEmpty());
-			Assert.assertTrue(p.imports.isEmpty());
-			Assert.assertEquals(1, p.subpackages.size());
-			Assert.assertTrue(p.types.isEmpty());
+			Assert.assertEquals(0, p.getFields().size());
+			Assert.assertEquals(0, p.getFunctions().size());
+			Assert.assertEquals(0, p.getImports().size());
+			Assert.assertEquals(1, p.getSubpackges().size());
+			Assert.assertEquals(0, p.getTypes().size());
 			
-			Package q = p.subpackages.get(0);
+			Package q = p.getSubpackges().get(0);
 			
-			Assert.assertEquals("q", q.name);
-			Assert.assertEquals(p, q.parent);
+			Assert.assertEquals("q", q.getName());
+			Assert.assertEquals(p, q.getParent());
 			
-			Assert.assertTrue(q.fields.isEmpty());
-			Assert.assertTrue(q.functions.isEmpty());
-			Assert.assertTrue(q.imports.isEmpty());
-			Assert.assertEquals(1, q.subpackages.size());
-			Assert.assertTrue(q.types.isEmpty());
+			Assert.assertEquals(0, q.getFields().size());
+			Assert.assertEquals(0, q.getFunctions().size());
+			Assert.assertEquals(0, q.getImports().size());
+			Assert.assertEquals(1, q.getSubpackges().size());
+			Assert.assertEquals(0, q.getTypes().size());
 			
-			Package r = q.subpackages.get(0);
+			Package r = q.getSubpackges().get(0);
 			
-			Assert.assertEquals("r", r.name);
-			Assert.assertEquals(q, r.parent);
+			Assert.assertEquals("r", r.getName());
+			Assert.assertEquals(q, r.getParent());
 			
-			Assert.assertTrue(r.fields.isEmpty());
-			Assert.assertTrue(r.functions.isEmpty());
-			Assert.assertTrue(r.imports.isEmpty());
-			Assert.assertEquals(1, r.subpackages.size());
-			Assert.assertTrue(r.types.isEmpty());
+			Assert.assertEquals(0, r.getFields().size());
+			Assert.assertEquals(0, r.getFunctions().size());
+			Assert.assertEquals(0, r.getImports().size());
+			Assert.assertEquals(1, r.getSubpackges().size());
+			Assert.assertEquals(0, r.getTypes().size());
 			
-			Package s = r.subpackages.get(0);
+			Package s = r.getSubpackges().get(0);
 			
-			Assert.assertEquals("s", s.name);
-			Assert.assertEquals(r, s.parent);
+			Assert.assertEquals("s", s.getName());
+			Assert.assertEquals(r, s.getParent());
 			
-			Assert.assertTrue(s.fields.isEmpty());
-			Assert.assertTrue(s.functions.isEmpty());
-			Assert.assertTrue(s.imports.isEmpty());
-			Assert.assertEquals(0, s.subpackages.size());
-			Assert.assertTrue(s.types.isEmpty());
+			Assert.assertEquals(0, s.getFields().size());
+			Assert.assertEquals(0, s.getFunctions().size());
+			Assert.assertEquals(0, s.getImports().size());
+			Assert.assertEquals(0, s.getSubpackges().size());
+			Assert.assertEquals(0, s.getTypes().size());
 		}),new CaseValid("package q;", (p)->{
-			Assert.assertEquals(1, p.subpackages.size());
+			Assert.assertEquals(1, p.getSubpackges().size());
 			
 			Assert.assertNotNull(p.source);
 			Assert.assertEquals(0, p.source.begin);
 			Assert.assertEquals(9, p.source.end);
 			Assert.assertEquals("<unknown>", p.source.file);
 			
-			Package q = p.subpackages.get(0);
+			Package q = p.getSubpackges().get(0);
 			
 			Assert.assertNotNull(q.source);
 			Assert.assertEquals(0, q.source.begin);
 			Assert.assertEquals(9, q.source.end);
 			Assert.assertEquals("<unknown>", q.source.file);
 		}),new CaseValid("package q {package r;}", (p)->{
-			Assert.assertEquals(1, p.subpackages.size());
+			Assert.assertEquals(1, p.getSubpackges().size());
 			
 			Assert.assertNotNull(p.source);
 			Assert.assertEquals(0, p.source.begin);
 			Assert.assertEquals(21, p.source.end);
 			Assert.assertEquals("<unknown>", p.source.file);
 			
-			Package q = p.subpackages.get(0);
-			Assert.assertEquals(1, q.subpackages.size());
+			Package q = p.getSubpackges().get(0);
+			Assert.assertEquals(1, q.getSubpackges().size());
 			
 			Assert.assertNotNull(q.source);
 			Assert.assertEquals(0, q.source.begin);
 			Assert.assertEquals(21, q.source.end);
 			Assert.assertEquals("<unknown>", q.source.file);
 			
-			Package r = q.subpackages.get(0);
+			Package r = q.getSubpackges().get(0);
 			
 			Assert.assertNotNull(r.source);
 			Assert.assertEquals(11, r.source.begin);

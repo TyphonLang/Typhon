@@ -55,9 +55,9 @@ public class TyphonSourceReader {
 			});
 			
 			RootContext root = parser.root();
-			return readPackage(tni, new SourceInfo(root), null, null, root.tnDecls);
+			return readPackage(tni, new SourceInfo(root), "", null, root.tnDecls);
 		} catch (ParseCancellationException e) {
-			return new Package(tni.corePackage, new SourceInfo(file.getPath(), 0, (int) file.length()-1));
+			return new Package(new SourceInfo(file.getPath(), 0, (int) file.length()-1), "", tni.corePackage);
 		}
 	}
 	
@@ -83,15 +83,14 @@ public class TyphonSourceReader {
 		});
 		
 		try {
-			return readPackage(tni, new SourceInfo(0, input.length()-1), null, tni.corePackage, parser.root().tnDecls);
+			return readPackage(tni, new SourceInfo(0, input.length()-1), "", tni.corePackage, parser.root().tnDecls);
 		} catch (ParseCancellationException e) {
-			return new Package(tni.corePackage, new SourceInfo(0, input.length()-1));
+			return new Package(new SourceInfo(0, input.length()-1), "", tni.corePackage);
 		}
 	}
 	
 	public static Package readPackage(TyphonInput tni, SourceInfo source, String name, Package parent, List<DeclContext> decls) {
-		Package result = new Package(parent, source == null? parent.source : source);
-		result.name = name;
+		Package result = new Package(source == null? parent.source : source, name, parent);
 		
 		// TODO: actually parse packageNames fully
 		Box<Integer> declIndex = new Box<>(0);

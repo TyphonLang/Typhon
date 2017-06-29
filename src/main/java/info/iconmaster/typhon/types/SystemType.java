@@ -9,4 +9,9 @@ public class SystemType extends Type {
 		this.name = name;
 		this.parent = parent;
 	}
+	
+	@Override
+	public String getName() {
+		return name;
+	}
 }

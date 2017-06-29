@@ -15,4 +15,8 @@ public abstract class Type extends TyphonLanguageEntity {
 	public Type(TyphonInput input, SourceInfo source) {
 		super(input, source);
 	}
+	
+	public String getName() {
+		return null;
+	}
 }

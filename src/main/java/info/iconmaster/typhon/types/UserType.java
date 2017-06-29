@@ -24,4 +24,9 @@ public class UserType extends Type {
 		this.parent = parent;
 		this.name = name;
 	}
+	
+	@Override
+	public String getName() {
+		return name;
+	}
 }

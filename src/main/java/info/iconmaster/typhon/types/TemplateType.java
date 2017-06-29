@@ -20,13 +20,13 @@ public class TemplateType extends Type {
 	/**
 	 * The most broad type that this template will accept.
 	 */
-	private Type baseType;
+	private TypeRef baseType;
 	
 	/**
 	 * If no value is supplied at instantiation, this value is used.
 	 * Must be castable to this.baseType.
 	 */
-	private Type defaultValue;
+	private TypeRef defaultValue;
 	
 	/**
 	 * The ANTLR rule representing the base type.
@@ -61,14 +61,14 @@ public class TemplateType extends Type {
 	/**
 	 * @return The most broad type that this template will accept.
 	 */
-	public Type getBaseType() {
+	public TypeRef getBaseType() {
 		return baseType;
 	}
 
 	/**
 	 * @param baseType The new most broad type that this template will accept.
 	 */
-	public void setBaseType(Type baseType) {
+	public void setBaseType(TypeRef baseType) {
 		this.baseType = baseType;
 	}
 
@@ -77,7 +77,7 @@ public class TemplateType extends Type {
 	 * Must be castable to this.baseType.
 	 * @return The default type.
 	 */
-	public Type getDefaultValue() {
+	public TypeRef getDefaultValue() {
 		return defaultValue;
 	}
 
@@ -87,7 +87,7 @@ public class TemplateType extends Type {
 	 * 
 	 * @param defaultValue The new default type.
 	 */
-	public void setDefaultValue(Type defaultValue) {
+	public void setDefaultValue(TypeRef defaultValue) {
 		this.defaultValue = defaultValue;
 	}
 

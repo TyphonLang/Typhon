@@ -12,7 +12,7 @@ public class SystemType extends Type {
 	/**
 	 * The parent type. Cannot be null.
 	 */
-	private Type parent;
+	private TypeRef parent;
 	
 	/**
 	 * The name of this type.
@@ -23,10 +23,20 @@ public class SystemType extends Type {
 	 * @param name The name of this type.
 	 * @param parent The parent type. Cannot be null.
 	 */
-	public SystemType(String name, Type parent) {
+	public SystemType(String name, TypeRef parent) {
 		super(parent.tni, parent.source);
 		this.name = name;
 		this.parent = parent;
+	}
+	
+	/**
+	 * @param name The name of this type.
+	 * @param parent The parent type. Cannot be null.
+	 */
+	public SystemType(String name, Type parent) {
+		super(parent.tni, parent.source);
+		this.name = name;
+		this.parent = new TypeRef(parent);
 	}
 	
 	@Override
@@ -44,14 +54,14 @@ public class SystemType extends Type {
 	/**
 	 * @return The parent type. Cannot be null.
 	 */
-	public Type getParent() {
+	public TypeRef getParent() {
 		return parent;
 	}
 	
 	/**
 	 * @param parent The parent type. Cannot be null.
 	 */
-	public void setParent(Type parent) {
+	public void setParent(TypeRef parent) {
 		this.parent = parent;
 	}
 }

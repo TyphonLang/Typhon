@@ -5,6 +5,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
 import info.iconmaster.typhon.tnil.CodeBlock;
 import info.iconmaster.typhon.types.Type;
+import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.util.SourceInfo;
 
 /**
@@ -22,7 +23,7 @@ public class Field extends TyphonLanguageEntity {
 	/**
 	 * The type of this field.
 	 */
-	public Type type;
+	public TypeRef type;
 	
 	/**
 	 * This code is run before static initializers, and returns the initial value of this field.
@@ -64,14 +65,14 @@ public class Field extends TyphonLanguageEntity {
 	/**
 	 * @return The type of this field.
 	 */
-	public Type getType() {
+	public TypeRef getType() {
 		return type;
 	}
 
 	/**
 	 * @param type The new type of this field.
 	 */
-	public void setType(Type type) {
+	public void setType(TypeRef type) {
 		this.type = type;
 	}
 

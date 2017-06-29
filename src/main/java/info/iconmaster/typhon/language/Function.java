@@ -10,6 +10,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
 import info.iconmaster.typhon.tnil.CodeBlock;
 import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.types.Type;
+import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.util.SourceInfo;
 
 /**
@@ -30,7 +31,7 @@ public class Function extends TyphonLanguageEntity {
 	/**
 	 * The return types of this function.
 	 */
-	private List<Type> retType = new ArrayList<>();
+	private List<TypeRef> retType = new ArrayList<>();
 	
 	/**
 	 * The template parameters for this function.
@@ -110,7 +111,7 @@ public class Function extends TyphonLanguageEntity {
 	/**
 	 * @return The return types of this function.
 	 */
-	public List<Type> getRetType() {
+	public List<TypeRef> getRetType() {
 		return retType;
 	}
 

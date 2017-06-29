@@ -4,7 +4,7 @@ import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
 import info.iconmaster.typhon.tnil.CodeBlock;
-import info.iconmaster.typhon.types.Type;
+import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.util.SourceInfo;
 
 public class Parameter extends TyphonLanguageEntity {
@@ -16,7 +16,7 @@ public class Parameter extends TyphonLanguageEntity {
 	/**
 	 * The type of this parameter.
 	 */
-	private Type type;
+	private TypeRef type;
 	
 	/**
 	 * The code to execute when an argument is not supplied by a caller.
@@ -58,14 +58,14 @@ public class Parameter extends TyphonLanguageEntity {
 	/**
 	 * @return The type of this parameter.
 	 */
-	public Type getType() {
+	public TypeRef getType() {
 		return type;
 	}
 
 	/**
 	 * @param type The new type of this parameter.
 	 */
-	public void setType(Type type) {
+	public void setType(TypeRef type) {
 		this.type = type;
 	}
 

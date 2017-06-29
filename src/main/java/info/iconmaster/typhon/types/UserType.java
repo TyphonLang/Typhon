@@ -1,5 +1,8 @@
 package info.iconmaster.typhon.types;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.util.SourceInfo;
 
@@ -14,29 +17,45 @@ public class UserType extends Type {
 	/**
 	 * The parent type. Cannot be null.
 	 */
-	private Type parent;
+	private TypeRef parent;
 	
 	/**
 	 * The name of this type.
 	 */
 	private String name;
-
+	
 	/**
+	 * The template parameters this type has.
+	 */
+	private List<TemplateType> templates = new ArrayList<>();
+	
+	/**
+	 * @param name The name of this type.
 	 * @param parent The parent type. Cannot be null.
 	 */
-	public UserType(String name, Type parent) {
+	public UserType(String name, TypeRef parent) {
 		super(parent.tni, parent.source);
-		this.name = name;
 		this.parent = parent;
+		this.name = name;
+	}
+
+	/**
+	 * @param name The name of this type.
+	 * @param parent The parent type. Cannot be null.
+	 */
+	public UserType(SourceInfo source, String name, TypeRef parent) {
+		super(parent.tni, source);
+		this.parent = parent;
+		this.name = name;
 	}
 	
 	/**
 	 * @param name The name of this type.
 	 * @param parent The parent type. Cannot be null.
 	 */
-	public UserType(TyphonInput input, Type parent, String name) {
-		super(input, parent.source);
-		this.parent = parent;
+	public UserType(String name, Type parent) {
+		super(parent.tni, parent.source);
+		this.parent = new TypeRef(parent);
 		this.name = name;
 	}
 
@@ -44,9 +63,9 @@ public class UserType extends Type {
 	 * @param name The name of this type.
 	 * @param parent The parent type. Cannot be null.
 	 */
-	public UserType(TyphonInput input, SourceInfo source, Type parent, String name) {
-		super(input, source);
-		this.parent = parent;
+	public UserType(SourceInfo source, String name, Type parent) {
+		super(parent.tni, source);
+		this.parent = new TypeRef(parent);
 		this.name = name;
 	}
 	
@@ -65,14 +84,21 @@ public class UserType extends Type {
 	/**
 	 * @return The parent type. Cannot be null.
 	 */
-	public Type getParent() {
+	public TypeRef getParent() {
 		return parent;
 	}
 
 	/**
 	 * @param parent The new parent type. Cannot be null.
 	 */
-	public void setParent(Type parent) {
+	public void setParent(TypeRef parent) {
 		this.parent = parent;
+	}
+
+	/**
+	 * @return The template parameters this type has.
+	 */
+	public List<TemplateType> getTemplates() {
+		return templates;
 	}
 }

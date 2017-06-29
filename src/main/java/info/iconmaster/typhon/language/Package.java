@@ -118,8 +118,7 @@ public class Package extends TyphonLanguageEntity {
 			a = new ArrayList<>();
 			subpackages.put(p.getName(), a);
 		}
-
-		p.setParent(this);
+		
 		a.add(p);
 	}
 
@@ -135,8 +134,6 @@ public class Package extends TyphonLanguageEntity {
 				subpackages.remove(p.getName());
 			}
 		}
-		
-		p.setParent(null);
 	}
 
 	/**

@@ -14,17 +14,17 @@ import info.iconmaster.typhon.util.SourceInfo;
 public abstract class Type extends TyphonLanguageEntity {
 	/**
 	 * The package that contains methods, fields, etc. for this type.
+	 * 
+	 * TODO: set this up properly.
 	 */
 	private Package typePackage;
 	
 	public Type(TyphonInput input) {
 		super(input);
-		typePackage = new Package(null, tni.corePackage); // TODO
 	}
 	
 	public Type(TyphonInput input, SourceInfo source) {
 		super(input, source);
-		typePackage = new Package(null, tni.corePackage); // TODO
 	}
 	
 	/**

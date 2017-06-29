@@ -111,6 +111,11 @@ public class Package extends TyphonLanguageEntity {
 	 * @param p The package to add. Cannot be null.
 	 */
 	public void addSubpackage(Package p) {
+		if (p.parent != null) {
+			p.parent.removeSubpackage(p);
+		}
+		p.parent = this;
+		
 		List<Package> a;
 		if (subpackages.containsKey(p.getName())) {
 			a = subpackages.get(p.getName());
@@ -127,6 +132,8 @@ public class Package extends TyphonLanguageEntity {
 	 * @param p The package to remove. Cannot be null.
 	 */
 	public void removeSubpackage(Package p) {
+		p.parent = null;
+		
 		if (subpackages.containsKey(p.getName())) {
 			List<Package> a = subpackages.get(p.getName());
 			a.remove(p);

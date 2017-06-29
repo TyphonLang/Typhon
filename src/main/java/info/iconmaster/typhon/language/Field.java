@@ -117,4 +117,25 @@ public class Field extends TyphonLanguageEntity {
 	public ExprContext getRawValue() {
 		return rawValue;
 	}
+	
+	/**
+	 * The package this field belongs to.
+	 */
+	private Package parent;
+
+	/**
+	 * @return The package this field belongs to.
+	 */
+	public Package getParent() {
+		return parent;
+	}
+
+	/**
+	 * NOTE: Don't call this, call <tt>{@link Package}.addField()</tt> instead.
+	 * 
+	 * @param parent The new package this field belongs to.
+	 */
+	public void setParent(Package parent) {
+		this.parent = parent;
+	}
 }

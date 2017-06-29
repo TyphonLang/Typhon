@@ -190,4 +190,25 @@ public class Function extends TyphonLanguageEntity {
 			throw new IllegalArgumentException("rawCode must be either List<StatContext> or ExprContext");
 		}
 	}
+	
+	/**
+	 * The package this function belongs to.
+	 */
+	private Package parent;
+
+	/**
+	 * @return The package this function belongs to.
+	 */
+	public Package getParent() {
+		return parent;
+	}
+
+	/**
+	 * NOTE: Don't call this, call <tt>{@link Package}.addFunction()</tt> instead.
+	 * 
+	 * @param parent The new package this function belongs to.
+	 */
+	public void setParent(Package parent) {
+		this.parent = parent;
+	}
 }

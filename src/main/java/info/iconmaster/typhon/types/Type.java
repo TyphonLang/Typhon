@@ -44,4 +44,25 @@ public abstract class Type extends TyphonLanguageEntity {
 	public Package getTypePackage() {
 		return typePackage;
 	}
+	
+	/**
+	 * The package this type belongs to.
+	 */
+	private Package parent;
+
+	/**
+	 * @return The package this type belongs to.
+	 */
+	public Package getParent() {
+		return parent;
+	}
+
+	/**
+	 * NOTE: Don't call this, call <tt>{@link Package}.addType()</tt> instead.
+	 * 
+	 * @param parent The new package this type belongs to.
+	 */
+	public void setParent(Package parent) {
+		this.parent = parent;
+	}
 }

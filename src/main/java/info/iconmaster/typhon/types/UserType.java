@@ -16,7 +16,7 @@ public class UserType extends Type {
 	/**
 	 * The parent type. Cannot be null.
 	 */
-	private TypeRef parent;
+	private TypeRef parentType;
 	
 	/**
 	 * The name of this type.
@@ -34,7 +34,7 @@ public class UserType extends Type {
 	 */
 	public UserType(String name, TypeRef parent) {
 		super(parent.tni, parent.source);
-		this.parent = parent;
+		this.parentType = parent;
 		this.name = name;
 	}
 
@@ -44,27 +44,27 @@ public class UserType extends Type {
 	 */
 	public UserType(SourceInfo source, String name, TypeRef parent) {
 		super(parent.tni, source);
-		this.parent = parent;
+		this.parentType = parent;
 		this.name = name;
 	}
 	
 	/**
 	 * @param name The name of this type.
-	 * @param parent The parent type. Cannot be null.
+	 * @param parentType The parent type. Cannot be null.
 	 */
-	public UserType(String name, Type parent) {
-		super(parent.tni, parent.source);
-		this.parent = new TypeRef(parent);
+	public UserType(String name, Type parentType) {
+		super(parentType.tni, parentType.source);
+		this.parentType = new TypeRef(parentType);
 		this.name = name;
 	}
 
 	/**
 	 * @param name The name of this type.
-	 * @param parent The parent type. Cannot be null.
+	 * @param parentType The parent type. Cannot be null.
 	 */
-	public UserType(SourceInfo source, String name, Type parent) {
-		super(parent.tni, source);
-		this.parent = new TypeRef(parent);
+	public UserType(SourceInfo source, String name, Type parentType) {
+		super(parentType.tni, source);
+		this.parentType = new TypeRef(parentType);
 		this.name = name;
 	}
 	
@@ -83,15 +83,15 @@ public class UserType extends Type {
 	/**
 	 * @return The parent type. Cannot be null.
 	 */
-	public TypeRef getParent() {
-		return parent;
+	public TypeRef getParentType() {
+		return parentType;
 	}
 
 	/**
-	 * @param parent The new parent type. Cannot be null.
+	 * @param parentType The new parent type. Cannot be null.
 	 */
-	public void setParent(TypeRef parent) {
-		this.parent = parent;
+	public void setParentType(TypeRef parentType) {
+		this.parentType = parentType;
 	}
 
 	/**

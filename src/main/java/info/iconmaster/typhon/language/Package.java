@@ -182,6 +182,11 @@ public class Package extends TyphonLanguageEntity {
 		if (f.getName() == null)
 			throw new NullPointerException("Cannot add a function without a name");
 		
+		if (f.getParent() != null) {
+			f.getParent().removeFunction(f);
+		}
+		f.setParent(this);
+		
 		List<Function> a;
 		if (functions.containsKey(f.getName())) {
 			a = functions.get(f.getName());
@@ -201,6 +206,8 @@ public class Package extends TyphonLanguageEntity {
 	public void removeFunction(Function f) {
 		if (f.getName() == null)
 			throw new NullPointerException("Cannot remove a function without a name");
+		
+		f.setParent(null);
 		
 		if (functions.containsKey(f.getName())) {
 			List<Function> a = functions.get(f.getName());
@@ -242,6 +249,11 @@ public class Package extends TyphonLanguageEntity {
 	 * @param f The field to add. Cannot be null.
 	 */
 	public void addField(Field f) {
+		if (f.getParent() != null) {
+			f.getParent().removeField(f);
+		}
+		f.setParent(this);
+		
 		fields.put(f.name, f);
 	}
 
@@ -251,6 +263,8 @@ public class Package extends TyphonLanguageEntity {
 	 * @param f The field to remove. Cannot be null.
 	 */
 	public void removeField(Field f) {
+		f.setParent(null);
+		
 		fields.remove(f.name, f);
 	}
 
@@ -282,6 +296,12 @@ public class Package extends TyphonLanguageEntity {
 	public void addType(Type t) {
 		if (t.getName() == null)
 			throw new NullPointerException("Cannot add a type without a name");
+		
+		if (t.getParent() != null) {
+			t.getParent().removeType(t);
+		}
+		t.setParent(this);
+		
 		types.put(t.getName(), t);
 	}
 
@@ -293,6 +313,9 @@ public class Package extends TyphonLanguageEntity {
 	public void removeType(Type t) {
 		if (t.getName() == null)
 			throw new NullPointerException("Cannot remove a type without a name");
+		
+		t.setParent(null);
+		
 		types.remove(t.getName(), t);
 	}
 
@@ -322,6 +345,11 @@ public class Package extends TyphonLanguageEntity {
 	 * @param i
 	 */
 	public void addImport(Import i) {
+		if (i.getParent() != null) {
+			i.getParent().removeImport(i);
+		}
+		i.setParent(this);
+		
 		imports.add(i);
 	}
 
@@ -330,6 +358,8 @@ public class Package extends TyphonLanguageEntity {
 	 * @param i
 	 */
 	public void removeImport(Import i) {
+		i.setParent(null);
+		
 		imports.remove(i);
 	}
 
@@ -348,6 +378,11 @@ public class Package extends TyphonLanguageEntity {
 	 * @param f The annotation definition to add. Cannot be null.
 	 */
 	public void addAnnotDef(AnnotationDefinition f) {
+		if (f.getParent() != null) {
+			f.getParent().removeAnnotDef(f);
+		}
+		f.setParent(this);
+		
 		List<AnnotationDefinition> a;
 		if (definedAnnots.containsKey(f.getName())) {
 			a = definedAnnots.get(f.getName());
@@ -365,6 +400,8 @@ public class Package extends TyphonLanguageEntity {
 	 * @param f The annotation definition to remove. Cannot be null.
 	 */
 	public void removeAnnotDef(AnnotationDefinition f) {
+		f.setParent(null);
+		
 		if (definedAnnots.containsKey(f.getName())) {
 			List<AnnotationDefinition> a = definedAnnots.get(f.getName());
 			a.remove(f);
@@ -405,6 +442,11 @@ public class Package extends TyphonLanguageEntity {
 	 * @param b
 	 */
 	public void addStaticInitBlock(StaticInitBlock b) {
+		if (b.getParent() != null) {
+			b.getParent().removeStaticInitBlock(b);
+		}
+		b.setParent(this);
+		
 		staticInitBlocks.add(b);
 	}
 
@@ -413,6 +455,8 @@ public class Package extends TyphonLanguageEntity {
 	 * @param b
 	 */
 	public void removeStaticInitBlock(StaticInitBlock b) {
+		b.setParent(null);
+		
 		staticInitBlocks.remove(b);
 	}
 

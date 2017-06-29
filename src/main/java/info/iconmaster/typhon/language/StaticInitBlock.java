@@ -61,4 +61,25 @@ public class StaticInitBlock extends TyphonLanguageEntity {
 	public void setRawData(List<StatContext> rawCode) {
 		this.rawCode = rawCode;
 	}
+	
+	/**
+	 * The package this block belongs to.
+	 */
+	private Package parent;
+
+	/**
+	 * @return The package this block belongs to.
+	 */
+	public Package getParent() {
+		return parent;
+	}
+
+	/**
+	 * NOTE: Don't call this, call <tt>{@link Package}.addStaticInitBlock()</tt> instead.
+	 * 
+	 * @param parent The new package this block belongs to.
+	 */
+	public void setParent(Package parent) {
+		this.parent = parent;
+	}
 }

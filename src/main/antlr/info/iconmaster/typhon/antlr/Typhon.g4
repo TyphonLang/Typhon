@@ -3,8 +3,8 @@ grammar Typhon;
 root: tnDecls+=decl* EOF;
 
 decl:
-	tnDoc=DOC_COMMENT? tnRetType=types tnAnnots+=annotation* tnName=WORD tnFunc=anonFunc																													#methodDecl
-|	tnDoc=DOC_COMMENT? tnRetType=types tnAnnots+=annotation* tnName=WORD tnTemplate=templateDecls? '(' tnArgs=paramsDecl ')' ';'																			#methodStubDecl
+	tnDoc=DOC_COMMENT? tnAnnots+=annotation* tnRetType=types tnName=WORD tnFunc=anonFunc																													#methodDecl
+|	tnDoc=DOC_COMMENT? tnAnnots+=annotation* tnRetType=types tnName=WORD tnTemplate=templateDecls? '(' tnArgs=paramsDecl ')' ';'																			#methodStubDecl
 |	tnDoc=DOC_COMMENT? tnType=type tnNames+=paramName (',' tnNames+=paramName)* ('=' tnValues+=expr (',' tnValues+=expr)*)? ';'																				#fieldDecl
 |	tnAnnots+=annotation* tnBlock=block																																										#staticInitDecl
 |	tnDoc=DOC_COMMENT? tnAnnots+=annotation* 'class' tnName=WORD tnTemplate=templateDecls? (':' tnExtends+=type (',' tnExtends+=type)*)? '{' tnDecls+=decl* '}'												#classDecl
@@ -26,12 +26,15 @@ type:
 |	tnAnnots+=annotation* tnTemplate=templateDecls? '(' (tnArgTypes+=type (',' tnArgTypes+=type)*)? ')' '->' tnRetType=types	#funcType
 |	tnAnnots+=annotation* '[' tnBaseType=type ']'																				#arrayType
 |	tnAnnots+=annotation* '{' tnKeyType=type ':' tnValueType=type '}'															#mapType
-|	tnAnnots+=annotation* 'void'																								#voidType
 |	tnAnnots+=annotation* 'var'																									#varType
 |	tnAnnots+=annotation* 'const' tnType=type																					#constType
 |	tnAnnots+=annotation* tnName=WORD tnTemplate=templateInst?																	#basicType
 ;
-types: tnTypes+=type | '(' (tnTypes+=type (',' tnTypes+=type)*)? ')';
+types:
+	tnType=type										#singleTypes
+|	'(' (tnTypes+=type (',' tnTypes+=type)*)? ')'	#multiTypes
+|	'void'											#voidTypes
+;
 
 expr:
 	tnLhs=expr (tnOp='.'|tnOp='?.'|tnOp='::') tnValue=WORD															#memberExpr

@@ -20,7 +20,7 @@ public class TestGrammar extends TyphonTest {
 			//methodDecl
 			new CaseValid("void main() {}"),
 			new CaseValid("void main() {0;1;}"),
-			new CaseValid("/**doc*/ void @a @b main() {}"),
+			new CaseValid("/**doc*/ @a @b void main() {}"),
 			new CaseInvalid("void main() {};"),
 			new CaseInvalid("main() {}"),
 			//methodStubDecl
@@ -28,7 +28,7 @@ public class TestGrammar extends TyphonTest {
 			new CaseValid("void main(var x);"),
 			new CaseValid("void main(var x, var y);"),
 			new CaseValid("void main<T>();"),
-			new CaseValid("/**doc*/ void @a @b main();"),
+			new CaseValid("/**doc*/ @a @b void main();"),
 			new CaseInvalid("void main()"),
 			new CaseInvalid("main();"),
 			//fieldDecl
@@ -119,9 +119,6 @@ public class TestGrammar extends TyphonTest {
 			new CaseValid("@a @b {int:int}", (parser)->{parser.type();}),
 			new CaseInvalid("{}", (parser)->{parser.type();}),
 			new CaseInvalid("{int}", (parser)->{parser.type();}),
-			//voidType
-			new CaseValid("void", (parser)->{parser.type();}),
-			new CaseValid("@a @b void", (parser)->{parser.type();}),
 			//varType
 			new CaseValid("var", (parser)->{parser.type();}),
 			new CaseValid("@a @b var", (parser)->{parser.type();}),
@@ -133,13 +130,19 @@ public class TestGrammar extends TyphonTest {
 			new CaseValid("x", (parser)->{parser.type();}),
 			new CaseValid("x<t>", (parser)->{parser.type();}),
 			new CaseValid("@a @b x", (parser)->{parser.type();}),
-			//types
+			//singleTypes
 			new CaseValid("var", (parser)->{parser.types();}),
+			new CaseValid("const int", (parser)->{parser.types();}),
+			new CaseValid("int", (parser)->{parser.types();}),
+			new CaseValid("()->()", (parser)->{parser.types();}),
+			//multiTypes
 			new CaseValid("()", (parser)->{parser.types();}),
 			new CaseValid("(var)", (parser)->{parser.types();}),
 			new CaseValid("(var,var)", (parser)->{parser.types();}),
 			new CaseValid("(var,var,var)", (parser)->{parser.types();}),
 			new CaseInvalid("(var var)", (parser)->{parser.types();}),
+			//voidTypes
+			new CaseValid("void", (parser)->{parser.types();}),
 			//memberExpr
 			new CaseValid("a.b", (parser)->{parser.expr();}),
 			new CaseValid("a?.b", (parser)->{parser.expr();}),

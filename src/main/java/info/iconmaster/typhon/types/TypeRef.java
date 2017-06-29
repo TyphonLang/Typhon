@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import info.iconmaster.typhon.TyphonInput;
+import info.iconmaster.typhon.language.TemplateArgument;
 import info.iconmaster.typhon.language.TyphonLanguageEntity;
 import info.iconmaster.typhon.util.SourceInfo;
 
@@ -23,7 +24,7 @@ public class TypeRef extends TyphonLanguageEntity {
 	 * The templates this type has been instantiated with.
 	 * Must be empty if this type does not support templates.
 	 */
-	private List<TypeRef> templateArgs = new ArrayList<>();
+	private List<TemplateArgument> templateArgs = new ArrayList<>();
 
 	public TypeRef(TyphonInput tni) {
 		super(tni);
@@ -60,7 +61,7 @@ public class TypeRef extends TyphonLanguageEntity {
 	/**
 	 * @return The templates this type has been instantiated with. Must be empty if this type does not support templates.
 	 */
-	public List<TypeRef> getTemplateArgs() {
+	public List<TemplateArgument> getTemplateArgs() {
 		return templateArgs;
 	}
 }

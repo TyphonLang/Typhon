@@ -3,7 +3,6 @@ package info.iconmaster.typhon.types;
 import java.util.ArrayList;
 import java.util.List;
 
-import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.util.SourceInfo;
 
 /**

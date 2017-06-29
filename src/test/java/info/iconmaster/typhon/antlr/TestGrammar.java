@@ -481,11 +481,19 @@ public class TestGrammar extends TyphonTest {
 			new CaseInvalid("<1 2>", (parser)->{parser.templateDecls();}),
 			new CaseInvalid("<1", (parser)->{parser.templateDecls();}),
 			new CaseInvalid("1>", (parser)->{parser.templateDecls();}),
-			//templateInst
-			new CaseValid("<>", (parser)->{parser.templateInst();}),
-			new CaseValid("<var>", (parser)->{parser.templateInst();}),
-			new CaseValid("<var,var,var>", (parser)->{parser.templateInst();}),
-			new CaseInvalid("<1>", (parser)->{parser.templateInst();}),
+			//templateArg
+			new CaseValid("var", (parser)->{parser.templateArg();}),
+			new CaseValid("T:var", (parser)->{parser.templateArg();}),
+			new CaseInvalid("1", (parser)->{parser.templateArg();}),
+			new CaseInvalid("1:var", (parser)->{parser.templateArg();}),
+			new CaseInvalid("T:1", (parser)->{parser.templateArg();}),
+			//templateArgs
+			new CaseValid("<>", (parser)->{parser.templateArgs();}),
+			new CaseValid("<var>", (parser)->{parser.templateArgs();}),
+			new CaseValid("<T:var>", (parser)->{parser.templateArgs();}),
+			new CaseValid("<var,var,var>", (parser)->{parser.templateArgs();}),
+			new CaseValid("<var,T:var,var>", (parser)->{parser.templateArgs();}),
+			new CaseInvalid("<1>", (parser)->{parser.templateArgs();}),
 			//paramName
 			new CaseValid("x", (parser)->{parser.paramName();}),
 			new CaseValid("@a @b x", (parser)->{parser.paramName();}),

@@ -28,7 +28,7 @@ type:
 |	tnAnnots+=annotation* '{' tnKeyType=type ':' tnValueType=type '}'															#mapType
 |	tnAnnots+=annotation* 'var'																									#varType
 |	tnAnnots+=annotation* 'const' tnType=type																					#constType
-|	tnAnnots+=annotation* tnName=WORD tnTemplate=templateInst?																	#basicType
+|	tnAnnots+=annotation* tnName=WORD tnTemplate=templateArgs?																	#basicType
 ;
 types:
 	tnType=type										#singleTypes
@@ -38,8 +38,8 @@ types:
 
 expr:
 	tnLhs=expr (tnOp='.'|tnOp='?.'|tnOp='::') tnValue=WORD															#memberExpr
-|	tnCallee=expr tnTemplate=templateInst? '(' tnArgs=argsDecl ')'													#funcCallExpr
-|	tnCallee=expr tnTemplate=templateInst? '[' tnArgs=argsDecl ']'													#indexCallExpr
+|	tnCallee=expr tnTemplate=templateArgs? '(' tnArgs=argsDecl ')'													#funcCallExpr
+|	tnCallee=expr tnTemplate=templateArgs? '[' tnArgs=argsDecl ']'													#indexCallExpr
 |	tnLhs=expr 'as' tnRhs=type																						#castExpr
 |	tnAnnots+=annotation* 'new' tnType=type '(' tnArgs=argsDecl ')' ('{' tnDecls+=decl* '}')?						#newExpr
 |	tnAnnots+=annotation* (tnOp='-'|tnOp='+'|tnOp='!'|tnOp='~') tnArg=expr											#unOpsExpr
@@ -103,7 +103,9 @@ globalAnnotation: '@@' tnName=packageName ('(' tnArgs=argsDecl ')')?;
 
 templateDecl: tnAnnots+=annotation* tnName=WORD (':' tnBaseType=type)? ('=' tnDefaultType=type)?;
 templateDecls: '<' (tnArgs+=templateDecl (',' tnArgs+=templateDecl)*)? '>';
-templateInst: '<' (tnArgs+=type (',' tnArgs+=type)*)? '>';
+
+templateArg: (tnLabel=WORD ':')? tnType=type;
+templateArgs: '<' (tnArgs+=templateArg (',' tnArgs+=templateArg)*)? '>';
 
 paramName: tnAnnots+=annotation* tnName=WORD;
 paramDecl: tnType=type tnAnnots+=annotation* tnName=WORD ('=' tnDefaultValue=expr)?;

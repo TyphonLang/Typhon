@@ -9,7 +9,6 @@ import info.iconmaster.typhon.antlr.TyphonParser.StatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
 import info.iconmaster.typhon.tnil.CodeBlock;
 import info.iconmaster.typhon.types.TemplateType;
-import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.util.SourceInfo;
 

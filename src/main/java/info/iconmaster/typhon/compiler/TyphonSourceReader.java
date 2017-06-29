@@ -218,6 +218,13 @@ public class TyphonSourceReader {
 		}).collect(Collectors.toCollection(()->new ArrayList<>()));
 	}
 	
+	/**
+	 * Translates an ANTLR rule for a function into a Typhon function.
+	 * 
+	 * @param tni
+	 * @param rule The method declaration. Cannot be null.
+	 * @return The function the input represents.
+	 */
 	public static Function readFunction(TyphonInput tni, MethodDeclContext rule) {
 		Function f = new Function(tni, new SourceInfo(rule), rule.tnName.getText());
 		
@@ -238,6 +245,13 @@ public class TyphonSourceReader {
 		return f;
 	}
 	
+	/**
+	 * Translates ANTLR rules for parameters into Typhon parameters.
+	 * 
+	 * @param tni
+	 * @param rules The parameters. Cannot be null.
+	 * @return The list of parameters the input represents.
+	 */
 	public static List<Parameter> readParams(TyphonInput tni, List<ParamDeclContext> rules) {
 		return rules.stream().map((rule)->{
 			Parameter p = new Parameter(tni, new SourceInfo(rule));
@@ -250,6 +264,13 @@ public class TyphonSourceReader {
 		}).collect(Collectors.toCollection(()->new ArrayList<>()));
 	}
 	
+	/**
+	 * Translates ANTLR rules for template parameters into Typhon template parameters.
+	 * 
+	 * @param tni
+	 * @param rules The parameters. Cannot be null.
+	 * @return The list of parameters the input represents.
+	 */
 	public static List<TemplateType> readTemplateParams(TyphonInput tni, List<TemplateDeclContext> rules) {
 		return rules.stream().map((rule)->{
 			TemplateType t = new TemplateType(tni, new SourceInfo(rule), rule.tnName.getText());
@@ -261,6 +282,13 @@ public class TyphonSourceReader {
 		}).collect(Collectors.toCollection(()->new ArrayList<>()));
 	}
 	
+	/**
+	 * Parses a return type specification.
+	 * Used to ensure 'void' is equivalent to '()', among other things.
+	 * 
+	 * @param rule The return types.
+	 * @return The list of actual return types.
+	 */
 	public static List<TypeContext> readTypes(TypesContext rule) {
 		if (rule instanceof SingleTypesContext) {
 			return Arrays.asList(((SingleTypesContext)rule).tnType);

@@ -144,6 +144,8 @@ public class TestGrammar extends TyphonTest {
 			new CaseValid("a.b", (parser)->{parser.expr();}),
 			new CaseValid("a?.b", (parser)->{parser.expr();}),
 			new CaseValid("a.b?.c.d", (parser)->{parser.expr();}),
+			new CaseValid("'a'.b", (parser)->{parser.expr();}),
+			new CaseInvalid("a.'b'", (parser)->{parser.expr();}),
 			//funcCallExpr
 			new CaseValid("a()", (parser)->{parser.expr();}),
 			new CaseValid("a(b)", (parser)->{parser.expr();}),

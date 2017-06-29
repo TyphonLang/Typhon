@@ -34,7 +34,7 @@ type:
 types: tnTypes+=type | '(' (tnTypes+=type (',' tnTypes+=type)*)? ')';
 
 expr:
-	tnLhs=expr (tnOp='.'|tnOp='?.') tnRhs=expr																		#memberExpr
+	tnLhs=expr (tnOp='.'|tnOp='?.') tnValue=WORD																	#memberExpr
 |	tnCallee=expr tnTemplate=templateInst? '(' tnArgs=argsDecl ')'													#funcCallExpr
 |	tnCallee=expr tnTemplate=templateInst? '[' tnArgs=argsDecl ']'													#indexCallExpr
 |	tnLhs=expr 'as' tnRhs=type																						#castExpr

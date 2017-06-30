@@ -29,15 +29,17 @@ import info.iconmaster.typhon.language.Annotation;
 public class TestAnnotationReader extends TyphonTest {
 	@Parameterized.Parameters
     public static Collection<Object[]> data() {
+    	// The 'x's are to avoid the bug with ANTLR 4.5.
+    	
 		return TyphonTest.makeData(new CaseValid("@a", (a)->{
 			Assert.assertEquals("a", a.getRawDefinition().getText());
-		}),new CaseValid("@a()", (a)->{
+		}),new CaseValid("@a() x", (a)->{
 			Assert.assertEquals("a", a.getRawDefinition().getText());
-		}),new CaseValid("@a(b,c)", (a)->{
+		}),new CaseValid("@a(b,c) x", (a)->{
 			Assert.assertEquals("a", a.getRawDefinition().getText());
 			
 			Assert.assertEquals(2, a.getArgs().size());
-		}),new CaseValid("@a(@x b,@y c)", (a)->{
+		}),new CaseValid("@a(@x b,@y c) x", (a)->{
 			Assert.assertEquals("a", a.getRawDefinition().getText());
 			
 			Assert.assertEquals(2, a.getArgs().size());

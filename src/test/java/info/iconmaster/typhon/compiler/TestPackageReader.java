@@ -496,7 +496,7 @@ public class TestPackageReader extends TyphonTest {
 		}),
 		new CaseInvalid("x", 0, 1),
 		new CaseInvalid("aaa", 2, 3),
-		new CaseInvalid("a.a", 1, 1),
+		new CaseInvalid("a.a", 2, 3),
 		new CaseInvalid("package", 6, 7),
 		new CaseInvalid("package 1", 8, 8),
 		new CaseInvalid("package\n1", 8, 8),

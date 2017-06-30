@@ -138,6 +138,9 @@ public class TestGrammar extends TyphonTest {
 			new CaseValid("x", (parser)->{parser.type();}),
 			new CaseValid("x<t>", (parser)->{parser.type();}),
 			new CaseValid("@a @b x", (parser)->{parser.type();}),
+			new CaseValid("a.b", (parser)->{parser.type();}),
+			new CaseValid("(1).a", (parser)->{parser.type();}),
+			new CaseValid("(1).a<x,y>", (parser)->{parser.type();}),
 			//singleTypes
 			new CaseValid("var", (parser)->{parser.types();}),
 			new CaseValid("const int", (parser)->{parser.types();}),
@@ -453,16 +456,16 @@ public class TestGrammar extends TyphonTest {
 			new CaseInvalid("a.1", (parser)->{parser.packageName();}),
 			new CaseInvalid("1.a", (parser)->{parser.packageName();}),
 			//annotation
-			new CaseValid("@a", (parser)->{parser.annotation();}),
-			new CaseValid("@a()", (parser)->{parser.annotation();}),
-			new CaseValid("@a.b", (parser)->{parser.annotation();}),
-			new CaseValid("@a.b()", (parser)->{parser.annotation();}),
-			// The following two lines are commented out due to a known bug in ANTLR 4.5.
+			// The following lines are commented out due to a known bug in ANTLR 4.5.
 			// TODO: Update to ANTLR 4.7; current cannot due to Gradle
+			new CaseValid("@a", (parser)->{parser.annotation();}),
+			//new CaseValid("@a()", (parser)->{parser.annotation();}),
+			new CaseValid("@a.b", (parser)->{parser.annotation();}),
+			//new CaseValid("@a.b()", (parser)->{parser.annotation();}),
 			//new CaseValid("@a(b)", (parser)->{parser.annotation();}),
 			//new CaseValid("@a.b(c)", (parser)->{parser.annotation();}),
-			new CaseValid("@a(b,c)", (parser)->{parser.annotation();}),
-			new CaseValid("@a.b(c,d)", (parser)->{parser.annotation();}),
+			//new CaseValid("@a(b,c)", (parser)->{parser.annotation();}),
+			//new CaseValid("@a.b(c,d)", (parser)->{parser.annotation();}),
 			new CaseValid("@a.b.c.d.e", (parser)->{parser.annotation();}),
 			new CaseInvalid("@()", (parser)->{parser.annotation();}),
 			//globalAnnotation

@@ -37,7 +37,8 @@ types:
 ;
 
 expr:
-	tnCallee=expr tnLookup+=memberItem* (tnOp='.'|tnOp='?.') tnAnnots+=annotation* tnValue=WORD												#memberExpr
+	tnLhs=expr tnLookup+=memberItem* (tnOp='.'|tnOp='?.') tnAnnots+=annotation* tnValue=WORD												#memberExpr
+|	tnLhs=expr '::' tnValue=WORD tnTemplate=templateArgs? '(' (tnFuncPtrArg+=templateArg (',' tnFuncPtrArg+=templateArg)*)? ')'				#funcPtrExpr
 |	tnCallee=expr tnAnnots+=annotation* tnTemplate=templateArgs? '(' tnArgs=argsDecl ')'													#funcCallExpr
 |	tnCallee=expr tnAnnots+=annotation* tnTemplate=templateArgs? '[' tnArgs=argsDecl ']'													#indexCallExpr
 |	tnLhs=expr 'as' tnRhs=type																												#castExpr

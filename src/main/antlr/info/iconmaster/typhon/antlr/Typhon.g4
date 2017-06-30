@@ -12,7 +12,7 @@ decl:
 |	tnDoc=DOC_COMMENT? tnAnnots+=annotation* 'package' tnName=packageName ';'																																#simplePackageDecl
 |	tnDoc=DOC_COMMENT? tnAnnots+=annotation* 'package' tnName=packageName '{' tnDecls+=decl* '}'																											#packageDecl
 |	tnAnnots+=annotation* 'import' tnName=packageName ('as' tnAlias=packageName)? ';'																														#importDecl
-|	tnDoc=DOC_COMMENT? tnAnnots+=annotation* 'new' '(' (tnArgs+=constructorParam (',' tnArgs+=constructorParam)*)? ')' ('=>' tnExprForm=exprs | tnBlockForm=block)											#constructorDecl
+|	tnDoc=DOC_COMMENT? tnAnnots+=annotation* 'new' '(' (tnArgs+=constructorParam (',' tnArgs+=constructorParam)*)? ')' ('=>' tnExprForm=exprs | tnBlockForm=block | tnStubForm=';')							#constructorDecl
 |	tnAnnots+=annotation* tnGlobalAnnot=globalAnnotation																																					#globalAnnotDecl
 ;
 enumValueDecl: tnDoc=DOC_COMMENT? tnAnnots+=annotation* tnName=WORD ('(' tnArgs=argsDecl ')')?;
@@ -53,7 +53,6 @@ expr:
 |	tnLhs=expr (tnOp='&&'|tnOp='||') tnRhs=expr																		#logicOpsExpr
 |	tnAnnots+=annotation* 'throw' tnArg=expr																		#throwExpr
 |	tnIf=expr '?' tnThen=expr ':' tnElse=expr																		#terneryOpExpr
-|	tnAnnots+=annotation* 'type' tnType=type																		#typeConstExpr
 |	tnAnnots+=annotation* 'null'																					#nullConstExpr
 |	tnAnnots+=annotation* 'true'																					#trueConstExpr
 |	tnAnnots+=annotation* 'false'																					#falseConstExpr

@@ -24,11 +24,12 @@ import info.iconmaster.typhon.antlr.TyphonParser;
 import info.iconmaster.typhon.antlr.TyphonParser.AnnotationContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ArgDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DeclContext;
-import info.iconmaster.typhon.antlr.TyphonParser.ExprsContext;
+import info.iconmaster.typhon.antlr.TyphonParser.FieldDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MethodDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MultiTypesContext;
 import info.iconmaster.typhon.antlr.TyphonParser.PackageDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ParamDeclContext;
+import info.iconmaster.typhon.antlr.TyphonParser.ParamNameContext;
 import info.iconmaster.typhon.antlr.TyphonParser.RootContext;
 import info.iconmaster.typhon.antlr.TyphonParser.SimplePackageDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.SingleTypesContext;
@@ -39,6 +40,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.VoidTypesContext;
 import info.iconmaster.typhon.errors.SyntaxError;
 import info.iconmaster.typhon.language.Annotation;
 import info.iconmaster.typhon.language.Argument;
+import info.iconmaster.typhon.language.Field;
 import info.iconmaster.typhon.language.Function;
 import info.iconmaster.typhon.language.Package;
 import info.iconmaster.typhon.language.Parameter;
@@ -181,6 +183,15 @@ public class TyphonSourceReader {
 				
 				return null;
 			}
+			
+			@Override
+			public Void visitFieldDecl(FieldDeclContext ctx) {
+				for (Field f : readField(tni, ctx)) {
+					result.addField(f);
+				}
+				
+				return null;
+			}
 		};
 		
 		for (DeclContext decl : decls) {
@@ -243,6 +254,34 @@ public class TyphonSourceReader {
 		
 		f.getAnnots().addAll(readAnnots(tni, rule.tnAnnots));
 		return f;
+	}
+	
+	/**
+	 * Translates an ANTLR rule for a field into Typhon fields.
+	 * 
+	 * @param tni
+	 * @param rule The field declaration. Cannot be null.
+	 * @return The fields the input represents.
+	 */
+	public static List<Field> readField(TyphonInput tni, FieldDeclContext rule) {
+		ArrayList<Field> a = new ArrayList<>();
+		
+		int i = 0;
+		for (ParamNameContext name : rule.tnNames) {
+			Field f = new Field(tni, new SourceInfo(rule), name.tnName.getText());
+			
+			if (i < rule.tnValues.size()) {
+				f.setRawData(rule.tnType, rule.tnValues.get(i));
+			} else {
+				f.setRawData(rule.tnType, null);
+			}
+			f.getAnnots().addAll(readAnnots(tni, name.tnAnnots));
+			
+			a.add(f);
+			i++;
+		}
+		
+		return a;
 	}
 	
 	/**

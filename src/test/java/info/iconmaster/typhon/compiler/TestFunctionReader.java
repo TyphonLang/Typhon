@@ -160,8 +160,7 @@ public class TestFunctionReader extends TyphonTest {
 			
 			DeclContext root = parser.decl();
 			Assert.assertTrue("'"+input+"' was not a methodDecl: ", root instanceof MethodDeclContext);
-			Function f = TyphonSourceReader.readFunction(tni, (MethodDeclContext)root);
-			test.accept(f);
+			test.accept(TyphonSourceReader.readFunction(tni, (MethodDeclContext)root));
 		}
     }
 }

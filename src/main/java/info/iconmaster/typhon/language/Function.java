@@ -75,12 +75,19 @@ public class Function extends TyphonLanguageEntity {
 	public static enum Form {
 		/**
 		 * Block ('{}') form.
+		 * rawCode should be a {@link List}<{@link StatContext}>.
 		 */
 		BLOCK,
 		/**
 		 * Expression ('=>') form.
+		 * rawCode should be a {@link List}<{@link ExprContext}>.
 		 */
 		EXPR,
+		/**
+		 * Stub (';') form.
+		 * rawCode should be null.
+		 */
+		STUB,
 	}
 	
 	public Function(TyphonInput input, String name) {
@@ -161,20 +168,12 @@ public class Function extends TyphonLanguageEntity {
 	 * 
 	 * @param rawRetType The ANTLR rule representing the return types.
 	 * @param form The form of the function as it was declared.
-	 * @param rawCode The ANTLR rule representing the function's code. Either a {@link List}<{@link StatContext}> or an {@link ExprContext}.
-	 * @throws IllegalArgumentException If rawCode is not a valid type, given the form supplied.
+	 * @param rawCode The ANTLR rule representing the function's code. See {@link Form} for details.
 	 */
 	public void setRawData(List<TypeContext> rawRetType, Form form, List<?> rawCode) {
 		this.rawRetType = rawRetType;
 		this.form = form;
-		
-		if (this.form == Form.BLOCK && rawCode instanceof List) {
-			this.rawCode = ((List)rawCode);
-		} else if (this.form == Form.EXPR && rawCode instanceof List) {
-			this.rawCode = ((List)rawCode);
-		} else {
-			throw new IllegalArgumentException("rawCode must be either List<StatContext> or List<ExprContext>");
-		}
+		this.rawCode = rawCode;
 	}
 	
 	/**

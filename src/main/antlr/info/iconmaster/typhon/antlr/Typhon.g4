@@ -3,16 +3,15 @@ grammar Typhon;
 root: tnDecls+=decl* EOF;
 
 decl:
-	tnDoc=DOC_COMMENT? tnAnnots+=annotation* tnRetType=types tnName=WORD tnFunc=anonFunc																													#methodDecl
-|	tnDoc=DOC_COMMENT? tnAnnots+=annotation* tnRetType=types tnName=WORD tnTemplate=templateDecls? '(' tnArgs=paramsDecl ')' ';'																			#methodStubDecl
+	tnDoc=DOC_COMMENT? tnAnnots+=annotation* tnRetType=types tnName=WORD tnTemplate=templateDecls? '(' tnArgs=paramsDecl ')' ('=>' tnExprForm=exprs | '{' tnBlockForm+=stat* '}' | tnStubForm=';')			#methodDecl
 |	tnDoc=DOC_COMMENT? tnType=type tnNames+=paramName (',' tnNames+=paramName)* ('=' tnValues+=expr (',' tnValues+=expr)*)? ';'																				#fieldDecl
-|	tnAnnots+=annotation* tnBlock=block																																										#staticInitDecl
+|	tnAnnots+=annotation* '{' tnBlock+=stat* '}'																																							#staticInitDecl
 |	tnDoc=DOC_COMMENT? tnAnnots+=annotation* 'class' tnName=WORD tnTemplate=templateDecls? (':' tnExtends+=type (',' tnExtends+=type)*)? '{' tnDecls+=decl* '}'												#classDecl
 |	tnDoc=DOC_COMMENT? tnAnnots+=annotation* 'enum' tnName=WORD (':' tnExtends+=type (',' tnExtends+=type)*)? '{' (tnValues+=enumValueDecl (',' tnValues+=enumValueDecl)* ','?)? ';'? tnDecls+=decl* '}'	#enumDecl
 |	tnDoc=DOC_COMMENT? tnAnnots+=annotation* 'package' tnName=packageName ';'																																#simplePackageDecl
 |	tnDoc=DOC_COMMENT? tnAnnots+=annotation* 'package' tnName=packageName '{' tnDecls+=decl* '}'																											#packageDecl
 |	tnAnnots+=annotation* 'import' tnName=packageName ('as' tnAlias=packageName)? ';'																														#importDecl
-|	tnDoc=DOC_COMMENT? tnAnnots+=annotation* 'new' '(' (tnArgs+=constructorParam (',' tnArgs+=constructorParam)*)? ')' ('=>' tnExprForm=exprs | tnBlockForm=block | tnStubForm=';')							#constructorDecl
+|	tnDoc=DOC_COMMENT? tnAnnots+=annotation* 'new' '(' (tnArgs+=constructorParam (',' tnArgs+=constructorParam)*)? ')' ('=>' tnExprForm=exprs | '{' tnBlockForm+=stat* '}' | tnStubForm=';')				#constructorDecl
 |	tnAnnots+=annotation* tnGlobalAnnot=globalAnnotation																																					#globalAnnotDecl
 ;
 enumValueDecl: tnDoc=DOC_COMMENT? tnAnnots+=annotation* tnName=WORD ('(' tnArgs=argsDecl ')')?;
@@ -114,7 +113,7 @@ argDecl: (tnKey=WORD ':')? tnValue=expr;
 argsDecl: tnArgs+=argDecl (',' tnArgs+=argDecl)* |;
 
 block: ('<' tnLabel=WORD '>')? '{' tnBlock+=stat* '}';
-anonFunc: tnTemplate=templateDecls? '(' tnArgs=paramsDecl ')' ('=>' tnExprForm=exprs | tnBlockForm=block);
+anonFunc: tnTemplate=templateDecls? '(' tnArgs=paramsDecl ')' ('=>' tnExprForm=exprs | '{' tnBlockForm+=stat* '}');
 
 fragment LETTER: [a-zA-Z] | '_';
 fragment DIGIT: [0-9];

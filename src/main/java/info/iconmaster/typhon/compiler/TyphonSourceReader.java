@@ -239,17 +239,19 @@ public class TyphonSourceReader {
 	public static Function readFunction(TyphonInput tni, MethodDeclContext rule) {
 		Function f = new Function(tni, new SourceInfo(rule), rule.tnName.getText());
 		
-		if (rule.tnFunc.tnArgs != null) {
-			f.getParams().addAll(readParams(tni, rule.tnFunc.tnArgs.tnArgs));
+		if (rule.tnArgs != null) {
+			f.getParams().addAll(readParams(tni, rule.tnArgs.tnArgs));
 		}
-		if (rule.tnFunc.tnTemplate != null) {
-			f.getTemplate().addAll(readTemplateParams(tni, rule.tnFunc.tnTemplate.tnArgs));
+		if (rule.tnTemplate != null) {
+			f.getTemplate().addAll(readTemplateParams(tni, rule.tnTemplate.tnArgs));
 		}
 		
-		if (rule.tnFunc.tnBlockForm != null) {
-			f.setRawData(readTypes(rule.tnRetType), Function.Form.BLOCK, rule.tnFunc.tnBlockForm.tnBlock);
-		} else if (rule.tnFunc.tnExprForm != null) {
-			f.setRawData(readTypes(rule.tnRetType), Function.Form.EXPR, rule.tnFunc.tnExprForm.tnExprs);
+		if (rule.tnExprForm == null && rule.tnStubForm == null) {
+			f.setRawData(readTypes(rule.tnRetType), Function.Form.BLOCK, rule.tnBlockForm);
+		} else if (rule.tnExprForm != null) {
+			f.setRawData(readTypes(rule.tnRetType), Function.Form.EXPR, rule.tnExprForm.tnExprs);
+		} else {
+			f.setRawData(readTypes(rule.tnRetType), Function.Form.STUB, null);
 		}
 		
 		f.getAnnots().addAll(readAnnots(tni, rule.tnAnnots));

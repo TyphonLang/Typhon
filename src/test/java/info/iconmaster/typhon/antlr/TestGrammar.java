@@ -27,14 +27,13 @@ public class TestGrammar extends TyphonTest {
 			new CaseValid("void main() {}"),
 			new CaseValid("void main() {0;1;}"),
 			new CaseValid("/**doc*/ @a @b void main() {}"),
-			new CaseInvalid("void main() {};"),
-			new CaseInvalid("main() {}"),
-			//methodStubDecl
 			new CaseValid("void main();"),
 			new CaseValid("void main(var x);"),
 			new CaseValid("void main(var x, var y);"),
 			new CaseValid("void main<T>();"),
 			new CaseValid("/**doc*/ @a @b void main();"),
+			new CaseInvalid("void main() {};"),
+			new CaseInvalid("main() {}"),
 			new CaseInvalid("void main()"),
 			new CaseInvalid("main();"),
 			//fieldDecl

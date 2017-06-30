@@ -1,8 +1,12 @@
 package info.iconmaster.typhon.types;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import info.iconmaster.typhon.TyphonInput;
+import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
 import info.iconmaster.typhon.util.SourceInfo;
 
 /**
@@ -16,7 +20,7 @@ public class UserType extends Type {
 	/**
 	 * The parent type. Cannot be null.
 	 */
-	private TypeRef parentType;
+	private List<TypeRef> parentTypes = new ArrayList<>();
 	
 	/**
 	 * The name of this type.
@@ -24,47 +28,44 @@ public class UserType extends Type {
 	private String name;
 	
 	/**
+	 * The ANTLR rule representing the parent types of this type.
+	 */
+	private List<TypeContext> rawParentTypes;
+
+	/**
 	 * The template parameters this type has.
 	 */
 	private List<TemplateType> templates = new ArrayList<>();
 	
-	/**
-	 * @param name The name of this type.
-	 * @param parent The parent type. Cannot be null.
-	 */
-	public UserType(String name, TypeRef parent) {
-		super(parent.tni, parent.source);
-		this.parentType = parent;
+	public UserType(TyphonInput input, SourceInfo source, String name) {
+		super(input, source);
+		this.name = name;
+	}
+
+	public UserType(TyphonInput input, String name) {
+		super(input);
 		this.name = name;
 	}
 
 	/**
 	 * @param name The name of this type.
-	 * @param parent The parent type. Cannot be null.
+	 * @param parentType One or more parent types.
 	 */
-	public UserType(SourceInfo source, String name, TypeRef parent) {
-		super(parent.tni, source);
-		this.parentType = parent;
+	public UserType(String name, Type parentType, Type... otherParentTypes) {
+		super(parentType.tni);
+		this.parentTypes.add(new TypeRef(parentType));
+		this.parentTypes.addAll(Arrays.asList(otherParentTypes).stream().map((t)->new TypeRef(t)).collect(Collectors.toList()));
 		this.name = name;
 	}
 	
 	/**
 	 * @param name The name of this type.
-	 * @param parentType The parent type. Cannot be null.
+	 * @param parentType One or more parent types.
 	 */
-	public UserType(String name, Type parentType) {
-		super(parentType.tni, parentType.source);
-		this.parentType = new TypeRef(parentType);
-		this.name = name;
-	}
-
-	/**
-	 * @param name The name of this type.
-	 * @param parentType The parent type. Cannot be null.
-	 */
-	public UserType(SourceInfo source, String name, Type parentType) {
-		super(parentType.tni, source);
-		this.parentType = new TypeRef(parentType);
+	public UserType(String name, TypeRef parentType, TypeRef... otherParentTypes) {
+		super(parentType.tni);
+		this.parentTypes.add(parentType);
+		this.parentTypes.addAll(Arrays.asList(otherParentTypes));
 		this.name = name;
 	}
 	
@@ -74,17 +75,10 @@ public class UserType extends Type {
 	}
 
 	/**
-	 * @return The parent type. Cannot be null.
+	 * @return The parent types of this type.
 	 */
-	public TypeRef getParentType() {
-		return parentType;
-	}
-
-	/**
-	 * @param parentType The new parent type. Cannot be null.
-	 */
-	public void setParentType(TypeRef parentType) {
-		this.parentType = parentType;
+	public List<TypeRef> getParentTypes() {
+		return parentTypes;
 	}
 
 	/**
@@ -92,5 +86,21 @@ public class UserType extends Type {
 	 */
 	public List<TemplateType> getTemplates() {
 		return templates;
+	}
+	
+	/**
+	 * @return The ANTLR rule representing the parent types of this type.
+	 */
+	public List<TypeContext> getRawParentTypes() {
+		return rawParentTypes;
+	}
+
+	/**
+	 * Sets the raw ANTLR data for this type.
+	 * 
+	 * @param rawParentTypes The ANTLR rule representing the parent types of this type.
+	 */
+	public void setRawData(List<TypeContext> rawParentTypes) {
+		this.rawParentTypes = rawParentTypes;
 	}
 }

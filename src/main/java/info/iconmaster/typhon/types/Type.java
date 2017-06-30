@@ -42,6 +42,10 @@ public abstract class Type extends TyphonLanguageEntity {
 	 * @return The package that contains methods, fields, etc. for this type.
 	 */
 	public Package getTypePackage() {
+		if (typePackage == null) {
+			typePackage = new Package("", parent == null ? tni.corePackage : parent);
+		}
+		
 		return typePackage;
 	}
 	

@@ -1,5 +1,12 @@
 package info.iconmaster.typhon.types;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import info.iconmaster.typhon.TyphonInput;
+
 /**
  * These types are created by the system.
  * They usually have special means of compilation, and cannot be created by the user.
@@ -12,31 +19,38 @@ public class SystemType extends Type {
 	/**
 	 * The parent type. Cannot be null.
 	 */
-	private TypeRef parentType;
+	private List<TypeRef> parentTypes = new ArrayList<>();
 	
 	/**
 	 * The name of this type.
 	 */
 	private String name;
 
+	public SystemType(TyphonInput input, String name) {
+		super(input);
+		this.name = name;
+	}
+
 	/**
 	 * @param name The name of this type.
-	 * @param parentType The parent type. Cannot be null.
+	 * @param parentType One or more parent types.
 	 */
-	public SystemType(String name, TypeRef parentType) {
-		super(parentType.tni, parentType.source);
+	public SystemType(String name, Type parentType, Type... otherParentTypes) {
+		super(parentType.tni);
+		this.parentTypes.add(new TypeRef(parentType));
+		this.parentTypes.addAll(Arrays.asList(otherParentTypes).stream().map((t)->new TypeRef(t)).collect(Collectors.toList()));
 		this.name = name;
-		this.parentType = parentType;
 	}
 	
 	/**
 	 * @param name The name of this type.
-	 * @param parentType The parent type. Cannot be null.
+	 * @param parentType One or more parent types.
 	 */
-	public SystemType(String name, Type parentType) {
-		super(parentType.tni, parentType.source);
+	public SystemType(String name, TypeRef parentType, TypeRef... otherParentTypes) {
+		super(parentType.tni);
+		this.parentTypes.add(parentType);
+		this.parentTypes.addAll(Arrays.asList(otherParentTypes));
 		this.name = name;
-		this.parentType = new TypeRef(parentType);
 	}
 	
 	@Override
@@ -47,14 +61,7 @@ public class SystemType extends Type {
 	/**
 	 * @return The parent type. Cannot be null.
 	 */
-	public TypeRef getParentType() {
-		return parentType;
-	}
-	
-	/**
-	 * @param parentType The parent type. Cannot be null.
-	 */
-	public void setParentType(TypeRef parentType) {
-		this.parentType = parentType;
+	public List<TypeRef> getParentTypes() {
+		return parentTypes;
 	}
 }

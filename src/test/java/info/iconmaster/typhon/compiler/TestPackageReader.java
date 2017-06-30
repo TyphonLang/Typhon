@@ -21,6 +21,9 @@ import info.iconmaster.typhon.errors.TyphonError;
 import info.iconmaster.typhon.language.Annotation;
 import info.iconmaster.typhon.language.Field;
 import info.iconmaster.typhon.language.Function;
+import info.iconmaster.typhon.language.Import;
+import info.iconmaster.typhon.language.Import.PackageImport;
+import info.iconmaster.typhon.language.Import.RawImport;
 import info.iconmaster.typhon.language.Package;
 import info.iconmaster.typhon.util.SourceInfo;
 
@@ -425,6 +428,71 @@ public class TestPackageReader extends TyphonTest {
 			
 			Field f = q.getFields().get(0);
 			Assert.assertEquals("x", f.getName());
+		}),new CaseValid("import x;", (p)->{
+			Assert.assertEquals(1, p.getImports().size());
+			
+			Import i = p.getImports().get(0);
+			Assert.assertEquals(0, i.getAliasName().size());
+			
+			Assert.assertTrue(i instanceof PackageImport);
+			Assert.assertEquals(1, ((PackageImport)i).getPackageName().size());
+			Assert.assertEquals("x", ((PackageImport)i).getPackageName().get(0));
+		}),new CaseValid("import x.y;", (p)->{
+			Assert.assertEquals(1, p.getImports().size());
+			
+			Import i = p.getImports().get(0);
+			Assert.assertEquals(0, i.getAliasName().size());
+			
+			Assert.assertTrue(i instanceof PackageImport);
+			Assert.assertEquals(2, ((PackageImport)i).getPackageName().size());
+			Assert.assertEquals("x", ((PackageImport)i).getPackageName().get(0));
+			Assert.assertEquals("y", ((PackageImport)i).getPackageName().get(1));
+		}),new CaseValid("import x as y;", (p)->{
+			Assert.assertEquals(1, p.getImports().size());
+			
+			Import i = p.getImports().get(0);
+			Assert.assertEquals(1, i.getAliasName().size());
+			Assert.assertEquals("y", i.getAliasName().get(0));
+			
+			Assert.assertTrue(i instanceof PackageImport);
+			Assert.assertEquals(1, ((PackageImport)i).getPackageName().size());
+			Assert.assertEquals("x", ((PackageImport)i).getPackageName().get(0));
+		}),new CaseValid("import x as y.z;", (p)->{
+			Assert.assertEquals(1, p.getImports().size());
+			
+			Import i = p.getImports().get(0);
+			Assert.assertEquals(2, i.getAliasName().size());
+			Assert.assertEquals("y", i.getAliasName().get(0));
+			Assert.assertEquals("z", i.getAliasName().get(1));
+			
+			Assert.assertTrue(i instanceof PackageImport);
+			Assert.assertEquals(1, ((PackageImport)i).getPackageName().size());
+			Assert.assertEquals("x", ((PackageImport)i).getPackageName().get(0));
+		}),new CaseValid("import \"x\";", (p)->{
+			Assert.assertEquals(1, p.getImports().size());
+			
+			Import i = p.getImports().get(0);
+			Assert.assertEquals(0, i.getAliasName().size());
+			
+			Assert.assertTrue(i instanceof RawImport);
+			Assert.assertEquals("x", ((RawImport)i).getImportData());
+		}),new CaseValid("import \"x\" as y;", (p)->{
+			Assert.assertEquals(1, p.getImports().size());
+			
+			Import i = p.getImports().get(0);
+			Assert.assertEquals(1, i.getAliasName().size());
+			Assert.assertEquals("y", i.getAliasName().get(0));
+			
+			Assert.assertTrue(i instanceof RawImport);
+			Assert.assertEquals("x", ((RawImport)i).getImportData());
+		}),new CaseValid("import \"\";", (p)->{
+			Assert.assertEquals(1, p.getImports().size());
+			
+			Import i = p.getImports().get(0);
+			Assert.assertEquals(0, i.getAliasName().size());
+			
+			Assert.assertTrue(i instanceof RawImport);
+			Assert.assertEquals("", ((RawImport)i).getImportData());
 		}),
 		new CaseInvalid("x", 0, 1),
 		new CaseInvalid("aaa", 2, 3),

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,6 +26,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.AnnotationContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ArgDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.FieldDeclContext;
+import info.iconmaster.typhon.antlr.TyphonParser.ImportDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MethodDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MultiTypesContext;
 import info.iconmaster.typhon.antlr.TyphonParser.PackageDeclContext;
@@ -42,8 +44,11 @@ import info.iconmaster.typhon.language.Annotation;
 import info.iconmaster.typhon.language.Argument;
 import info.iconmaster.typhon.language.Field;
 import info.iconmaster.typhon.language.Function;
+import info.iconmaster.typhon.language.Import;
 import info.iconmaster.typhon.language.Package;
 import info.iconmaster.typhon.language.Parameter;
+import info.iconmaster.typhon.language.Import.PackageImport;
+import info.iconmaster.typhon.language.Import.RawImport;
 import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.util.Box;
 import info.iconmaster.typhon.util.SourceInfo;
@@ -178,8 +183,7 @@ public class TyphonSourceReader {
 			
 			@Override
 			public Void visitMethodDecl(MethodDeclContext ctx) {
-				Function f = readFunction(tni, ctx);
-				result.addFunction(f);
+				result.addFunction(readFunction(tni, ctx));
 				
 				return null;
 			}
@@ -189,6 +193,13 @@ public class TyphonSourceReader {
 				for (Field f : readField(tni, ctx)) {
 					result.addField(f);
 				}
+				
+				return null;
+			}
+			
+			@Override
+			public Void visitImportDecl(ImportDeclContext ctx) {
+				result.addImport(readImport(tni, ctx));
 				
 				return null;
 			}
@@ -284,6 +295,22 @@ public class TyphonSourceReader {
 		}
 		
 		return a;
+	}
+	
+	public static Import readImport(TyphonInput tni, ImportDeclContext rule) {
+		if (rule.tnRawName == null) {
+			PackageImport i = new PackageImport(tni, new SourceInfo(rule));
+			i.getPackageName().addAll(rule.tnName.tnName.stream().map((name)->name.getText()).collect(Collectors.toList()));
+			if (rule.tnAlias != null) i.getAliasName().addAll(rule.tnAlias.tnName.stream().map((name)->name.getText()).collect(Collectors.toList()));
+			i.getAnnots().addAll(readAnnots(tni, rule.tnAnnots));
+			return i;
+		} else {
+			RawImport i = new RawImport(tni, new SourceInfo(rule));
+			i.setImportData(rule.tnRawName.getText().substring(1, rule.tnRawName.getText().length()-1));
+			if (rule.tnAlias != null) i.getAliasName().addAll(rule.tnAlias.tnName.stream().map((name)->name.getText()).collect(Collectors.toList()));
+			i.getAnnots().addAll(readAnnots(tni, rule.tnAnnots));
+			return i;
+		}
 	}
 	
 	/**

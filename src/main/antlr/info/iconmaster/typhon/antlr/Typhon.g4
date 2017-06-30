@@ -27,7 +27,8 @@ type:
 |	tnAnnots+=annotation* '{' tnKeyType=type ':' tnValueType=type '}'															#mapType
 |	tnAnnots+=annotation* 'var'																									#varType
 |	tnAnnots+=annotation* 'const' tnType=type																					#constType
-|	(tnExpr=expr '.')? tnAnnots+=annotation* tnName=WORD tnTemplate=templateArgs?												#basicType
+|	tnExpr=expr tnLookup+=memberItem* (tnOp='.'|tnOp='?.') tnAnnots+=annotation* tnName=WORD tnTemplate=templateDecls?			#memberType
+|	tnAnnots+=annotation* tnName=WORD tnTemplate=templateDecls?																	#basicType
 ;
 types:
 	tnType=type										#singleTypes
@@ -36,7 +37,7 @@ types:
 ;
 
 expr:
-	tnLhs=expr (tnOp='.'|tnOp='?.'|tnOp='::') tnValue=WORD																					#memberExpr
+	tnCallee=expr tnLookup+=memberItem* (tnOp='.'|tnOp='?.') tnAnnots+=annotation* tnValue=WORD												#memberExpr
 |	tnCallee=expr tnAnnots+=annotation* tnTemplate=templateArgs? '(' tnArgs=argsDecl ')'													#funcCallExpr
 |	tnCallee=expr tnAnnots+=annotation* tnTemplate=templateArgs? '[' tnArgs=argsDecl ']'													#indexCallExpr
 |	tnLhs=expr 'as' tnRhs=type																												#castExpr
@@ -56,7 +57,7 @@ expr:
 |	tnAnnots+=annotation* 'true'																											#trueConstExpr
 |	tnAnnots+=annotation* 'false'																											#falseConstExpr
 |	tnAnnots+=annotation* 'this'																											#thisConstExpr
-|	tnAnnots+=annotation* tnValue=WORD tnTemplate=templateArgs?																				#varExpr
+|	tnAnnots+=annotation* tnValue=WORD																										#varExpr
 |	tnAnnots+=annotation* tnValue=NUMBER																									#numConstExpr
 |	tnAnnots+=annotation* tnValue=STRING																									#stringConstExpr
 |	tnAnnots+=annotation* tnValue=CHAR																										#charConstExpr
@@ -66,6 +67,7 @@ expr:
 |	tnAnnots+=annotation* '(' tnExpr=expr ')'																								#parensExpr
 ;
 exprs: tnExprs+=expr | '(' (tnExprs+=expr (',' tnExprs+=expr)*)? ')';
+memberItem: (tnOp='.'|tnOp='?.') tnAnnots+=annotation* tnName=WORD tnTemplate=templateArgs?;
 
 stat:
 	tnAnnots+=annotation* 'return' (tnValues+=expr (',' tnValues+=expr)*)? ';'																							#retStat

@@ -138,9 +138,13 @@ public class TestGrammar extends TyphonTest {
 			new CaseValid("x", (parser)->{parser.type();}),
 			new CaseValid("x<t>", (parser)->{parser.type();}),
 			new CaseValid("@a @b x", (parser)->{parser.type();}),
+			//memberType
 			new CaseValid("a.b", (parser)->{parser.type();}),
 			new CaseValid("(1).a", (parser)->{parser.type();}),
 			new CaseValid("(1).a<x,y>", (parser)->{parser.type();}),
+			new CaseValid("a.b<c>.d<e>", (parser)->{parser.type();}),
+			new CaseValid("@a a.@b b<@c c>.@d d<@e e>", (parser)->{parser.type();}),
+			new CaseInvalid("a.(1)", (parser)->{parser.type();}),
 			//singleTypes
 			new CaseValid("var", (parser)->{parser.types();}),
 			new CaseValid("const int", (parser)->{parser.types();}),
@@ -157,9 +161,15 @@ public class TestGrammar extends TyphonTest {
 			//memberExpr
 			new CaseValid("a.b", (parser)->{parser.expr();}),
 			new CaseValid("a?.b", (parser)->{parser.expr();}),
-			new CaseValid("a::b", (parser)->{parser.expr();}),
-			new CaseValid("a.b?.c::d", (parser)->{parser.expr();}),
+			new CaseValid("a.b?.c.d", (parser)->{parser.expr();}),
 			new CaseValid("'a'.b", (parser)->{parser.expr();}),
+			new CaseValid("a.b().c", (parser)->{parser.expr();}),
+			new CaseValid("a().b().c", (parser)->{parser.expr();}),
+			new CaseValid("a.b<t>.c", (parser)->{parser.expr();}),
+			new CaseValid("@a a.b", (parser)->{parser.expr();}),
+			new CaseValid("a.@b b", (parser)->{parser.expr();}),
+			new CaseValid("@a a.@b b", (parser)->{parser.expr();}),
+			new CaseInvalid("a.b<t>", (parser)->{parser.expr();}),
 			new CaseInvalid("a.'b'", (parser)->{parser.expr();}),
 			//funcCallExpr
 			new CaseValid("a()", (parser)->{parser.expr();}),
@@ -167,12 +177,14 @@ public class TestGrammar extends TyphonTest {
 			new CaseValid("a(b,c,d)", (parser)->{parser.expr();}),
 			new CaseValid("a<int>()", (parser)->{parser.expr();}),
 			new CaseValid("a.b()", (parser)->{parser.expr();}),
+			new CaseValid("a @a() ()", (parser)->{parser.expr();}),
 			//indexCallExpr
 			new CaseValid("a[]", (parser)->{parser.expr();}),
 			new CaseValid("a[b]", (parser)->{parser.expr();}),
 			new CaseValid("a[b,c,d]", (parser)->{parser.expr();}),
 			new CaseValid("a<int>[]", (parser)->{parser.expr();}),
 			new CaseValid("a.b[]", (parser)->{parser.expr();}),
+			new CaseValid("a @a() []", (parser)->{parser.expr();}),
 			//castExpr
 			new CaseValid("a as int", (parser)->{parser.expr();}),
 			new CaseValid("a as int as long", (parser)->{parser.expr();}),
@@ -247,8 +259,6 @@ public class TestGrammar extends TyphonTest {
 			new CaseValid("@a @b this", (parser)->{parser.expr();}),
 			//varExpr
 			new CaseValid("x", (parser)->{parser.expr();}),
-			new CaseValid("x<t>", (parser)->{parser.expr();}),
-			new CaseValid("x<a,b>", (parser)->{parser.expr();}),
 			new CaseValid("xyz", (parser)->{parser.expr();}),
 			new CaseValid("_", (parser)->{parser.expr();}),
 			new CaseValid("_123", (parser)->{parser.expr();}),

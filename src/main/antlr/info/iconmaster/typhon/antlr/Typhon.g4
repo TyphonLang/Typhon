@@ -36,34 +36,34 @@ types:
 ;
 
 expr:
-	tnLhs=expr (tnOp='.'|tnOp='?.'|tnOp='::') tnValue=WORD															#memberExpr
-|	tnCallee=expr tnTemplate=templateArgs? '(' tnArgs=argsDecl ')'													#funcCallExpr
-|	tnCallee=expr tnTemplate=templateArgs? '[' tnArgs=argsDecl ']'													#indexCallExpr
-|	tnLhs=expr 'as' tnRhs=type																						#castExpr
-|	tnAnnots+=annotation* 'new' tnType=type '(' tnArgs=argsDecl ')' ('{' tnDecls+=decl* '}')?						#newExpr
-|	tnAnnots+=annotation* (tnOp='-'|tnOp='+'|tnOp='!'|tnOp='~') tnArg=expr											#unOpsExpr
-|	tnLhs=expr (tnOp='*'|tnOp='/'|tnOp='%') tnRhs=expr																#binOps1Expr
-|	tnLhs=expr (tnOp='+'|tnOp='-') tnRhs=expr																		#binOps2Expr
-|	tnLhs=expr (tnOp='&'|tnOp='|'|tnOp='^'|tnOp='<<'|tnOp='>>') tnRhs=expr											#bitOpsExpr
-|	tnLhs=expr '??' tnRhs=expr																						#nullCoalesceExpr
-|	tnLhs=expr (tnOp='<'|tnOp='>'|tnOp='<='|tnOp='>=') tnRhs=expr													#relOpsExpr
-|	tnLhs=expr 'is' tnRhs=type																						#isExpr
-|	tnLhs=expr (tnOp='=='|tnOp='!='|tnOp='==='|tnOp='!==') tnRhs=expr												#eqOpsExpr
-|	tnLhs=expr (tnOp='&&'|tnOp='||') tnRhs=expr																		#logicOpsExpr
-|	tnAnnots+=annotation* 'throw' tnArg=expr																		#throwExpr
-|	tnIf=expr '?' tnThen=expr ':' tnElse=expr																		#terneryOpExpr
-|	tnAnnots+=annotation* 'null'																					#nullConstExpr
-|	tnAnnots+=annotation* 'true'																					#trueConstExpr
-|	tnAnnots+=annotation* 'false'																					#falseConstExpr
-|	tnAnnots+=annotation* 'this'																					#thisConstExpr
-|	tnAnnots+=annotation* tnValue=WORD																				#varExpr
-|	tnAnnots+=annotation* tnValue=NUMBER																			#numConstExpr
-|	tnAnnots+=annotation* tnValue=STRING																			#stringConstExpr
-|	tnAnnots+=annotation* tnValue=CHAR																				#charConstExpr
-|	tnAnnots+=annotation* tnFunc=anonFunc																			#funcConstExpr
-|	tnAnnots+=annotation* '[' (tnValues+=expr (',' tnValues+=expr)*)? ','? ']'										#arrayConstExpr
-|	tnAnnots+=annotation* '{' (tnKeys+=expr '=' tnValues+=expr (',' tnKeys+=expr '=' tnValues+=expr)*)? ','? '}'	#mapConstExpr
-|	tnAnnots+=annotation* '(' tnExpr=expr ')'																		#parensExpr
+	tnLhs=expr (tnOp='.'|tnOp='?.'|tnOp='::') tnValue=WORD																					#memberExpr
+|	tnCallee=expr tnTemplate=templateArgs? '(' tnArgs=argsDecl ')'																			#funcCallExpr
+|	tnCallee=expr tnTemplate=templateArgs? '[' tnArgs=argsDecl ']'																			#indexCallExpr
+|	tnLhs=expr 'as' tnRhs=type																												#castExpr
+|	tnAnnots+=annotation* 'new' tnType=type '(' tnArgs=argsDecl ')' ('{' tnDecls+=decl* '}')?												#newExpr
+|	tnAnnots+=annotation* (tnOp='-'|tnOp='+'|tnOp='!'|tnOp='~') tnArg=expr																	#unOpsExpr
+|	tnLhs=expr (tnOp='*'|tnOp='/'|tnOp='%') tnRhs=expr																						#binOps1Expr
+|	tnLhs=expr (tnOp='+'|tnOp='-') tnRhs=expr																								#binOps2Expr
+|	tnLhs=expr (tnOp='&'|tnOp='|'|tnOp='^'|tnOp='<<'|tnOp='>>') tnRhs=expr																	#bitOpsExpr
+|	tnLhs=expr '??' tnRhs=expr																												#nullCoalesceExpr
+|	tnLhs=expr (tnOp='<'|tnOp='>'|tnOp='<='|tnOp='>=') tnRhs=expr																			#relOpsExpr
+|	tnLhs=expr 'is' tnRhs=type																												#isExpr
+|	tnLhs=expr (tnOp='=='|tnOp='!='|tnOp='==='|tnOp='!==') tnRhs=expr																		#eqOpsExpr
+|	tnLhs=expr (tnOp='&&'|tnOp='||') tnRhs=expr																								#logicOpsExpr
+|	tnAnnots+=annotation* 'throw' tnArg=expr																								#throwExpr
+|	tnIf=expr '?' tnThen=expr ':' tnElse=expr																								#terneryOpExpr
+|	tnAnnots+=annotation* 'null'																											#nullConstExpr
+|	tnAnnots+=annotation* 'true'																											#trueConstExpr
+|	tnAnnots+=annotation* 'false'																											#falseConstExpr
+|	tnAnnots+=annotation* 'this'																											#thisConstExpr
+|	tnAnnots+=annotation* tnValue=WORD																										#varExpr
+|	tnAnnots+=annotation* tnValue=NUMBER																									#numConstExpr
+|	tnAnnots+=annotation* tnValue=STRING																									#stringConstExpr
+|	tnAnnots+=annotation* tnValue=CHAR																										#charConstExpr
+|	tnAnnots+=annotation* tnFuncTemplate=templateDecls? '(' tnFuncArgs=paramsDecl ')' ('=>' tnExprForm=exprs | '{' tnBlockForm+=stat* '}')	#funcConstExpr
+|	tnAnnots+=annotation* '[' (tnValues+=expr (',' tnValues+=expr)*)? ','? ']'																#arrayConstExpr
+|	tnAnnots+=annotation* '{' (tnKeys+=expr '=' tnValues+=expr (',' tnKeys+=expr '=' tnValues+=expr)*)? ','? '}'							#mapConstExpr
+|	tnAnnots+=annotation* '(' tnExpr=expr ')'																								#parensExpr
 ;
 exprs: tnExprs+=expr | '(' (tnExprs+=expr (',' tnExprs+=expr)*)? ')';
 
@@ -113,7 +113,6 @@ argDecl: (tnKey=WORD ':')? tnValue=expr;
 argsDecl: tnArgs+=argDecl (',' tnArgs+=argDecl)* |;
 
 block: ('<' tnLabel=WORD '>')? '{' tnBlock+=stat* '}';
-anonFunc: tnTemplate=templateDecls? '(' tnArgs=paramsDecl ')' ('=>' tnExprForm=exprs | '{' tnBlockForm+=stat* '}');
 
 fragment LETTER: [a-zA-Z] | '_';
 fragment DIGIT: [0-9];

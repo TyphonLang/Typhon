@@ -56,7 +56,7 @@ expr:
 |	tnAnnots+=annotation* 'true'																											#trueConstExpr
 |	tnAnnots+=annotation* 'false'																											#falseConstExpr
 |	tnAnnots+=annotation* 'this'																											#thisConstExpr
-|	tnAnnots+=annotation* tnValue=WORD																										#varExpr
+|	tnAnnots+=annotation* tnValue=WORD tnTemplate=templateArgs?																				#varExpr
 |	tnAnnots+=annotation* tnValue=NUMBER																									#numConstExpr
 |	tnAnnots+=annotation* tnValue=STRING																									#stringConstExpr
 |	tnAnnots+=annotation* tnValue=CHAR																										#charConstExpr

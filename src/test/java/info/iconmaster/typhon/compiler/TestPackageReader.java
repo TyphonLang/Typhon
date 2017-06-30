@@ -25,6 +25,7 @@ import info.iconmaster.typhon.language.Import;
 import info.iconmaster.typhon.language.Import.PackageImport;
 import info.iconmaster.typhon.language.Import.RawImport;
 import info.iconmaster.typhon.language.Package;
+import info.iconmaster.typhon.language.StaticInitBlock;
 import info.iconmaster.typhon.util.SourceInfo;
 
 /**
@@ -493,6 +494,27 @@ public class TestPackageReader extends TyphonTest {
 			
 			Assert.assertTrue(i instanceof RawImport);
 			Assert.assertEquals("", ((RawImport)i).getImportData());
+		}),new CaseValid("{}", (p)->{
+			Assert.assertEquals(1, p.getStaticInitBlocks().size());
+			
+			StaticInitBlock b = p.getStaticInitBlocks().get(0);
+			Assert.assertEquals(0, b.getRawCode().size());
+		}),new CaseValid("{x;}", (p)->{
+			Assert.assertEquals(1, p.getStaticInitBlocks().size());
+			
+			StaticInitBlock b = p.getStaticInitBlocks().get(0);
+			Assert.assertEquals(1, b.getRawCode().size());
+		}),new CaseValid("{x;y;}", (p)->{
+			Assert.assertEquals(1, p.getStaticInitBlocks().size());
+			
+			StaticInitBlock b = p.getStaticInitBlocks().get(0);
+			Assert.assertEquals(2, b.getRawCode().size());
+		}),new CaseValid("@a {}", (p)->{
+			Assert.assertEquals(1, p.getStaticInitBlocks().size());
+			
+			StaticInitBlock b = p.getStaticInitBlocks().get(0);
+			Assert.assertEquals(0, b.getRawCode().size());
+			Assert.assertEquals(1, b.getAnnots().size());
 		}),
 		new CaseInvalid("x", 0, 1),
 		new CaseInvalid("aaa", 2, 3),

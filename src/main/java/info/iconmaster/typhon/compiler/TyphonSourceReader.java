@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,6 +34,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.ParamNameContext;
 import info.iconmaster.typhon.antlr.TyphonParser.RootContext;
 import info.iconmaster.typhon.antlr.TyphonParser.SimplePackageDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.SingleTypesContext;
+import info.iconmaster.typhon.antlr.TyphonParser.StaticInitDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TemplateDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TypesContext;
@@ -45,10 +45,11 @@ import info.iconmaster.typhon.language.Argument;
 import info.iconmaster.typhon.language.Field;
 import info.iconmaster.typhon.language.Function;
 import info.iconmaster.typhon.language.Import;
-import info.iconmaster.typhon.language.Package;
-import info.iconmaster.typhon.language.Parameter;
 import info.iconmaster.typhon.language.Import.PackageImport;
 import info.iconmaster.typhon.language.Import.RawImport;
+import info.iconmaster.typhon.language.Package;
+import info.iconmaster.typhon.language.Parameter;
+import info.iconmaster.typhon.language.StaticInitBlock;
 import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.util.Box;
 import info.iconmaster.typhon.util.SourceInfo;
@@ -184,7 +185,6 @@ public class TyphonSourceReader {
 			@Override
 			public Void visitMethodDecl(MethodDeclContext ctx) {
 				result.addFunction(readFunction(tni, ctx));
-				
 				return null;
 			}
 			
@@ -200,7 +200,12 @@ public class TyphonSourceReader {
 			@Override
 			public Void visitImportDecl(ImportDeclContext ctx) {
 				result.addImport(readImport(tni, ctx));
-				
+				return null;
+			}
+			
+			@Override
+			public Void visitStaticInitDecl(StaticInitDeclContext ctx) {
+				result.addStaticInitBlock(readStaticInitBlock(tni, ctx));
 				return null;
 			}
 		};
@@ -367,5 +372,21 @@ public class TyphonSourceReader {
 		} else {
 			throw new IllegalArgumentException("Unknown subclass of TypesContext");
 		}
+	}
+	
+	/**
+	 * Translates ANTLR rules for a static init block into a Typhon static init block.
+	 * 
+	 * @param tni
+	 * @param rule The block. Cannot be null.
+	 * @return The block the input represents.
+	 */
+	public static StaticInitBlock readStaticInitBlock(TyphonInput tni, StaticInitDeclContext rule) {
+		StaticInitBlock block = new StaticInitBlock(tni, new SourceInfo(rule));
+		
+		block.setRawData(rule.tnBlock);
+		block.getAnnots().addAll(readAnnots(tni, rule.tnAnnots));
+		
+		return block;
 	}
 }

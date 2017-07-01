@@ -54,6 +54,7 @@ expr:
 |	tnLhs=expr (tnOp='&&'|tnOp='||') tnRhs=expr																								#logicOpsExpr
 |	tnAnnots+=annotation* 'throw' tnArg=expr																								#throwExpr
 |	tnIf=expr '?' tnThen=expr ':' tnElse=expr																								#terneryOpExpr
+|	tnAnnots+=annotation* 'class' tnType=type																								#typeConstExpr
 |	tnAnnots+=annotation* 'null'																											#nullConstExpr
 |	tnAnnots+=annotation* 'true'																											#trueConstExpr
 |	tnAnnots+=annotation* 'false'																											#falseConstExpr

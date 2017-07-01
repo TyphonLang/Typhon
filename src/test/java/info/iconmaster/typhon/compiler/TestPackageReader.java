@@ -1,5 +1,9 @@
 package info.iconmaster.typhon.compiler;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
@@ -10,6 +14,8 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runners.Parameterized;
 
 import info.iconmaster.typhon.TyphonInput;
@@ -276,21 +282,18 @@ public class TestPackageReader extends TyphonTest {
 			Assert.assertNotNull(p.source);
 			Assert.assertEquals(0, p.source.begin);
 			Assert.assertEquals(9, p.source.end);
-			Assert.assertEquals("<unknown>", p.source.file);
 			
 			Package q = p.getSubpackges().get(0);
 			
 			Assert.assertNotNull(q.source);
 			Assert.assertEquals(0, q.source.begin);
 			Assert.assertEquals(9, q.source.end);
-			Assert.assertEquals("<unknown>", q.source.file);
 		}),new CaseValid("package q {package r;}", (p)->{
 			Assert.assertEquals(1, p.getSubpackges().size());
 			
 			Assert.assertNotNull(p.source);
 			Assert.assertEquals(0, p.source.begin);
 			Assert.assertEquals(21, p.source.end);
-			Assert.assertEquals("<unknown>", p.source.file);
 			
 			Package q = p.getSubpackges().get(0);
 			Assert.assertEquals(1, q.getSubpackges().size());
@@ -298,14 +301,12 @@ public class TestPackageReader extends TyphonTest {
 			Assert.assertNotNull(q.source);
 			Assert.assertEquals(0, q.source.begin);
 			Assert.assertEquals(21, q.source.end);
-			Assert.assertEquals("<unknown>", q.source.file);
 			
 			Package r = q.getSubpackges().get(0);
 			
 			Assert.assertNotNull(r.source);
 			Assert.assertEquals(11, r.source.begin);
 			Assert.assertEquals(20, r.source.end);
-			Assert.assertEquals("<unknown>", r.source.file);
 		}),new CaseValid("package q {} package r {}", (p)->{
 			Assert.assertNull(p.getName());
 			Assert.assertNotNull(p.getParent());
@@ -694,6 +695,16 @@ public class TestPackageReader extends TyphonTest {
 		@Override
 		public void run() {
 			TyphonInput tni = new TyphonInput();
+			
+			// test it via parseFile
+			try {
+				File tempFile = File.createTempFile("test", ".tn");
+				Files.write(tempFile.toPath(), input.getBytes());
+				test.accept(TyphonSourceReader.parseFile(tni, tempFile));
+				tempFile.delete();
+			} catch (IOException e) {
+				Assert.fail("IOException: "+e.getMessage());
+			}
 			
 			// test it via parseString
 			test.accept(TyphonSourceReader.parseString(tni, input));

@@ -560,6 +560,27 @@ public class TestPackageReader extends TyphonTest {
 			Assert.assertEquals("q", q.getName());
 			
 			Assert.assertTrue(p.getSubpackges().contains(tp));
+		}),new CaseValid("new() {}", (p)->{
+			Assert.assertEquals(1, p.getFunctions().size());
+			
+			Function f = p.getFunctions().get(0);
+			Assert.assertEquals("new", f.getName());
+		}),new CaseValid("package q; new() {}", (p)->{
+			Assert.assertEquals(1, p.getSubpackges().size());
+			
+			Package q = p.getSubpackges().get(0);
+			Assert.assertEquals(1, q.getFunctions().size());
+			
+			Function f = q.getFunctions().get(0);
+			Assert.assertEquals("new", f.getName());
+		}),new CaseValid("package q { new() {} }", (p)->{
+			Assert.assertEquals(1, p.getSubpackges().size());
+			
+			Package q = p.getSubpackges().get(0);
+			Assert.assertEquals(1, q.getFunctions().size());
+			
+			Function f = q.getFunctions().get(0);
+			Assert.assertEquals("new", f.getName());
 		}),
 		new CaseInvalid("x", 0, 1),
 		new CaseInvalid("aaa", 2, 3),

@@ -24,6 +24,10 @@ import info.iconmaster.typhon.antlr.TyphonParser;
 import info.iconmaster.typhon.antlr.TyphonParser.AnnotationContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ArgDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ClassDeclContext;
+import info.iconmaster.typhon.antlr.TyphonParser.ConstructorDeclContext;
+import info.iconmaster.typhon.antlr.TyphonParser.ConstructorParamContext;
+import info.iconmaster.typhon.antlr.TyphonParser.ConstructorParamThisContext;
+import info.iconmaster.typhon.antlr.TyphonParser.ConstructorParamTypedContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.FieldDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ImportDeclContext;
@@ -43,6 +47,8 @@ import info.iconmaster.typhon.antlr.TyphonParser.VoidTypesContext;
 import info.iconmaster.typhon.errors.SyntaxError;
 import info.iconmaster.typhon.language.Annotation;
 import info.iconmaster.typhon.language.Argument;
+import info.iconmaster.typhon.language.Constructor;
+import info.iconmaster.typhon.language.Constructor.ConstructorParameter;
 import info.iconmaster.typhon.language.Field;
 import info.iconmaster.typhon.language.Function;
 import info.iconmaster.typhon.language.Import;
@@ -209,6 +215,12 @@ public class TyphonSourceReader {
 			@Override
 			public Void visitClassDecl(ClassDeclContext ctx) {
 				result.addType(readClass(result.tni, ctx));
+				return null;
+			}
+			
+			@Override
+			public Void visitConstructorDecl(ConstructorDeclContext ctx) {
+				result.addFunction(readConstructor(result.tni, ctx));
 				return null;
 			}
 		};
@@ -410,5 +422,38 @@ public class TyphonSourceReader {
 		readPackage(t.getTypePackage(), rule.tnDecls);
 		
 		return t;
+	}
+	
+	public static Constructor readConstructor(TyphonInput tni, ConstructorDeclContext rule) {
+		Constructor f = new Constructor(tni, new SourceInfo(rule));
+		
+		for (ConstructorParamContext argRule : rule.tnArgs) {
+			ConstructorParameter p = new ConstructorParameter(tni, new SourceInfo(argRule));
+			if (argRule instanceof ConstructorParamThisContext) {
+				p.isField(true);
+				p.setName(((ConstructorParamThisContext)argRule).tnName.getText());
+				p.getAnnots().addAll(readAnnots(tni, ((ConstructorParamThisContext)argRule).tnAnnots));
+				p.setRawData(null, ((ConstructorParamThisContext)argRule).tnDefaultValue);
+			} else if (argRule instanceof ConstructorParamTypedContext) {
+				p.isField(false);
+				p.setName(((ConstructorParamTypedContext)argRule).tnName.getText());
+				p.getAnnots().addAll(readAnnots(tni, ((ConstructorParamTypedContext)argRule).tnAnnots));
+				p.setRawData(((ConstructorParamTypedContext)argRule).tnType, ((ConstructorParamTypedContext)argRule).tnDefaultValue);
+			} else {
+				throw new IllegalArgumentException("Unknown subclass of ConstructorParamContext");
+			}
+			f.getConstParams().add(p);
+		}
+		
+		if (rule.tnExprForm == null && rule.tnStubForm == null) {
+			f.setRawData(Function.Form.BLOCK, rule.tnBlockForm);
+		} else if (rule.tnExprForm != null) {
+			f.setRawData(Function.Form.EXPR, rule.tnExprForm.tnExprs);
+		} else {
+			f.setRawData(Function.Form.STUB, null);
+		}
+		
+		f.getAnnots().addAll(readAnnots(tni, rule.tnAnnots));
+		return f;
 	}
 }

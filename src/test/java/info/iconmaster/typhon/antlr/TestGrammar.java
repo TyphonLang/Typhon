@@ -88,6 +88,7 @@ public class TestGrammar extends TyphonTest {
 			new CaseValid("new() {}"),
 			new CaseValid("new() {0;1;}"),
 			new CaseValid("new(var x,this.y,var z) {}"),
+			new CaseValid("new(var x = 1,this.y = 2,var z,this.w) {}"),
 			new CaseValid("/**doc*/ @a @b new() {}"),
 			new CaseInvalid("new {}"),
 			//globalAnnotDecl

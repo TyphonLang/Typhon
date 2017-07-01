@@ -16,8 +16,8 @@ decl:
 ;
 enumValueDecl: tnDoc=DOC_COMMENT? tnAnnots+=annotation* tnName=WORD ('(' tnArgs=argsDecl ')')?;
 constructorParam:
-	tnAnnots+=annotation* 'this' '.' tnName=WORD	#constructorParamThis
-|	tnType=type tnAnnots+=annotation* tnName=WORD	#constructorParamTyped
+	tnAnnots+=annotation* 'this' '.' tnName=WORD ('=' tnDefaultValue=expr)?		#constructorParamThis
+|	tnType=type tnAnnots+=annotation* tnName=WORD ('=' tnDefaultValue=expr)?	#constructorParamTyped
 ;
 
 type:

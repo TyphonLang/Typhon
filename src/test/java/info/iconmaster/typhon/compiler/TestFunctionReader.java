@@ -15,8 +15,11 @@ import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.TyphonTest;
 import info.iconmaster.typhon.antlr.TyphonLexer;
 import info.iconmaster.typhon.antlr.TyphonParser;
+import info.iconmaster.typhon.antlr.TyphonParser.ConstructorDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MethodDeclContext;
+import info.iconmaster.typhon.language.Constructor;
+import info.iconmaster.typhon.language.Constructor.ConstructorParameter;
 import info.iconmaster.typhon.language.Function;
 import info.iconmaster.typhon.language.Parameter;
 import info.iconmaster.typhon.types.TemplateType;
@@ -132,6 +135,82 @@ public class TestFunctionReader extends TyphonTest {
 			Assert.assertEquals("a", t.getRawBaseType().getText());
 			Assert.assertNotNull(t.getRawDefaultValue());
 			Assert.assertEquals("b", t.getRawDefaultValue().getText());
+		}),new CaseConstructorValid("new() {}", (f)->{
+			Assert.assertEquals("new", f.getName());
+			Assert.assertEquals(0, f.getParams().size());
+			Assert.assertEquals(0, f.getTemplate().size());
+			Assert.assertNull(f.getRawRetType());
+			
+			Assert.assertEquals(Function.Form.BLOCK, f.getForm());
+			Assert.assertEquals(0, f.getRawCode().size());
+		}),new CaseConstructorValid("new(var a) {}", (f)->{
+			Assert.assertEquals("new", f.getName());
+			Assert.assertEquals(1, f.getParams().size());
+			Assert.assertEquals(0, f.getTemplate().size());
+			Assert.assertNull(f.getRawRetType());
+			
+			Assert.assertEquals(Function.Form.BLOCK, f.getForm());
+			Assert.assertEquals(0, f.getRawCode().size());
+			
+			ConstructorParameter p = f.getConstParams().get(0);
+			Assert.assertEquals("a", p.getName());
+			Assert.assertFalse(p.isField());
+		}),new CaseConstructorValid("new(this.a) {}", (f)->{
+			Assert.assertEquals("new", f.getName());
+			Assert.assertEquals(1, f.getParams().size());
+			Assert.assertEquals(0, f.getTemplate().size());
+			Assert.assertNull(f.getRawRetType());
+			
+			Assert.assertEquals(Function.Form.BLOCK, f.getForm());
+			Assert.assertEquals(0, f.getRawCode().size());
+			
+			ConstructorParameter p = f.getConstParams().get(0);
+			Assert.assertEquals("a", p.getName());
+			Assert.assertTrue(p.isField());
+		}),new CaseConstructorValid("new(var a, this.b, var c) {}", (f)->{
+			Assert.assertEquals("new", f.getName());
+			Assert.assertEquals(3, f.getParams().size());
+			Assert.assertEquals(0, f.getTemplate().size());
+			Assert.assertNull(f.getRawRetType());
+			
+			Assert.assertEquals(Function.Form.BLOCK, f.getForm());
+			Assert.assertEquals(0, f.getRawCode().size());
+			
+			ConstructorParameter p;
+			
+			p = f.getConstParams().get(0);
+			Assert.assertEquals("a", p.getName());
+			Assert.assertFalse(p.isField());
+			
+			p = f.getConstParams().get(1);
+			Assert.assertEquals("b", p.getName());
+			Assert.assertTrue(p.isField());
+			
+			p = f.getConstParams().get(2);
+			Assert.assertEquals("c", p.getName());
+			Assert.assertFalse(p.isField());
+		}),new CaseConstructorValid("new(var @a a = 1, @b this.b = 2, var @c c = 3) {}", (f)->{
+			Assert.assertEquals("new", f.getName());
+			Assert.assertEquals(3, f.getParams().size());
+			Assert.assertEquals(0, f.getTemplate().size());
+			Assert.assertNull(f.getRawRetType());
+			
+			Assert.assertEquals(Function.Form.BLOCK, f.getForm());
+			Assert.assertEquals(0, f.getRawCode().size());
+			
+			ConstructorParameter p;
+			
+			p = f.getConstParams().get(0);
+			Assert.assertEquals("a", p.getName());
+			Assert.assertFalse(p.isField());
+			
+			p = f.getConstParams().get(1);
+			Assert.assertEquals("b", p.getName());
+			Assert.assertTrue(p.isField());
+			
+			p = f.getConstParams().get(2);
+			Assert.assertEquals("c", p.getName());
+			Assert.assertFalse(p.isField());
 		}));
 	}
     
@@ -161,6 +240,35 @@ public class TestFunctionReader extends TyphonTest {
 			DeclContext root = parser.decl();
 			Assert.assertTrue("'"+input+"' was not a methodDecl: ", root instanceof MethodDeclContext);
 			test.accept(TyphonSourceReader.readFunction(tni, (MethodDeclContext)root));
+		}
+    }
+    
+    private static class CaseConstructorValid implements Runnable {
+    	String input;
+    	Consumer<Constructor> test;
+    	
+		public CaseConstructorValid(String input, Consumer<Constructor> test) {
+			this.input = input;
+			this.test = test;
+		}
+		
+		@Override
+		public void run() {
+			TyphonInput tni = new TyphonInput();
+			
+			TyphonLexer lexer = new TyphonLexer(new ANTLRInputStream(input));
+			TyphonParser parser = new TyphonParser(new CommonTokenStream(lexer));
+			parser.removeErrorListeners();
+			parser.addErrorListener(new BaseErrorListener() {
+				@Override
+				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+					Assert.fail("parse of '"+input+"' failed: "+msg);
+				}
+			});
+			
+			DeclContext root = parser.decl();
+			Assert.assertTrue("'"+input+"' was not a constrcutorDecl: ", root instanceof ConstructorDeclContext);
+			test.accept(TyphonSourceReader.readConstructor(tni, (ConstructorDeclContext)root));
 		}
     }
 }

@@ -42,6 +42,10 @@ public class TestLinker extends TyphonTest {
 		}),new TestCase("package i {package p {} package p {} import p;} package p {}", (p)->{
 			Assert.assertEquals(0, p.tni.errors.size());
 			Assert.assertEquals(2, p.getSubpackagesWithName("i").get(0).getImports().get(0).getResolvedTo().size());
+		}),new TestCase("import p;", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("import p; package q {package p {}}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
 		}));
 	}
     

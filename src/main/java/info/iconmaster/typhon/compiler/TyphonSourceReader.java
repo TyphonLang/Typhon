@@ -109,7 +109,9 @@ public class TyphonSourceReader {
 			});
 			
 			RootContext root = parser.root();
-			return readPackage(new Package(new SourceInfo(root), null, tni.corePackage), root.tnDecls);
+			Package p = new Package(new SourceInfo(root), null, tni.corePackage);
+			p.setRawData();
+			return readPackage(p, root.tnDecls);
 		} catch (ParseCancellationException e) {
 			return new Package(new SourceInfo(file.getPath(), 0, (int) file.length()-1), null, tni.corePackage);
 		}
@@ -144,7 +146,9 @@ public class TyphonSourceReader {
 		});
 		
 		try {
-			return readPackage(new Package(new SourceInfo(0, input.length()-1), null, tni.corePackage), parser.root().tnDecls);
+			Package p = new Package(new SourceInfo(0, input.length()-1), null, tni.corePackage);
+			p.setRawData();
+			return readPackage(p, parser.root().tnDecls);
 		} catch (ParseCancellationException e) {
 			return new Package(new SourceInfo(0, input.length()-1), null, tni.corePackage);
 		}
@@ -169,9 +173,11 @@ public class TyphonSourceReader {
 				Package base = result;
 				for (String name : names) {
 					base = readPackage(new Package(new SourceInfo(decl), name, base), new ArrayList<>());
+					base.setRawData();
 				}
 				
 				Package p = readPackage(new Package(new SourceInfo(decl), lastName, base), decl.tnDecls);
+				p.setRawData();
 				p.getAnnots().addAll(readAnnots(result.tni, decl.tnAnnots));
 				p.getAnnots().addAll(globalAnnots);
 				return null;
@@ -184,10 +190,12 @@ public class TyphonSourceReader {
 				Package base = result;
 				for (String name : names) {
 					base = readPackage(new Package(new SourceInfo(decl), name, base), new ArrayList<>());
+					base.setRawData();
 				}
 				
 				List<DeclContext> remainingDecls = decls.subList(declIndex.data+1, decls.size());
 				Package p = readPackage(new Package(new SourceInfo(decl), lastName, base), remainingDecls);
+				p.setRawData();
 				p.getAnnots().addAll(readAnnots(result.tni, decl.tnAnnots));
 				p.getAnnots().addAll(globalAnnots);
 				doneVisiting.data = true;

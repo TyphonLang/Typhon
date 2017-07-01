@@ -171,6 +171,7 @@ public class Function extends TyphonLanguageEntity {
 	 * @param rawCode The ANTLR rule representing the function's code. See {@link Form} for details.
 	 */
 	public void setRawData(List<TypeContext> rawRetType, Form form, List<?> rawCode) {
+		super.setRawData();
 		this.rawRetType = rawRetType;
 		this.form = form;
 		this.rawCode = rawCode;

@@ -72,6 +72,7 @@ public class TemplateArgument extends TyphonLanguageEntity {
 	 * @param rawValue The ANTLR rule corresponding to the value.
 	 */
 	public void setRawData(TypeContext rawValue) {
+		super.setRawData();
 		this.rawValue = rawValue;
 	}
 

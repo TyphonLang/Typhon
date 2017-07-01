@@ -29,6 +29,12 @@ public class TyphonLanguageEntity {
 	 */
 	private List<Annotation> annots = new ArrayList<>();
 	
+	/**
+	 * True if we have raw data, and need to be compiled.
+	 * May be set to false even if there is raw data (if a user-supplied type has been compiled already, for example).
+	 */
+	private boolean hasRawData = false;
+	
 	public TyphonLanguageEntity(TyphonInput tni) {
 		this.tni = tni;
 	}
@@ -43,5 +49,29 @@ public class TyphonLanguageEntity {
 	 */
 	public List<Annotation> getAnnots() {
 		return annots;
+	}
+
+	/**
+	 * @return True if we have raw data, and need to be compiled.
+	 * May be set to false even if there is raw data (if a user-supplied type has been compiled already, for example).
+	 */
+	public boolean needsCompiled() {
+		return hasRawData;
+	}
+
+	/**
+	 * @param hasRawData True if we have raw data, and need to be compiled.
+	 * May be set to false even if there is raw data (if a user-supplied type has been compiled already, for example).
+	 */
+	public void needsCompiled(boolean hasRawData) {
+		this.hasRawData = hasRawData;
+	}
+	
+	/**
+	 * Sets the raw ANTLR data for this entity.
+	 * Subclasses should call this in thier own setRawData; this function updates important flags.
+	 */
+	public void setRawData() {
+		this.hasRawData = true;
 	}
 }

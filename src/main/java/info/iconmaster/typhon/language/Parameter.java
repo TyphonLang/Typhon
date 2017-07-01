@@ -104,6 +104,7 @@ public class Parameter extends TyphonLanguageEntity {
 	 * @param rawDefaultValue The ANTLR rule representing the default value of this parameter.
 	 */
 	public void setRawData(TypeContext rawType, ExprContext rawDefaultValue) {
+		super.setRawData();
 		this.rawType = rawType;
 		this.rawDefaultValue = rawDefaultValue;
 	}

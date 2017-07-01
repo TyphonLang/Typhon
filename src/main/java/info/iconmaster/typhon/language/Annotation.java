@@ -72,6 +72,7 @@ public class Annotation extends TyphonLanguageEntity {
 	 * @param rawDefinition The ANTLR rule representing the potentially-qualified name of the annotation we want to be.
 	 */
 	public void setRawData(PackageNameContext rawDefinition) {
+		super.setRawData();
 		this.rawDefinition = rawDefinition;
 	}
 }

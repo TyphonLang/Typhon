@@ -59,6 +59,7 @@ public class StaticInitBlock extends TyphonLanguageEntity {
 	 * @param rawCode The ANTLR rule representing the code of this block.
 	 */
 	public void setRawData(List<StatContext> rawCode) {
+		super.setRawData();
 		this.rawCode = rawCode;
 	}
 	

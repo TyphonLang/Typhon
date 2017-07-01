@@ -101,6 +101,8 @@ public class UserType extends Type {
 	 * @param rawParentTypes The ANTLR rule representing the parent types of this type.
 	 */
 	public void setRawData(List<TypeContext> rawParentTypes) {
+		super.setRawData();
+		getTypePackage().setRawData();
 		this.rawParentTypes = rawParentTypes;
 	}
 }

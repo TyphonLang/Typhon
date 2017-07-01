@@ -95,6 +95,7 @@ public class Field extends TyphonLanguageEntity {
 	 * @param rawValue The ANTLR rule representing the initial value of this field.
 	 */
 	public void setRawData(TypeContext rawType, ExprContext rawValue) {
+		super.setRawData();
 		this.rawType = rawType;
 		this.rawValue = rawValue;
 	}

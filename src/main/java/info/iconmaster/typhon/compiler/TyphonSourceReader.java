@@ -29,6 +29,8 @@ import info.iconmaster.typhon.antlr.TyphonParser.ConstructorParamContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ConstructorParamThisContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ConstructorParamTypedContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DeclContext;
+import info.iconmaster.typhon.antlr.TyphonParser.EnumDeclContext;
+import info.iconmaster.typhon.antlr.TyphonParser.EnumValueDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.FieldDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.GlobalAnnotDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.GlobalAnnotationContext;
@@ -59,6 +61,8 @@ import info.iconmaster.typhon.language.Import.RawImport;
 import info.iconmaster.typhon.language.Package;
 import info.iconmaster.typhon.language.Parameter;
 import info.iconmaster.typhon.language.StaticInitBlock;
+import info.iconmaster.typhon.types.EnumType;
+import info.iconmaster.typhon.types.EnumType.EnumChoice;
 import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.types.UserType;
 import info.iconmaster.typhon.util.Box;
@@ -248,6 +252,14 @@ public class TyphonSourceReader {
 				globalAnnots.add(a);
 				return null;
 			}
+			
+			@Override
+			public Void visitEnumDecl(EnumDeclContext ctx) {
+				EnumType t = readEnum(result.tni, ctx);
+				result.addType(t);
+				t.getAnnots().addAll(globalAnnots);
+				return null;
+			}
 		};
 		
 		for (DeclContext decl : decls) {
@@ -271,15 +283,7 @@ public class TyphonSourceReader {
 			Annotation annot = new Annotation(tni, new SourceInfo(rule));
 			
 			annot.setRawData(rule.tnName);
-			if (rule.tnArgs != null)
-			for (ArgDeclContext argRule : rule.tnArgs.tnArgs) {
-				Argument arg = new Argument(tni, new SourceInfo(argRule));
-				
-				if (argRule.tnKey != null) arg.setLabel(argRule.tnKey.getText());
-				arg.setRawData(argRule.tnValue);
-				
-				annot.getArgs().add(arg);
-			}
+			if (rule.tnArgs != null) annot.getArgs().addAll(readArgs(tni, rule.tnArgs.tnArgs));
 			
 			return annot;
 		}).collect(Collectors.toCollection(()->new ArrayList<>()));
@@ -420,6 +424,24 @@ public class TyphonSourceReader {
 	}
 	
 	/**
+	 * Translates ANTLR rules for arguments into Typhon arguments.
+	 * 
+	 * @param tni
+	 * @param rules The arguments. Cannot be null.
+	 * @return The list of arguments the input represents.
+	 */
+	public static List<Argument> readArgs(TyphonInput tni, List<ArgDeclContext> rules) {
+		return rules.stream().map((rule)->{
+			Argument arg = new Argument(tni, new SourceInfo(rule));
+			
+			if (rule.tnKey != null) arg.setLabel(rule.tnKey.getText());
+			arg.setRawData(rule.tnValue);
+			
+			return arg;
+		}).collect(Collectors.toCollection(()->new ArrayList<>()));
+	}
+	
+	/**
 	 * Parses a return type specification.
 	 * Used to ensure 'void' is equivalent to '()', among other things.
 	 * 
@@ -462,7 +484,7 @@ public class TyphonSourceReader {
 	 * @return The type.
 	 */
 	public static UserType readClass(TyphonInput tni, ClassDeclContext rule) {
-		UserType t = new UserType(tni, rule.tnName.getText());
+		UserType t = new UserType(tni, new SourceInfo(rule), rule.tnName.getText());
 		
 		if (rule.tnTemplate != null) t.getTemplates().addAll(readTemplateParams(tni, rule.tnTemplate.tnArgs));
 		t.setRawData(rule.tnExtends);
@@ -473,6 +495,13 @@ public class TyphonSourceReader {
 		return t;
 	}
 	
+	/**
+	 * Translates ANTLR rules for a constructor into a Typhon function.
+	 * 
+	 * @param tni
+	 * @param rule The constructor. Cannot be null.
+	 * @return The function.
+	 */
 	public static Constructor readConstructor(TyphonInput tni, ConstructorDeclContext rule) {
 		Constructor f = new Constructor(tni, new SourceInfo(rule));
 		
@@ -504,5 +533,31 @@ public class TyphonSourceReader {
 		
 		f.getAnnots().addAll(readAnnots(tni, rule.tnAnnots));
 		return f;
+	}
+	
+	/**
+	 * Translates ANTLR rules for an enum class into a Typhon type.
+	 * 
+	 * @param tni
+	 * @param rule The enum class declaration. Cannot be null.
+	 * @return The type.
+	 */
+	public static EnumType readEnum(TyphonInput tni, EnumDeclContext rule) {
+		EnumType t = new EnumType(tni, new SourceInfo(rule), rule.tnName.getText());
+		
+		t.setRawData(rule.tnExtends);
+		t.getAnnots().addAll(readAnnots(tni, rule.tnAnnots));
+		readPackage(t.getTypePackage(), rule.tnDecls);
+		
+		for (EnumValueDeclContext choiceRule : rule.tnValues) {
+			EnumChoice choice = new EnumChoice(tni, new SourceInfo(choiceRule), choiceRule.tnName.getText());
+			
+			if (choiceRule.tnArgs != null) choice.getArgs().addAll(readArgs(tni, choiceRule.tnArgs.tnArgs));
+			choice.getAnnots().addAll(readAnnots(tni, choiceRule.tnAnnots));
+			
+			t.getChoices().add(choice);
+		}
+		
+		return t;
 	}
 }

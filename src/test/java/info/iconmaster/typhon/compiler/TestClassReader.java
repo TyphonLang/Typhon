@@ -17,6 +17,8 @@ import info.iconmaster.typhon.antlr.TyphonLexer;
 import info.iconmaster.typhon.antlr.TyphonParser;
 import info.iconmaster.typhon.antlr.TyphonParser.ClassDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DeclContext;
+import info.iconmaster.typhon.antlr.TyphonParser.EnumDeclContext;
+import info.iconmaster.typhon.types.EnumType;
 import info.iconmaster.typhon.types.UserType;
 
 /**
@@ -70,6 +72,60 @@ public class TestClassReader extends TyphonTest {
 			Assert.assertEquals(0, t.getTemplates().size());
 			
 			Assert.assertEquals(1, t.getTypePackage().getTypes().size());
+		}),new CaseEnumValid("enum x {}", (t)->{
+			Assert.assertEquals("x", t.getName());
+			Assert.assertEquals(0, t.getAnnots().size());
+			Assert.assertEquals(0, t.getRawParentTypes().size());
+			Assert.assertEquals(0, t.getTemplates().size());
+			Assert.assertEquals(0, t.getChoices().size());
+		}),new CaseEnumValid("enum x : y {}", (t)->{
+			Assert.assertEquals("x", t.getName());
+			Assert.assertEquals(0, t.getAnnots().size());
+			Assert.assertEquals(1, t.getRawParentTypes().size());
+			Assert.assertEquals(0, t.getTemplates().size());
+			Assert.assertEquals(0, t.getChoices().size());
+		}),new CaseEnumValid("enum x : y,z {}", (t)->{
+			Assert.assertEquals("x", t.getName());
+			Assert.assertEquals(0, t.getAnnots().size());
+			Assert.assertEquals(2, t.getRawParentTypes().size());
+			Assert.assertEquals(0, t.getTemplates().size());
+			Assert.assertEquals(0, t.getChoices().size());
+		}),new CaseEnumValid("enum x {A}", (t)->{
+			Assert.assertEquals("x", t.getName());
+			Assert.assertEquals(0, t.getAnnots().size());
+			Assert.assertEquals(0, t.getRawParentTypes().size());
+			Assert.assertEquals(0, t.getTemplates().size());
+			Assert.assertEquals(1, t.getChoices().size());
+		}),new CaseEnumValid("enum x {A,B,C}", (t)->{
+			Assert.assertEquals("x", t.getName());
+			Assert.assertEquals(0, t.getAnnots().size());
+			Assert.assertEquals(0, t.getRawParentTypes().size());
+			Assert.assertEquals(0, t.getTemplates().size());
+			Assert.assertEquals(3, t.getChoices().size());
+		}),new CaseEnumValid("enum x {A,B,C; var x;}", (t)->{
+			Assert.assertEquals("x", t.getName());
+			Assert.assertEquals(0, t.getAnnots().size());
+			Assert.assertEquals(0, t.getRawParentTypes().size());
+			Assert.assertEquals(0, t.getTemplates().size());
+			Assert.assertEquals(3, t.getChoices().size());
+			
+			Assert.assertEquals(1, t.getTypePackage().getFields().size());
+		}),new CaseEnumValid("enum x {A,B,C var x;}", (t)->{
+			Assert.assertEquals("x", t.getName());
+			Assert.assertEquals(0, t.getAnnots().size());
+			Assert.assertEquals(0, t.getRawParentTypes().size());
+			Assert.assertEquals(0, t.getTemplates().size());
+			Assert.assertEquals(3, t.getChoices().size());
+			
+			Assert.assertEquals(1, t.getTypePackage().getFields().size());
+		}),new CaseEnumValid("enum x {A(a),B(b),C(c) var x;}", (t)->{
+			Assert.assertEquals("x", t.getName());
+			Assert.assertEquals(0, t.getAnnots().size());
+			Assert.assertEquals(0, t.getRawParentTypes().size());
+			Assert.assertEquals(0, t.getTemplates().size());
+			Assert.assertEquals(3, t.getChoices().size());
+			
+			Assert.assertEquals(1, t.getTypePackage().getFields().size());
 		}));
 	}
     
@@ -99,6 +155,35 @@ public class TestClassReader extends TyphonTest {
 			DeclContext root = parser.decl();
 			Assert.assertTrue("'"+input+"' was not a classDecl: ", root instanceof ClassDeclContext);
 			test.accept(TyphonSourceReader.readClass(tni, (ClassDeclContext)root));
+		}
+    }
+    
+    private static class CaseEnumValid implements Runnable {
+    	String input;
+    	Consumer<EnumType> test;
+    	
+		public CaseEnumValid(String input, Consumer<EnumType> test) {
+			this.input = input;
+			this.test = test;
+		}
+		
+		@Override
+		public void run() {
+			TyphonInput tni = new TyphonInput();
+			
+			TyphonLexer lexer = new TyphonLexer(new ANTLRInputStream(input));
+			TyphonParser parser = new TyphonParser(new CommonTokenStream(lexer));
+			parser.removeErrorListeners();
+			parser.addErrorListener(new BaseErrorListener() {
+				@Override
+				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+					Assert.fail("parse of '"+input+"' failed: "+msg);
+				}
+			});
+			
+			DeclContext root = parser.decl();
+			Assert.assertTrue("'"+input+"' was not a enumDecl: ", root instanceof EnumDeclContext);
+			test.accept(TyphonSourceReader.readEnum(tni, (EnumDeclContext)root));
 		}
     }
 }

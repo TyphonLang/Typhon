@@ -26,6 +26,7 @@ import info.iconmaster.typhon.language.Import.PackageImport;
 import info.iconmaster.typhon.language.Import.RawImport;
 import info.iconmaster.typhon.language.Package;
 import info.iconmaster.typhon.language.StaticInitBlock;
+import info.iconmaster.typhon.types.EnumType;
 import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.UserType;
 import info.iconmaster.typhon.util.SourceInfo;
@@ -621,6 +622,56 @@ public class TestPackageReader extends TyphonTest {
 			
 			Type t = p.getTypes().get(0);
 			Assert.assertEquals(1, t.getAnnots().size());
+		}),new CaseValid("enum x {}", (p)->{
+			Assert.assertEquals(1, p.getTypes().size());
+			Assert.assertEquals(1, p.getSubpackges().size());
+			
+			Type t = p.getType("x");
+			Assert.assertNotNull(t);
+			Assert.assertTrue(t instanceof EnumType);
+			Assert.assertEquals(0, ((EnumType)t).getTemplates().size());
+			Assert.assertEquals(0, ((EnumType)t).getRawParentTypes().size());
+			Assert.assertEquals(0, ((EnumType)t).getChoices().size());
+		}),new CaseValid("enum x : y,z {}", (p)->{
+			Assert.assertEquals(1, p.getTypes().size());
+			Assert.assertEquals(1, p.getSubpackges().size());
+			
+			Type t = p.getType("x");
+			Assert.assertNotNull(t);
+			Assert.assertTrue(t instanceof EnumType);
+			Assert.assertEquals(0, ((EnumType)t).getTemplates().size());
+			Assert.assertEquals(2, ((EnumType)t).getRawParentTypes().size());
+			Assert.assertEquals(0, ((EnumType)t).getChoices().size());
+		}),new CaseValid("enum x {A;}", (p)->{
+			Assert.assertEquals(1, p.getTypes().size());
+			Assert.assertEquals(1, p.getSubpackges().size());
+			
+			Type t = p.getType("x");
+			Assert.assertNotNull(t);
+			Assert.assertTrue(t instanceof EnumType);
+			Assert.assertEquals(0, ((EnumType)t).getTemplates().size());
+			Assert.assertEquals(0, ((EnumType)t).getRawParentTypes().size());
+			Assert.assertEquals(1, ((EnumType)t).getChoices().size());
+		}),new CaseValid("enum x {A,B,C}", (p)->{
+			Assert.assertEquals(1, p.getTypes().size());
+			Assert.assertEquals(1, p.getSubpackges().size());
+			
+			Type t = p.getType("x");
+			Assert.assertNotNull(t);
+			Assert.assertTrue(t instanceof EnumType);
+			Assert.assertEquals(0, ((EnumType)t).getTemplates().size());
+			Assert.assertEquals(0, ((EnumType)t).getRawParentTypes().size());
+			Assert.assertEquals(3, ((EnumType)t).getChoices().size());
+		}),new CaseValid("enum x {A(),B(),C(),;}", (p)->{
+			Assert.assertEquals(1, p.getTypes().size());
+			Assert.assertEquals(1, p.getSubpackges().size());
+			
+			Type t = p.getType("x");
+			Assert.assertNotNull(t);
+			Assert.assertTrue(t instanceof EnumType);
+			Assert.assertEquals(0, ((EnumType)t).getTemplates().size());
+			Assert.assertEquals(0, ((EnumType)t).getRawParentTypes().size());
+			Assert.assertEquals(3, ((EnumType)t).getChoices().size());
 		}),
 		new CaseInvalid("x", 0, 1),
 		new CaseInvalid("aaa", 2, 3),

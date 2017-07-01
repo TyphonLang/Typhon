@@ -12,7 +12,7 @@ public class SyntaxError extends TyphonError {
 	/**
 	 * The message ANTLR returned.
 	 */
-	private String message;
+	public String message;
 	
 	public SyntaxError(SourceInfo source, String message) {
 		super(source);

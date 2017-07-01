@@ -50,6 +50,8 @@ public class Typhon {
 				return;
 			}
 			
+			// build the TyphonInput
+			
 			TyphonInput tni = new TyphonInput();
 			
 			for (String fileName : options.positionalArguments) {
@@ -70,6 +72,14 @@ public class Typhon {
 					}
 					tni.libraryFiles.addAll(FileUtils.getAllFiles(file, FileUtils.FILTER_TYPHON_FILES));
 				}
+			}
+			
+			if (options.optionalArguments.containsKey(TyphonCommandLine.OPTION_PATH)) {
+				for (String fileName : options.optionalArguments.get(TyphonCommandLine.OPTION_PATH)) {
+					tni.rawImportLookupPaths.add(new File(fileName));
+				}
+			} else {
+				tni.rawImportLookupPaths.add(new File("."));
 			}
 			
 			// parse the input files

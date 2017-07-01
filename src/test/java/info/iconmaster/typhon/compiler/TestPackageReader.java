@@ -24,21 +24,22 @@ import info.iconmaster.typhon.antlr.TyphonLexer;
 import info.iconmaster.typhon.antlr.TyphonParser;
 import info.iconmaster.typhon.antlr.TyphonParser.RootContext;
 import info.iconmaster.typhon.errors.TyphonError;
-import info.iconmaster.typhon.language.Annotation;
-import info.iconmaster.typhon.language.Field;
-import info.iconmaster.typhon.language.Function;
-import info.iconmaster.typhon.language.Import;
-import info.iconmaster.typhon.language.Import.PackageImport;
-import info.iconmaster.typhon.language.Import.RawImport;
-import info.iconmaster.typhon.language.Package;
-import info.iconmaster.typhon.language.StaticInitBlock;
+import info.iconmaster.typhon.model.Annotation;
+import info.iconmaster.typhon.model.Field;
+import info.iconmaster.typhon.model.Function;
+import info.iconmaster.typhon.model.Import;
+import info.iconmaster.typhon.model.Package;
+import info.iconmaster.typhon.model.StaticInitBlock;
+import info.iconmaster.typhon.model.TyphonModelReader;
+import info.iconmaster.typhon.model.Import.PackageImport;
+import info.iconmaster.typhon.model.Import.RawImport;
 import info.iconmaster.typhon.types.EnumType;
 import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.UserType;
 import info.iconmaster.typhon.util.SourceInfo;
 
 /**
- * Tests <tt>{@link TyphonSourceReader}.readPackage()</tt>.
+ * Tests <tt>{@link TyphonModelReader}.readPackage()</tt>.
  * 
  * @author iconmaster
  *
@@ -700,14 +701,14 @@ public class TestPackageReader extends TyphonTest {
 			try {
 				File tempFile = File.createTempFile("test", ".tn");
 				Files.write(tempFile.toPath(), input.getBytes());
-				test.accept(TyphonSourceReader.parseFile(tni, tempFile));
+				test.accept(TyphonModelReader.parseFile(tni, tempFile));
 				tempFile.delete();
 			} catch (IOException e) {
 				Assert.fail("IOException: "+e.getMessage());
 			}
 			
 			// test it via parseString
-			test.accept(TyphonSourceReader.parseString(tni, input));
+			test.accept(TyphonModelReader.parseString(tni, input));
 			
 			// test it via readPackage
 			TyphonLexer lexer = new TyphonLexer(new ANTLRInputStream(input));
@@ -721,7 +722,7 @@ public class TestPackageReader extends TyphonTest {
 			});
 			
 			RootContext root = parser.root();
-			test.accept(TyphonSourceReader.readPackage(new Package(new SourceInfo(root), null, tni.corePackage), root.tnDecls));
+			test.accept(TyphonModelReader.readPackage(new Package(new SourceInfo(root), null, tni.corePackage), root.tnDecls));
 		}
     }
     
@@ -738,7 +739,7 @@ public class TestPackageReader extends TyphonTest {
 		@Override
 		public void run() {
 			TyphonInput tni = new TyphonInput();
-			TyphonSourceReader.parseString(tni, input);
+			TyphonModelReader.parseString(tni, input);
 			Assert.assertEquals("Input '"+input+"': Incorrect number of errors:", 1, tni.errors.size());
 			TyphonError error = tni.errors.get(0);
 			Assert.assertNotNull("Input '"+input+"': Source was null:", error.source);

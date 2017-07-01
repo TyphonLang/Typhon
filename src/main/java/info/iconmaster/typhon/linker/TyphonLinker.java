@@ -7,12 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import info.iconmaster.typhon.compiler.TyphonSourceReader;
 import info.iconmaster.typhon.errors.UnresolvedImportError;
-import info.iconmaster.typhon.language.Import;
-import info.iconmaster.typhon.language.Import.PackageImport;
-import info.iconmaster.typhon.language.Import.RawImport;
-import info.iconmaster.typhon.language.Package;
+import info.iconmaster.typhon.model.Import;
+import info.iconmaster.typhon.model.Package;
+import info.iconmaster.typhon.model.TyphonModelReader;
+import info.iconmaster.typhon.model.Import.PackageImport;
+import info.iconmaster.typhon.model.Import.RawImport;
 
 /**
  * This class contains methods for resolving imports in Typhon code.
@@ -109,7 +109,7 @@ public class TyphonLinker {
 				File toCheck = Paths.get(file.toString(), i.getImportData()).toFile();
 				if (toCheck.exists()) {
 					try {
-						resolvedTo = TyphonSourceReader.parseFile(i.tni, toCheck);
+						resolvedTo = TyphonModelReader.parseFile(i.tni, toCheck);
 						break;
 					} catch (IOException e) {
 						// ignore; we'll assume there's another viable candidate in the lookup paths

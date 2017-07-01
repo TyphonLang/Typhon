@@ -1,4 +1,4 @@
-package info.iconmaster.typhon.language;
+package info.iconmaster.typhon.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ import info.iconmaster.typhon.util.SourceInfo;
  * @author iconmaster
  *
  */
-public abstract class Import extends TyphonLanguageEntity {
+public abstract class Import extends TyphonModelEntity {
 	/**
 	 * The package(s) this import resolves to.
 	 * Will be empty if this.resolved is false.

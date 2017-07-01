@@ -1,4 +1,4 @@
-package info.iconmaster.typhon.language;
+package info.iconmaster.typhon.model;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ import info.iconmaster.typhon.util.SourceInfo;
  * @author iconmaster
  *
  */
-public class StaticInitBlock extends TyphonLanguageEntity {
+public class StaticInitBlock extends TyphonModelEntity {
 	/**
 	 * The code that runs on initialization.
 	 */

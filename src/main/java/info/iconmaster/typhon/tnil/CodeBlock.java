@@ -1,7 +1,7 @@
 package info.iconmaster.typhon.tnil;
 
 import info.iconmaster.typhon.TyphonInput;
-import info.iconmaster.typhon.language.TyphonLanguageEntity;
+import info.iconmaster.typhon.model.TyphonModelEntity;
 import info.iconmaster.typhon.util.SourceInfo;
 
 /**
@@ -10,7 +10,7 @@ import info.iconmaster.typhon.util.SourceInfo;
  * @author iconmaster
  *
  */
-public class CodeBlock extends TyphonLanguageEntity {
+public class CodeBlock extends TyphonModelEntity {
 
 	public CodeBlock(TyphonInput input, SourceInfo source) {
 		super(input, source);

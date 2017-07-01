@@ -1,4 +1,4 @@
-package info.iconmaster.typhon.language;
+package info.iconmaster.typhon.model;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
@@ -13,7 +13,7 @@ import info.iconmaster.typhon.util.SourceInfo;
  * @author iconmaster
  *
  */
-public class Field extends TyphonLanguageEntity {
+public class Field extends TyphonModelEntity {
 	/**
 	 * The name of this field. Must be a valid Typhon identifier.
 	 */

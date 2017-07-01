@@ -18,10 +18,11 @@ import info.iconmaster.typhon.TyphonTest;
 import info.iconmaster.typhon.antlr.TyphonLexer;
 import info.iconmaster.typhon.antlr.TyphonParser;
 import info.iconmaster.typhon.antlr.TyphonParser.AnnotationContext;
-import info.iconmaster.typhon.language.Annotation;
+import info.iconmaster.typhon.model.Annotation;
+import info.iconmaster.typhon.model.TyphonModelReader;
 
 /**
- * Tests <tt>{@link TyphonSourceReader}.readAnnotations()</tt>.
+ * Tests <tt>{@link TyphonModelReader}.readAnnotations()</tt>.
  * 
  * @author iconmaster
  *
@@ -70,7 +71,7 @@ public class TestAnnotationReader extends TyphonTest {
 			});
 			
 			AnnotationContext root = parser.annotation();
-			List<Annotation> annots = TyphonSourceReader.readAnnots(tni, Arrays.asList(root));
+			List<Annotation> annots = TyphonModelReader.readAnnots(tni, Arrays.asList(root));
 			Assert.assertEquals(1, annots.size());
 			test.accept(annots.get(0));
 		}

@@ -18,10 +18,11 @@ import info.iconmaster.typhon.antlr.TyphonLexer;
 import info.iconmaster.typhon.antlr.TyphonParser;
 import info.iconmaster.typhon.antlr.TyphonParser.DeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.FieldDeclContext;
-import info.iconmaster.typhon.language.Field;
+import info.iconmaster.typhon.model.Field;
+import info.iconmaster.typhon.model.TyphonModelReader;
 
 /**
- * Tests <tt>{@link TyphonSourceReader}.readField()</tt>.
+ * Tests <tt>{@link TyphonModelReader}.readField()</tt>.
  * 
  * @author iconmaster
  *
@@ -120,7 +121,7 @@ public class TestFieldReader extends TyphonTest {
 			
 			DeclContext root = parser.decl();
 			Assert.assertTrue("'"+input+"' was not a methodDecl: ", root instanceof FieldDeclContext);
-			test.accept(TyphonSourceReader.readField(tni, (FieldDeclContext)root));
+			test.accept(TyphonModelReader.readField(tni, (FieldDeclContext)root));
 		}
     }
 }

@@ -1,4 +1,4 @@
-package info.iconmaster.typhon.language;
+package info.iconmaster.typhon.model;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
@@ -12,7 +12,7 @@ import info.iconmaster.typhon.util.SourceInfo;
  * @author iconmaster
  *
  */
-public class TemplateArgument extends TyphonLanguageEntity {
+public class TemplateArgument extends TyphonModelEntity {
 	/**
 	 * The label of the named parameter this argument corresponds to.
 	 * Must be a valid Typhon identifier.

@@ -1,9 +1,9 @@
 package info.iconmaster.typhon.errors;
 
-import info.iconmaster.typhon.language.Import;
-import info.iconmaster.typhon.language.Import.PackageImport;
-import info.iconmaster.typhon.language.Import.RawImport;
 import info.iconmaster.typhon.linker.TyphonLinker;
+import info.iconmaster.typhon.model.Import;
+import info.iconmaster.typhon.model.Import.PackageImport;
+import info.iconmaster.typhon.model.Import.RawImport;
 
 /**
  * This is an error for when the {@link TyphonLinker} cannot resolve an import.

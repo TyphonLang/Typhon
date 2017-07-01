@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import info.iconmaster.typhon.errors.TyphonError;
-import info.iconmaster.typhon.language.CorePackage;
-import info.iconmaster.typhon.language.Package;
+import info.iconmaster.typhon.model.CorePackage;
+import info.iconmaster.typhon.model.Package;
 
 /**
  * This contains general data about the compilation currently in progress.

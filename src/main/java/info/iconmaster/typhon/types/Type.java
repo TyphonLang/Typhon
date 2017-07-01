@@ -1,8 +1,8 @@
 package info.iconmaster.typhon.types;
 
 import info.iconmaster.typhon.TyphonInput;
-import info.iconmaster.typhon.language.Package;
-import info.iconmaster.typhon.language.TyphonLanguageEntity;
+import info.iconmaster.typhon.model.Package;
+import info.iconmaster.typhon.model.TyphonModelEntity;
 import info.iconmaster.typhon.util.SourceInfo;
 
 /**
@@ -11,7 +11,7 @@ import info.iconmaster.typhon.util.SourceInfo;
  * @author iconmaster
  *
  */
-public abstract class Type extends TyphonLanguageEntity {
+public abstract class Type extends TyphonModelEntity {
 	/**
 	 * The package that contains methods, fields, etc. for this type.
 	 * 

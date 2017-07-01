@@ -18,14 +18,15 @@ import info.iconmaster.typhon.antlr.TyphonParser;
 import info.iconmaster.typhon.antlr.TyphonParser.ConstructorDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MethodDeclContext;
-import info.iconmaster.typhon.language.Constructor;
-import info.iconmaster.typhon.language.Constructor.ConstructorParameter;
-import info.iconmaster.typhon.language.Function;
-import info.iconmaster.typhon.language.Parameter;
+import info.iconmaster.typhon.model.Constructor;
+import info.iconmaster.typhon.model.Function;
+import info.iconmaster.typhon.model.Parameter;
+import info.iconmaster.typhon.model.TyphonModelReader;
+import info.iconmaster.typhon.model.Constructor.ConstructorParameter;
 import info.iconmaster.typhon.types.TemplateType;
 
 /**
- * Tests <tt>{@link TyphonSourceReader}.readFunction()</tt>.
+ * Tests <tt>{@link TyphonModelReader}.readFunction()</tt>.
  * 
  * @author iconmaster
  *
@@ -239,7 +240,7 @@ public class TestFunctionReader extends TyphonTest {
 			
 			DeclContext root = parser.decl();
 			Assert.assertTrue("'"+input+"' was not a methodDecl: ", root instanceof MethodDeclContext);
-			test.accept(TyphonSourceReader.readFunction(tni, (MethodDeclContext)root));
+			test.accept(TyphonModelReader.readFunction(tni, (MethodDeclContext)root));
 		}
     }
     
@@ -268,7 +269,7 @@ public class TestFunctionReader extends TyphonTest {
 			
 			DeclContext root = parser.decl();
 			Assert.assertTrue("'"+input+"' was not a constrcutorDecl: ", root instanceof ConstructorDeclContext);
-			test.accept(TyphonSourceReader.readConstructor(tni, (ConstructorDeclContext)root));
+			test.accept(TyphonModelReader.readConstructor(tni, (ConstructorDeclContext)root));
 		}
     }
 }

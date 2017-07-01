@@ -1,4 +1,4 @@
-package info.iconmaster.typhon.language;
+package info.iconmaster.typhon.model;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
@@ -7,7 +7,7 @@ import info.iconmaster.typhon.tnil.CodeBlock;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.util.SourceInfo;
 
-public class Parameter extends TyphonLanguageEntity {
+public class Parameter extends TyphonModelEntity {
 	/**
 	 * The name of this parameter. Must be a valid Typhon identifier.
 	 */

@@ -1,4 +1,4 @@
-package info.iconmaster.typhon.language;
+package info.iconmaster.typhon.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,7 @@ import info.iconmaster.typhon.util.SourceInfo;
  * @author iconmaster
  *
  */
-public class Function extends TyphonLanguageEntity {
+public class Function extends TyphonModelEntity {
 	/**
 	 * The name of this function.
 	 * Must be a valid Typhon identifier.

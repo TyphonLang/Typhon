@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import info.iconmaster.typhon.TyphonInput;
-import info.iconmaster.typhon.language.TemplateArgument;
-import info.iconmaster.typhon.language.TyphonLanguageEntity;
+import info.iconmaster.typhon.model.TemplateArgument;
+import info.iconmaster.typhon.model.TyphonModelEntity;
 import info.iconmaster.typhon.util.SourceInfo;
 
 /**
@@ -14,7 +14,7 @@ import info.iconmaster.typhon.util.SourceInfo;
  * @author iconmaster
  *
  */
-public class TypeRef extends TyphonLanguageEntity {
+public class TypeRef extends TyphonModelEntity {
 	/**
 	 * The type definition of this reference.
 	 */

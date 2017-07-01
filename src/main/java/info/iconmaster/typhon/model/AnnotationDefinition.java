@@ -1,4 +1,4 @@
-package info.iconmaster.typhon.language;
+package info.iconmaster.typhon.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ import info.iconmaster.typhon.util.SourceInfo;
  * @author iconmaster
  *
  */
-public class AnnotationDefinition extends TyphonLanguageEntity {
+public class AnnotationDefinition extends TyphonModelEntity {
 	/**
 	 * The name of the annotation. Must be a valid Typhon identifier.
 	 */

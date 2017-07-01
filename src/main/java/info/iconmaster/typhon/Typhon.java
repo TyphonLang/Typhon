@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Scanner;
 
-import info.iconmaster.typhon.compiler.TyphonSourceReader;
 import info.iconmaster.typhon.errors.TyphonError;
-import info.iconmaster.typhon.language.Package;
+import info.iconmaster.typhon.model.Package;
+import info.iconmaster.typhon.model.TyphonModelReader;
 import info.iconmaster.typhon.util.CommandLineHelper.Result;
 import info.iconmaster.typhon.util.CommandLineHelper.UnknownOptionException;
 import info.iconmaster.typhon.util.FileUtils;
@@ -87,7 +87,7 @@ public class Typhon {
 			for (File file : tni.inputFiles) {
 				Package p;
 				try {
-					p = TyphonSourceReader.parseFile(tni, file);
+					p = TyphonModelReader.parseFile(tni, file);
 					tni.inputPackages.add(p);
 				} catch (IOException e) {
 					System.err.println("error: cannot read input file '"+file.getName()+"': "+e.getMessage());
@@ -100,7 +100,7 @@ public class Typhon {
 			for (File file : tni.libraryFiles) {
 				Package p;
 				try {
-					p = TyphonSourceReader.parseFile(tni, file);
+					p = TyphonModelReader.parseFile(tni, file);
 					p.markAsLibrary();
 					tni.libraryPackages.add(p);
 				} catch (IOException e) {

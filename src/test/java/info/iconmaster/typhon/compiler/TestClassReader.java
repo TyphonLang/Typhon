@@ -18,11 +18,12 @@ import info.iconmaster.typhon.antlr.TyphonParser;
 import info.iconmaster.typhon.antlr.TyphonParser.ClassDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.EnumDeclContext;
+import info.iconmaster.typhon.model.TyphonModelReader;
 import info.iconmaster.typhon.types.EnumType;
 import info.iconmaster.typhon.types.UserType;
 
 /**
- * Tests <tt>{@link TyphonSourceReader}.readClass()</tt>.
+ * Tests <tt>{@link TyphonModelReader}.readClass()</tt>.
  * 
  * @author iconmaster
  *
@@ -154,7 +155,7 @@ public class TestClassReader extends TyphonTest {
 			
 			DeclContext root = parser.decl();
 			Assert.assertTrue("'"+input+"' was not a classDecl: ", root instanceof ClassDeclContext);
-			test.accept(TyphonSourceReader.readClass(tni, (ClassDeclContext)root));
+			test.accept(TyphonModelReader.readClass(tni, (ClassDeclContext)root));
 		}
     }
     
@@ -183,7 +184,7 @@ public class TestClassReader extends TyphonTest {
 			
 			DeclContext root = parser.decl();
 			Assert.assertTrue("'"+input+"' was not a enumDecl: ", root instanceof EnumDeclContext);
-			test.accept(TyphonSourceReader.readEnum(tni, (EnumDeclContext)root));
+			test.accept(TyphonModelReader.readEnum(tni, (EnumDeclContext)root));
 		}
     }
 }

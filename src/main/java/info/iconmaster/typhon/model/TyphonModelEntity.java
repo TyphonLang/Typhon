@@ -1,4 +1,4 @@
-package info.iconmaster.typhon.language;
+package info.iconmaster.typhon.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ import info.iconmaster.typhon.util.SourceInfo;
  * @author iconmaster
  *
  */
-public class TyphonLanguageEntity {
+public class TyphonModelEntity {
 	/**
 	 * The compilation options used to produce this object. Cannot be null.
 	 */
@@ -35,11 +35,11 @@ public class TyphonLanguageEntity {
 	 */
 	private boolean hasRawData = false;
 	
-	public TyphonLanguageEntity(TyphonInput tni) {
+	public TyphonModelEntity(TyphonInput tni) {
 		this.tni = tni;
 	}
 	
-	public TyphonLanguageEntity(TyphonInput tni, SourceInfo source) {
+	public TyphonModelEntity(TyphonInput tni, SourceInfo source) {
 		this.tni = tni;
 		this.source = source;
 	}

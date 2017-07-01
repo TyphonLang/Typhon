@@ -8,8 +8,8 @@ import org.junit.runners.Parameterized;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.TyphonTest;
-import info.iconmaster.typhon.compiler.TyphonSourceReader;
-import info.iconmaster.typhon.language.Package;
+import info.iconmaster.typhon.model.Package;
+import info.iconmaster.typhon.model.TyphonModelReader;
 
 /**
  * Tests <tt>{@link TyphonLinker}</tt>.
@@ -76,7 +76,7 @@ public class TestLinker extends TyphonTest {
 		@Override
 		public void run() {
 			TyphonInput tni = new TyphonInput();
-			Package p = TyphonSourceReader.parseString(tni, input);
+			Package p = TyphonModelReader.parseString(tni, input);
 			TyphonLinker.link(p);
 			test.accept(p);
 		}

@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import info.iconmaster.typhon.TyphonInput;
-import info.iconmaster.typhon.language.Argument;
-import info.iconmaster.typhon.language.TyphonLanguageEntity;
+import info.iconmaster.typhon.model.Argument;
+import info.iconmaster.typhon.model.TyphonModelEntity;
 import info.iconmaster.typhon.util.SourceInfo;
 
 /**
@@ -23,7 +23,7 @@ public class EnumType extends UserType {
 	 * @author iconmaster
 	 *
 	 */
-	public static class EnumChoice extends TyphonLanguageEntity {
+	public static class EnumChoice extends TyphonModelEntity {
 		/**
 		 * The choice's name. Must be a valid Typhon identifier.
 		 */

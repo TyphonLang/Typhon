@@ -1,4 +1,4 @@
-package info.iconmaster.typhon.language;
+package info.iconmaster.typhon.model;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.types.AnyType;

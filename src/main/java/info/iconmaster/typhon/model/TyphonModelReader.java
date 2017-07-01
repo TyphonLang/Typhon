@@ -1,4 +1,4 @@
-package info.iconmaster.typhon.compiler;
+package info.iconmaster.typhon.model;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,18 +49,9 @@ import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TypesContext;
 import info.iconmaster.typhon.antlr.TyphonParser.VoidTypesContext;
 import info.iconmaster.typhon.errors.SyntaxError;
-import info.iconmaster.typhon.language.Annotation;
-import info.iconmaster.typhon.language.Argument;
-import info.iconmaster.typhon.language.Constructor;
-import info.iconmaster.typhon.language.Constructor.ConstructorParameter;
-import info.iconmaster.typhon.language.Field;
-import info.iconmaster.typhon.language.Function;
-import info.iconmaster.typhon.language.Import;
-import info.iconmaster.typhon.language.Import.PackageImport;
-import info.iconmaster.typhon.language.Import.RawImport;
-import info.iconmaster.typhon.language.Package;
-import info.iconmaster.typhon.language.Parameter;
-import info.iconmaster.typhon.language.StaticInitBlock;
+import info.iconmaster.typhon.model.Constructor.ConstructorParameter;
+import info.iconmaster.typhon.model.Import.PackageImport;
+import info.iconmaster.typhon.model.Import.RawImport;
 import info.iconmaster.typhon.types.EnumType;
 import info.iconmaster.typhon.types.EnumType.EnumChoice;
 import info.iconmaster.typhon.types.TemplateType;
@@ -75,8 +66,8 @@ import info.iconmaster.typhon.util.SourceInfo;
  * @author iconmaster
  *
  */
-public class TyphonSourceReader {
-	private TyphonSourceReader() {}
+public class TyphonModelReader {
+	private TyphonModelReader() {}
 	
 	/**
 	 * Reads a source file, and translates it into a Typhon package.

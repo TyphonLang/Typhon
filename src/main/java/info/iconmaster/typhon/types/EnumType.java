@@ -34,14 +34,21 @@ public class EnumType extends UserType {
 		 */
 		private List<Argument> args = new ArrayList<>();
 		
-		public EnumChoice(TyphonInput tni, SourceInfo source, String name) {
+		/**
+		 * The type this choice is a part of.
+		 */
+		private EnumType parent;
+		
+		public EnumChoice(TyphonInput tni, SourceInfo source, String name, EnumType parent) {
 			super(tni, source);
 			this.name = name;
+			this.parent = parent;
 		}
 		
-		public EnumChoice(TyphonInput tni, String name) {
+		public EnumChoice(TyphonInput tni, String name, EnumType parent) {
 			super(tni);
 			this.name = name;
+			this.parent = parent;
 		}
 
 		/**
@@ -56,6 +63,13 @@ public class EnumType extends UserType {
 		 */
 		public List<Argument> getArgs() {
 			return args;
+		}
+		
+		/**
+		 * @return The type this choice is a part of.
+		 */
+		public EnumType getParent() {
+			return parent;
 		}
 	}
 	

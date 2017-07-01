@@ -549,7 +549,7 @@ public class TyphonModelReader {
 		readPackage(t.getTypePackage(), rule.tnDecls);
 		
 		for (EnumValueDeclContext choiceRule : rule.tnValues) {
-			EnumChoice choice = new EnumChoice(tni, new SourceInfo(choiceRule), choiceRule.tnName.getText());
+			EnumChoice choice = new EnumChoice(tni, new SourceInfo(choiceRule), choiceRule.tnName.getText(), t);
 			
 			if (choiceRule.tnArgs != null) choice.getArgs().addAll(readArgs(tni, choiceRule.tnArgs.tnArgs));
 			choice.getAnnots().addAll(readAnnots(tni, choiceRule.tnAnnots));

@@ -23,6 +23,7 @@ import info.iconmaster.typhon.antlr.TyphonLexer;
 import info.iconmaster.typhon.antlr.TyphonParser;
 import info.iconmaster.typhon.antlr.TyphonParser.AnnotationContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ArgDeclContext;
+import info.iconmaster.typhon.antlr.TyphonParser.ClassDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.FieldDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ImportDeclContext;
@@ -51,6 +52,7 @@ import info.iconmaster.typhon.language.Package;
 import info.iconmaster.typhon.language.Parameter;
 import info.iconmaster.typhon.language.StaticInitBlock;
 import info.iconmaster.typhon.types.TemplateType;
+import info.iconmaster.typhon.types.UserType;
 import info.iconmaster.typhon.util.Box;
 import info.iconmaster.typhon.util.SourceInfo;
 
@@ -95,7 +97,7 @@ public class TyphonSourceReader {
 			});
 			
 			RootContext root = parser.root();
-			return readPackage(tni, new SourceInfo(root), "", tni.corePackage, root.tnDecls);
+			return readPackage(new Package(new SourceInfo(root), "", tni.corePackage), root.tnDecls);
 		} catch (ParseCancellationException e) {
 			return new Package(new SourceInfo(file.getPath(), 0, (int) file.length()-1), "", tni.corePackage);
 		}
@@ -130,25 +132,20 @@ public class TyphonSourceReader {
 		});
 		
 		try {
-			return readPackage(tni, new SourceInfo(0, input.length()-1), "", tni.corePackage, parser.root().tnDecls);
+			return readPackage(new Package(new SourceInfo(0, input.length()-1), "", tni.corePackage), parser.root().tnDecls);
 		} catch (ParseCancellationException e) {
 			return new Package(new SourceInfo(0, input.length()-1), "", tni.corePackage);
 		}
 	}
 	
 	/**
-	 * Translates an ANTLR rule for a package into a Typhon package.
+	 * Adds declarations to a Typhon package based on ANTLR input.
 	 * 
-	 * @param tni
-	 * @param source Where in the source code a package occurs.
-	 * @param name The name of the package. Cannot be null.
-	 * @param parent The parent package. Cannot be null. Use <tt>tni.corePackage</tt> when you want a base-level package.
+	 * @param result The package we want to populate with declarations.
 	 * @param decls The ANTLR rules for the declarations in this package.
 	 * @return The package representing the ANTLR rules given as input.
 	 */
-	public static Package readPackage(TyphonInput tni, SourceInfo source, String name, Package parent, List<DeclContext> decls) {
-		Package result = new Package(source == null? parent.source : source, name, parent);
-		
+	public static Package readPackage(Package result, List<DeclContext> decls) {
 		Box<Integer> declIndex = new Box<>(0);
 		Box<Boolean> doneVisiting = new Box<>(false);
 		TyphonBaseVisitor<Void> visitor = new TyphonBaseVisitor<Void>() {
@@ -158,11 +155,11 @@ public class TyphonSourceReader {
 				String lastName = names.remove(names.size()-1);
 				Package base = result;
 				for (String name : names) {
-					base = readPackage(tni, new SourceInfo(decl), name, base, new ArrayList<>());
+					base = readPackage(new Package(new SourceInfo(decl), name, base), new ArrayList<>());
 				}
 				
-				Package p = readPackage(tni, new SourceInfo(decl), lastName, base, decl.tnDecls);
-				p.getAnnots().addAll(readAnnots(tni, decl.tnAnnots));
+				Package p = readPackage(new Package(new SourceInfo(decl), lastName, base), decl.tnDecls);
+				p.getAnnots().addAll(readAnnots(result.tni, decl.tnAnnots));
 				return null;
 			}
 			
@@ -172,25 +169,25 @@ public class TyphonSourceReader {
 				String lastName = names.remove(names.size()-1);
 				Package base = result;
 				for (String name : names) {
-					base = readPackage(tni, new SourceInfo(decl), name, base, new ArrayList<>());
+					base = readPackage(new Package(new SourceInfo(decl), name, base), new ArrayList<>());
 				}
 				
 				List<DeclContext> remainingDecls = decls.subList(declIndex.data+1, decls.size());
-				Package p = readPackage(tni, new SourceInfo(decl), lastName, base, remainingDecls);
-				p.getAnnots().addAll(readAnnots(tni, decl.tnAnnots));
+				Package p = readPackage(new Package(new SourceInfo(decl), lastName, base), remainingDecls);
+				p.getAnnots().addAll(readAnnots(result.tni, decl.tnAnnots));
 				doneVisiting.data = true;
 				return null;
 			}
 			
 			@Override
 			public Void visitMethodDecl(MethodDeclContext ctx) {
-				result.addFunction(readFunction(tni, ctx));
+				result.addFunction(readFunction(result.tni, ctx));
 				return null;
 			}
 			
 			@Override
 			public Void visitFieldDecl(FieldDeclContext ctx) {
-				for (Field f : readField(tni, ctx)) {
+				for (Field f : readField(result.tni, ctx)) {
 					result.addField(f);
 				}
 				
@@ -199,13 +196,19 @@ public class TyphonSourceReader {
 			
 			@Override
 			public Void visitImportDecl(ImportDeclContext ctx) {
-				result.addImport(readImport(tni, ctx));
+				result.addImport(readImport(result.tni, ctx));
 				return null;
 			}
 			
 			@Override
 			public Void visitStaticInitDecl(StaticInitDeclContext ctx) {
-				result.addStaticInitBlock(readStaticInitBlock(tni, ctx));
+				result.addStaticInitBlock(readStaticInitBlock(result.tni, ctx));
+				return null;
+			}
+			
+			@Override
+			public Void visitClassDecl(ClassDeclContext ctx) {
+				result.addType(readClass(result.tni, ctx));
 				return null;
 			}
 		};
@@ -388,5 +391,24 @@ public class TyphonSourceReader {
 		block.getAnnots().addAll(readAnnots(tni, rule.tnAnnots));
 		
 		return block;
+	}
+	
+	/**
+	 * Translates ANTLR rules for a class into a Typhon type.
+	 * 
+	 * @param tni
+	 * @param rule The class declaration. Cannot be null.
+	 * @return The type.
+	 */
+	public static UserType readClass(TyphonInput tni, ClassDeclContext rule) {
+		UserType t = new UserType(tni, rule.tnName.getText());
+		
+		if (rule.tnTemplate != null) t.getTemplates().addAll(readTemplateParams(tni, rule.tnTemplate.tnArgs));
+		t.setRawData(rule.tnExtends);
+		t.getAnnots().addAll(readAnnots(tni, rule.tnAnnots));
+		
+		readPackage(t.getTypePackage(), rule.tnDecls);
+		
+		return t;
 	}
 }

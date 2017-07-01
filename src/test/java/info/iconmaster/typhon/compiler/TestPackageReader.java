@@ -26,6 +26,8 @@ import info.iconmaster.typhon.language.Import.PackageImport;
 import info.iconmaster.typhon.language.Import.RawImport;
 import info.iconmaster.typhon.language.Package;
 import info.iconmaster.typhon.language.StaticInitBlock;
+import info.iconmaster.typhon.types.Type;
+import info.iconmaster.typhon.types.UserType;
 import info.iconmaster.typhon.util.SourceInfo;
 
 /**
@@ -515,6 +517,49 @@ public class TestPackageReader extends TyphonTest {
 			StaticInitBlock b = p.getStaticInitBlocks().get(0);
 			Assert.assertEquals(0, b.getRawCode().size());
 			Assert.assertEquals(1, b.getAnnots().size());
+		}),new CaseValid("class x {}", (p)->{
+			Assert.assertEquals(1, p.getTypes().size());
+			Assert.assertEquals(1, p.getSubpackges().size());
+			
+			Type t = p.getType("x");
+			Assert.assertNotNull(t);
+			Assert.assertTrue(t instanceof UserType);
+			Assert.assertEquals(0, ((UserType)t).getTemplates().size());
+			Assert.assertEquals(0, ((UserType)t).getRawParentTypes().size());
+		}),new CaseValid("package q; class x {}", (p)->{
+			Assert.assertEquals(0, p.getTypes().size());
+			Assert.assertEquals(1, p.getSubpackges().size());
+			
+			Package q = p.getSubpackges().get(0);
+			Assert.assertEquals(1, q.getTypes().size());
+			Assert.assertEquals(1, q.getSubpackges().size());
+			
+			Type t = q.getType("x");
+			Assert.assertNotNull(t);
+			Assert.assertTrue(t instanceof UserType);
+			Assert.assertEquals(0, ((UserType)t).getTemplates().size());
+			Assert.assertEquals(0, ((UserType)t).getRawParentTypes().size());
+		}),new CaseValid("class x {package q;} package r;", (p)->{
+			Assert.assertEquals(1, p.getTypes().size());
+			Assert.assertEquals(2, p.getSubpackges().size());
+			
+			Type t = p.getType("x");
+			Assert.assertNotNull(t);
+			Assert.assertTrue(t instanceof UserType);
+			Assert.assertEquals(0, ((UserType)t).getTemplates().size());
+			Assert.assertEquals(0, ((UserType)t).getRawParentTypes().size());
+			
+			Assert.assertEquals(1, p.getSubpackagesWithName("r").size());
+			Package r = p.getSubpackagesWithName("r").get(0);
+			Assert.assertEquals("r", r.getName());
+			
+			Package tp = t.getTypePackage();
+			Assert.assertEquals(1, tp.getSubpackges().size());
+			
+			Package q = tp.getSubpackges().get(0);
+			Assert.assertEquals("q", q.getName());
+			
+			Assert.assertTrue(p.getSubpackges().contains(tp));
 		}),
 		new CaseInvalid("x", 0, 1),
 		new CaseInvalid("aaa", 2, 3),
@@ -553,7 +598,7 @@ public class TestPackageReader extends TyphonTest {
 			});
 			
 			RootContext root = parser.root();
-			test.accept(TyphonSourceReader.readPackage(tni, new SourceInfo(root), "", tni.corePackage, root.tnDecls));
+			test.accept(TyphonSourceReader.readPackage(new Package(new SourceInfo(root), "", tni.corePackage), root.tnDecls));
 		}
     }
     

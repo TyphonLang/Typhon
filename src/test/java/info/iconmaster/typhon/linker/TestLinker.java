@@ -46,6 +46,21 @@ public class TestLinker extends TyphonTest {
 			Assert.assertEquals(1, p.tni.errors.size());
 		}),new TestCase("import p; package q {package p {}}", (p)->{
 			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("import p as q; package p {}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+			Assert.assertEquals(2, p.getSubpackges().size());
+			Assert.assertEquals(1, p.getSubpackagesWithName("q").size());
+			Assert.assertEquals(1, p.getSubpackagesWithName("q").get(0).getImports().size());
+			Assert.assertEquals(1, p.getSubpackagesWithName("q").get(0).getImports().get(0).getResolvedTo().size());
+			Assert.assertEquals(p.getSubpackagesWithName("p").get(0), p.getSubpackagesWithName("q").get(0).getImports().get(0).getResolvedTo().get(0));
+		}),new TestCase("import p as q.r; package p {}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+			Assert.assertEquals(2, p.getSubpackges().size());
+			Assert.assertEquals(1, p.getSubpackagesWithName("q").size());
+			Assert.assertEquals(1, p.getSubpackagesWithName("q").get(0).getSubpackges().size());
+			Assert.assertEquals(1, p.getSubpackagesWithName("q").get(0).getSubpackges().get(0).getImports().size());
+			Assert.assertEquals(1, p.getSubpackagesWithName("q").get(0).getSubpackges().get(0).getImports().get(0).getResolvedTo().size());
+			Assert.assertEquals(p.getSubpackagesWithName("p").get(0), p.getSubpackagesWithName("q").get(0).getSubpackges().get(0).getImports().get(0).getResolvedTo().get(0));
 		}));
 	}
     

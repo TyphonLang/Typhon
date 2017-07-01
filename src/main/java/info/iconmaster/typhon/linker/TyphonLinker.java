@@ -13,7 +13,6 @@ import info.iconmaster.typhon.language.Import;
 import info.iconmaster.typhon.language.Import.PackageImport;
 import info.iconmaster.typhon.language.Import.RawImport;
 import info.iconmaster.typhon.language.Package;
-import javafx.scene.shape.Path;
 
 /**
  * This class contains methods for resolving imports in Typhon code.
@@ -59,7 +58,6 @@ public class TyphonLinker {
 	
 	/**
 	 * Attempts to resolve an import.
-	 * 
 	 * This function will update the fields in the import for you, and will move around packages to implement package aliases.
 	 * 
 	 * @param toResolve The import to resolve.
@@ -69,6 +67,7 @@ public class TyphonLinker {
 			return;
 		}
 		
+		// resolve the import
 		if (toResolve instanceof PackageImport) {
 			PackageImport i = (PackageImport) toResolve;
 			
@@ -124,6 +123,16 @@ public class TyphonLinker {
 			}
 		} else {
 			throw new IllegalArgumentException("Unknown sublclass of Import");
+		}
+		
+		// handle the alias (but only if resolved, so we only do this once)
+		if (toResolve.isResolved() && !toResolve.getAliasName().isEmpty()) {
+			Package base = toResolve.getParent();
+			for (String s : toResolve.getAliasName()) {
+				base = new Package(toResolve.source, s, base);
+			}
+			base.addImport(toResolve);
+			toResolve.getAliasName().clear();
 		}
 	}
 	

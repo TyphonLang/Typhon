@@ -40,7 +40,7 @@ public class TestPackageReader extends TyphonTest {
 	@Parameterized.Parameters
     public static Collection<Object[]> data() {
 		return TyphonTest.makeData(new CaseValid("", (p)->{
-			Assert.assertEquals("", p.getName());
+			Assert.assertNull(p.getName());
 			Assert.assertNotNull(p.getParent());
 			
 			Assert.assertEquals("core", p.getParent().getName());
@@ -52,7 +52,7 @@ public class TestPackageReader extends TyphonTest {
 			Assert.assertEquals(0, p.getSubpackges().size());
 			Assert.assertEquals(0, p.getTypes().size());
 		}),new CaseValid("\n", (p)->{
-			Assert.assertEquals("", p.getName());
+			Assert.assertNull(p.getName());
 			Assert.assertNotNull(p.getParent());
 			
 			Assert.assertEquals("core", p.getParent().getName());
@@ -64,7 +64,7 @@ public class TestPackageReader extends TyphonTest {
 			Assert.assertEquals(0, p.getSubpackges().size());
 			Assert.assertEquals(0, p.getTypes().size());
 		}),new CaseValid("package q;", (p)->{
-			Assert.assertEquals("", p.getName());
+			Assert.assertNull(p.getName());
 			Assert.assertNotNull(p.getParent());
 			
 			Assert.assertEquals(0, p.getFields().size());
@@ -84,7 +84,7 @@ public class TestPackageReader extends TyphonTest {
 			Assert.assertEquals(0, q.getSubpackges().size());
 			Assert.assertEquals(0, q.getTypes().size());
 		}),new CaseValid("package q {}", (p)->{
-			Assert.assertEquals("", p.getName());
+			Assert.assertNull(p.getName());
 			Assert.assertNotNull(p.getParent());
 			
 			Assert.assertEquals(0, p.getFields().size());
@@ -104,7 +104,7 @@ public class TestPackageReader extends TyphonTest {
 			Assert.assertEquals(0, q.getSubpackges().size());
 			Assert.assertEquals(0, q.getTypes().size());
 		}),new CaseValid("package q; package r;", (p)->{
-			Assert.assertEquals("", p.getName());
+			Assert.assertNull(p.getName());
 			Assert.assertNotNull(p.getParent());
 			
 			Assert.assertEquals(0, p.getFields().size());
@@ -135,7 +135,7 @@ public class TestPackageReader extends TyphonTest {
 			Assert.assertEquals(0, r.getSubpackges().size());
 			Assert.assertEquals(0, r.getTypes().size());
 		}),new CaseValid("package q {package r {}}", (p)->{
-			Assert.assertEquals("", p.getName());
+			Assert.assertNull(p.getName());
 			Assert.assertNotNull(p.getParent());
 			
 			Assert.assertEquals(0, p.getFields().size());
@@ -166,7 +166,7 @@ public class TestPackageReader extends TyphonTest {
 			Assert.assertEquals(0, r.getSubpackges().size());
 			Assert.assertEquals(0, r.getTypes().size());
 		}),new CaseValid("package q.r;", (p)->{
-			Assert.assertEquals("", p.getName());
+			Assert.assertNull(p.getName());
 			Assert.assertNotNull(p.getParent());
 			
 			Assert.assertEquals(0, p.getFields().size());
@@ -197,7 +197,7 @@ public class TestPackageReader extends TyphonTest {
 			Assert.assertEquals(0, r.getSubpackges().size());
 			Assert.assertEquals(0, r.getTypes().size());
 		}),new CaseValid("package q.r {}", (p)->{
-			Assert.assertEquals("", p.getName());
+			Assert.assertNull(p.getName());
 			Assert.assertNotNull(p.getParent());
 			
 			Assert.assertEquals(0, p.getFields().size());
@@ -228,7 +228,7 @@ public class TestPackageReader extends TyphonTest {
 			Assert.assertEquals(0, r.getSubpackges().size());
 			Assert.assertEquals(0, r.getTypes().size());
 		}),new CaseValid("package q.r.s {}", (p)->{
-			Assert.assertEquals("", p.getName());
+			Assert.assertNull(p.getName());
 			Assert.assertNotNull(p.getParent());
 			
 			Assert.assertEquals(0, p.getFields().size());
@@ -306,7 +306,7 @@ public class TestPackageReader extends TyphonTest {
 			Assert.assertEquals(20, r.source.end);
 			Assert.assertEquals("<unknown>", r.source.file);
 		}),new CaseValid("package q {} package r {}", (p)->{
-			Assert.assertEquals("", p.getName());
+			Assert.assertNull(p.getName());
 			Assert.assertNotNull(p.getParent());
 			
 			Assert.assertEquals(0, p.getFields().size());
@@ -320,7 +320,7 @@ public class TestPackageReader extends TyphonTest {
 			Assert.assertTrue(ps.stream().anyMatch((pp)->pp.getName().equals("r")));
 			Assert.assertTrue(ps.stream().allMatch((pp)->pp.getSubpackges().size() == 0));
 		}),new CaseValid("package q {} package q {}", (p)->{
-			Assert.assertEquals("", p.getName());
+			Assert.assertNull(p.getName());
 			Assert.assertNotNull(p.getParent());
 			
 			Assert.assertEquals(0, p.getFields().size());
@@ -333,7 +333,7 @@ public class TestPackageReader extends TyphonTest {
 			Assert.assertTrue(ps.stream().allMatch((pp)->pp.getName().equals("q")));
 			Assert.assertTrue(ps.stream().allMatch((pp)->pp.getSubpackges().size() == 0));
 		}),new CaseValid("package q {package r {}} package q {package r {}}", (p)->{
-			Assert.assertEquals("", p.getName());
+			Assert.assertNull(p.getName());
 			Assert.assertNotNull(p.getParent());
 			
 			Assert.assertEquals(0, p.getFields().size());
@@ -598,7 +598,7 @@ public class TestPackageReader extends TyphonTest {
 			});
 			
 			RootContext root = parser.root();
-			test.accept(TyphonSourceReader.readPackage(new Package(new SourceInfo(root), "", tni.corePackage), root.tnDecls));
+			test.accept(TyphonSourceReader.readPackage(new Package(new SourceInfo(root), null, tni.corePackage), root.tnDecls));
 		}
     }
     

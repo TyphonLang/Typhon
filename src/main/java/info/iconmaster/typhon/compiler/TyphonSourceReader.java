@@ -97,9 +97,9 @@ public class TyphonSourceReader {
 			});
 			
 			RootContext root = parser.root();
-			return readPackage(new Package(new SourceInfo(root), "", tni.corePackage), root.tnDecls);
+			return readPackage(new Package(new SourceInfo(root), null, tni.corePackage), root.tnDecls);
 		} catch (ParseCancellationException e) {
-			return new Package(new SourceInfo(file.getPath(), 0, (int) file.length()-1), "", tni.corePackage);
+			return new Package(new SourceInfo(file.getPath(), 0, (int) file.length()-1), null, tni.corePackage);
 		}
 	}
 	
@@ -132,9 +132,9 @@ public class TyphonSourceReader {
 		});
 		
 		try {
-			return readPackage(new Package(new SourceInfo(0, input.length()-1), "", tni.corePackage), parser.root().tnDecls);
+			return readPackage(new Package(new SourceInfo(0, input.length()-1), null, tni.corePackage), parser.root().tnDecls);
 		} catch (ParseCancellationException e) {
-			return new Package(new SourceInfo(0, input.length()-1), "", tni.corePackage);
+			return new Package(new SourceInfo(0, input.length()-1), null, tni.corePackage);
 		}
 	}
 	

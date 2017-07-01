@@ -23,7 +23,7 @@ public class Package extends TyphonLanguageEntity {
 	private Package parent;
 	
 	/**
-	 * This package's name. Cannot be null.
+	 * This package's name. If null, cannot be looked up from the parent package.
 	 */
 	private String name;
 
@@ -85,7 +85,7 @@ public class Package extends TyphonLanguageEntity {
 	}
 
 	/**
-	 * @return This package's name. Cannot be null.
+	 * @return This package's name. If null, cannot be looked up from the parent package.
 	 */
 	public String getName() {
 		return name;

@@ -43,7 +43,7 @@ public abstract class Type extends TyphonLanguageEntity {
 	 */
 	public Package getTypePackage() {
 		if (typePackage == null) {
-			typePackage = new Package(source, getName(), parent == null ? tni.corePackage : parent);
+			typePackage = new Package(source, null, parent == null ? tni.corePackage : parent);
 		}
 		
 		return typePackage;

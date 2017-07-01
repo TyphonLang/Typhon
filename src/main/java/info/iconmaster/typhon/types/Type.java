@@ -70,4 +70,11 @@ public abstract class Type extends TyphonLanguageEntity {
 		this.parent = parent;
 		getTypePackage().setParent(parent);
 	}
+	
+	@Override
+	public void markAsLibrary() {
+		super.markAsLibrary();
+		
+		getTypePackage().markAsLibrary();
+	}
 }

@@ -38,4 +38,21 @@ public class TyphonInput {
 	 * If this list isn't empty, the compilation was not successful.
 	 */
 	public List<TyphonError> errors = new ArrayList<>();
+	
+	/**
+	 * A list of libraries Typhon was given as input.
+	 * Its use is optional outside of command-line use.
+	 */
+	public List<File> libraryFiles = new ArrayList<>();
+	
+	/**
+	 * A list of library packages Typhon was given as input.
+	 * These are used to resolve imports.
+	 */
+	public List<Package> libraryPackages = new ArrayList<>();
+	
+	/**
+	 * A list of paths that can be the base for raw import includes.
+	 */
+	public List<File> rawImportLookupPaths = new ArrayList<>();
 }

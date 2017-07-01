@@ -51,6 +51,7 @@ public class Typhon {
 			}
 			
 			TyphonInput tni = new TyphonInput();
+			
 			for (String fileName : options.positionalArguments) {
 				File file = new File(fileName);
 				if (!file.exists()) {
@@ -60,6 +61,19 @@ public class Typhon {
 				tni.inputFiles.addAll(FileUtils.getAllFiles(file, FileUtils.FILTER_TYPHON_FILES));
 			}
 			
+			if (options.optionalArguments.containsKey(TyphonCommandLine.OPTION_LIBS)) {
+				for (String fileName : options.optionalArguments.get(TyphonCommandLine.OPTION_LIBS)) {
+					File file = new File(fileName);
+					if (!file.exists()) {
+						System.err.println("error: file or folder '"+fileName+"' does not exist");
+						return;
+					}
+					tni.libraryFiles.addAll(FileUtils.getAllFiles(file, FileUtils.FILTER_TYPHON_FILES));
+				}
+			}
+			
+			// parse the input files
+			
 			for (File file : tni.inputFiles) {
 				Package p;
 				try {
@@ -67,6 +81,20 @@ public class Typhon {
 					tni.inputPackages.add(p);
 				} catch (IOException e) {
 					System.err.println("error: cannot read input file '"+file.getName()+"': "+e.getMessage());
+					return;
+				}
+			}
+			
+			// parse the libraries
+			
+			for (File file : tni.libraryFiles) {
+				Package p;
+				try {
+					p = TyphonSourceReader.parseFile(tni, file);
+					p.markAsLibrary();
+					tni.libraryPackages.add(p);
+				} catch (IOException e) {
+					System.err.println("error: cannot read library file '"+file.getName()+"': "+e.getMessage());
 					return;
 				}
 			}

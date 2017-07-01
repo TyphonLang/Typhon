@@ -469,4 +469,16 @@ public class Package extends TyphonLanguageEntity {
 	public List<StaticInitBlock> getStaticInitBlocks() {
 		return staticInitBlocks;
 	}
+	
+	@Override
+	public void markAsLibrary() {
+		super.markAsLibrary();
+		
+		getSubpackges().stream().forEach((e)->e.markAsLibrary());
+		getFunctions().stream().forEach((e)->e.markAsLibrary());
+		getFields().stream().forEach((e)->e.markAsLibrary());
+		getTypes().stream().forEach((e)->e.markAsLibrary());
+		getImports().stream().forEach((e)->e.markAsLibrary());
+		getStaticInitBlocks().stream().forEach((e)->e.markAsLibrary());
+	}
 }

@@ -74,4 +74,23 @@ public class TyphonLanguageEntity {
 	public void setRawData() {
 		this.hasRawData = true;
 	}
+	
+	/**
+	 * True if this entity comes from a library.
+	 */
+	private boolean isLibrary;
+	
+	/**
+	 * @return True if this entity comes from a library.
+	 */
+	public boolean isLibrary() {
+		return isLibrary;
+	}
+	
+	/**
+	 * Marks this, and all children, as a library.
+	 */
+	public void markAsLibrary() {
+		this.isLibrary = true;
+	}
 }

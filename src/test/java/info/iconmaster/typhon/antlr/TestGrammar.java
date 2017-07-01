@@ -93,7 +93,6 @@ public class TestGrammar extends TyphonTest {
 			new CaseInvalid("new {}"),
 			//globalAnnotDecl
 			new CaseValid("@@a"),
-			new CaseValid("@x @y @@a"),
 			//enumValueDecl
 			new CaseValid("x", (parser)->{parser.enumValueDecl();}),
 			new CaseValid("x()", (parser)->{parser.enumValueDecl();}),
@@ -431,7 +430,6 @@ public class TestGrammar extends TyphonTest {
 			new CaseInvalid("switch x {};", (parser)->{parser.stat();}),
 			//globalAnnotStat
 			new CaseValid("@@a", (parser)->{parser.stat();}),
-			new CaseValid("@x @y @@a", (parser)->{parser.stat();}),
 			//exprStat
 			new CaseValid("1;", (parser)->{parser.stat();}),
 			new CaseValid("a.b();", (parser)->{parser.stat();}),

@@ -10,9 +10,9 @@ decl:
 |	tnDoc=DOC_COMMENT? tnAnnots+=annotation* 'enum' tnName=WORD (':' tnExtends+=type (',' tnExtends+=type)*)? '{' (tnValues+=enumValueDecl (',' tnValues+=enumValueDecl)* ','?)? ';'? tnDecls+=decl* '}'	#enumDecl
 |	tnDoc=DOC_COMMENT? tnAnnots+=annotation* 'package' tnName=packageName ';'																																#simplePackageDecl
 |	tnDoc=DOC_COMMENT? tnAnnots+=annotation* 'package' tnName=packageName '{' tnDecls+=decl* '}'																											#packageDecl
-|	tnAnnots+=annotation* 'import' (tnName=packageName | tnRawName=STRING) ('as' tnAlias=packageName)? ';'																														#importDecl
+|	tnAnnots+=annotation* 'import' (tnName=packageName | tnRawName=STRING) ('as' tnAlias=packageName)? ';'																									#importDecl
 |	tnDoc=DOC_COMMENT? tnAnnots+=annotation* 'new' '(' (tnArgs+=constructorParam (',' tnArgs+=constructorParam)*)? ')' ('=>' tnExprForm=exprs | '{' tnBlockForm+=stat* '}' | tnStubForm=';')				#constructorDecl
-|	tnAnnots+=annotation* tnGlobalAnnot=globalAnnotation																																					#globalAnnotDecl
+|	tnGlobalAnnot=globalAnnotation																																											#globalAnnotDecl
 ;
 enumValueDecl: tnDoc=DOC_COMMENT? tnAnnots+=annotation* tnName=WORD ('(' tnArgs=argsDecl ')')?;
 constructorParam:
@@ -83,7 +83,7 @@ stat:
 |	tnAnnots+=annotation* 'break' tnLabel=WORD? ';'																														#breakStat
 |	tnAnnots+=annotation* 'continue' tnLabel=WORD? ';'																													#contStat
 |	tnAnnots+=annotation* 'switch' tnExpr=expr ('<' tnLabel=WORD '>')? '{' tnCaseBlocks+=caseBlock* (tnDefaultAnnots+=annotation* 'default' tnDefaultBlock=block)? '}'	#switchStat
-|	tnAnnots+=annotation* tnGlobalAnnot=globalAnnotation																												#globalAnnotStat
+|	tnGlobalAnnot=globalAnnotation																																		#globalAnnotStat
 |	tnExpr=expr ';'																																						#exprStat
 |	tnAnnots+=annotation* tnBlock=block																																	#blockStat
 |	';'																																									#nullStat

@@ -30,6 +30,8 @@ import info.iconmaster.typhon.antlr.TyphonParser.ConstructorParamThisContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ConstructorParamTypedContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.FieldDeclContext;
+import info.iconmaster.typhon.antlr.TyphonParser.GlobalAnnotDeclContext;
+import info.iconmaster.typhon.antlr.TyphonParser.GlobalAnnotationContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ImportDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MethodDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MultiTypesContext;
@@ -154,6 +156,7 @@ public class TyphonSourceReader {
 	public static Package readPackage(Package result, List<DeclContext> decls) {
 		Box<Integer> declIndex = new Box<>(0);
 		Box<Boolean> doneVisiting = new Box<>(false);
+		ArrayList<Annotation> globalAnnots = new ArrayList<>();
 		TyphonBaseVisitor<Void> visitor = new TyphonBaseVisitor<Void>() {
 			@Override
 			public Void visitPackageDecl(PackageDeclContext decl) {
@@ -166,6 +169,7 @@ public class TyphonSourceReader {
 				
 				Package p = readPackage(new Package(new SourceInfo(decl), lastName, base), decl.tnDecls);
 				p.getAnnots().addAll(readAnnots(result.tni, decl.tnAnnots));
+				p.getAnnots().addAll(globalAnnots);
 				return null;
 			}
 			
@@ -181,13 +185,16 @@ public class TyphonSourceReader {
 				List<DeclContext> remainingDecls = decls.subList(declIndex.data+1, decls.size());
 				Package p = readPackage(new Package(new SourceInfo(decl), lastName, base), remainingDecls);
 				p.getAnnots().addAll(readAnnots(result.tni, decl.tnAnnots));
+				p.getAnnots().addAll(globalAnnots);
 				doneVisiting.data = true;
 				return null;
 			}
 			
 			@Override
 			public Void visitMethodDecl(MethodDeclContext ctx) {
-				result.addFunction(readFunction(result.tni, ctx));
+				Function f = readFunction(result.tni, ctx);
+				result.addFunction(f);
+				f.getAnnots().addAll(globalAnnots);
 				return null;
 			}
 			
@@ -195,6 +202,7 @@ public class TyphonSourceReader {
 			public Void visitFieldDecl(FieldDeclContext ctx) {
 				for (Field f : readField(result.tni, ctx)) {
 					result.addField(f);
+					f.getAnnots().addAll(globalAnnots);
 				}
 				
 				return null;
@@ -202,25 +210,42 @@ public class TyphonSourceReader {
 			
 			@Override
 			public Void visitImportDecl(ImportDeclContext ctx) {
-				result.addImport(readImport(result.tni, ctx));
+				Import i = readImport(result.tni, ctx);
+				result.addImport(i);
+				i.getAnnots().addAll(globalAnnots);
 				return null;
 			}
 			
 			@Override
 			public Void visitStaticInitDecl(StaticInitDeclContext ctx) {
-				result.addStaticInitBlock(readStaticInitBlock(result.tni, ctx));
+				StaticInitBlock b = readStaticInitBlock(result.tni, ctx);
+				result.addStaticInitBlock(b);
+				b.getAnnots().addAll(globalAnnots);
 				return null;
 			}
 			
 			@Override
 			public Void visitClassDecl(ClassDeclContext ctx) {
-				result.addType(readClass(result.tni, ctx));
+				UserType t = readClass(result.tni, ctx);
+				result.addType(t);
+				t.getAnnots().addAll(globalAnnots);
 				return null;
 			}
 			
 			@Override
 			public Void visitConstructorDecl(ConstructorDeclContext ctx) {
-				result.addFunction(readConstructor(result.tni, ctx));
+				Constructor f = readConstructor(result.tni, ctx);
+				result.addFunction(f);
+				f.getAnnots().addAll(globalAnnots);
+				return null;
+			}
+			
+			@Override
+			public Void visitGlobalAnnotDecl(GlobalAnnotDeclContext ctx) {
+				Annotation a = readGlobalAnnot(result.tni, ctx.tnGlobalAnnot);
+				// TODO: Should global annotations be annotatable? If so, how can normal annotations be annotated?
+				// a.getAnnots().addAll(readAnnots(result.tni, ctx.tnAnnots));
+				globalAnnots.add(a);
 				return null;
 			}
 		};
@@ -258,6 +283,30 @@ public class TyphonSourceReader {
 			
 			return annot;
 		}).collect(Collectors.toCollection(()->new ArrayList<>()));
+	}
+	
+	/**
+	 * Translates ANTLR rules for global annotations into Typhon annotations.
+	 * 
+	 * @param tni
+	 * @param rule The annotation rule. Cannot be null.
+	 * @return The annotation representing the ANTLR rule given as input.
+	 */
+	public static Annotation readGlobalAnnot(TyphonInput tni, GlobalAnnotationContext rule) {
+		Annotation annot = new Annotation(tni, new SourceInfo(rule));
+		
+		annot.setRawData(rule.tnName);
+		if (rule.tnArgs != null)
+		for (ArgDeclContext argRule : rule.tnArgs.tnArgs) {
+			Argument arg = new Argument(tni, new SourceInfo(argRule));
+			
+			if (argRule.tnKey != null) arg.setLabel(argRule.tnKey.getText());
+			arg.setRawData(argRule.tnValue);
+			
+			annot.getArgs().add(arg);
+		}
+		
+		return annot;
 	}
 	
 	/**

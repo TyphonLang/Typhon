@@ -581,6 +581,46 @@ public class TestPackageReader extends TyphonTest {
 			
 			Function f = q.getFunctions().get(0);
 			Assert.assertEquals("new", f.getName());
+		}),new CaseValid("@@a package q {}", (p)->{
+			Assert.assertEquals(1, p.getSubpackges().size());
+			
+			Package q = p.getSubpackges().get(0);
+			Assert.assertEquals(1, q.getAnnots().size());
+		}),new CaseValid("@@a package q;", (p)->{
+			Assert.assertEquals(1, p.getSubpackges().size());
+			
+			Package q = p.getSubpackges().get(0);
+			Assert.assertEquals(1, q.getAnnots().size());
+		}),new CaseValid("@@a @@b package q {}", (p)->{
+			Assert.assertEquals(1, p.getSubpackges().size());
+			
+			Package q = p.getSubpackges().get(0);
+			Assert.assertEquals(2, q.getAnnots().size());
+		}),new CaseValid("@@a package q {} @@b", (p)->{
+			Assert.assertEquals(1, p.getSubpackges().size());
+			
+			Package q = p.getSubpackges().get(0);
+			Assert.assertEquals(1, q.getAnnots().size());
+		}),new CaseValid("@@a package q {@@b} @@c", (p)->{
+			Assert.assertEquals(1, p.getSubpackges().size());
+			
+			Package q = p.getSubpackges().get(0);
+			Assert.assertEquals(1, q.getAnnots().size());
+		}),new CaseValid("@@a var x;", (p)->{
+			Assert.assertEquals(1, p.getFields().size());
+			
+			Field f = p.getFields().get(0);
+			Assert.assertEquals(1, f.getAnnots().size());
+		}),new CaseValid("@@a void f() {}", (p)->{
+			Assert.assertEquals(1, p.getFunctions().size());
+			
+			Function f = p.getFunctions().get(0);
+			Assert.assertEquals(1, f.getAnnots().size());
+		}),new CaseValid("@@a class x {}", (p)->{
+			Assert.assertEquals(1, p.getTypes().size());
+			
+			Type t = p.getTypes().get(0);
+			Assert.assertEquals(1, t.getAnnots().size());
 		}),
 		new CaseInvalid("x", 0, 1),
 		new CaseInvalid("aaa", 2, 3),

@@ -105,10 +105,6 @@ public class TestGrammar extends TyphonTest {
 			new CaseValid("@a @b var x", (parser)->{parser.constructorParam();}),
 			new CaseValid("@a @b this.x", (parser)->{parser.constructorParam();}),
 			new CaseInvalid("var this.x", (parser)->{parser.constructorParam();}),
-			//typeofType
-			new CaseValid("typeof 3", (parser)->{parser.type();}),
-			new CaseValid("@a @b typeof 3", (parser)->{parser.type();}),
-			new CaseInvalid("typeof ()", (parser)->{parser.type();}),
 			//funcType
 			new CaseValid("()->void", (parser)->{parser.type();}),
 			new CaseValid("(int)->void", (parser)->{parser.type();}),

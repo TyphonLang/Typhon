@@ -400,6 +400,7 @@ public class TyphonModelReader {
 			p.setRawData(rule.tnType, rule.tnDefaultValue);
 			
 			p.getAnnots().addAll(readAnnots(tni, rule.tnAnnots));
+			p.setRawData();
 			return p;
 		}).collect(Collectors.toCollection(()->new ArrayList<>()));
 	}
@@ -418,6 +419,7 @@ public class TyphonModelReader {
 			t.setRawData(rule.tnBaseType, rule.tnDefaultType);
 			
 			t.getAnnots().addAll(readAnnots(tni, rule.tnAnnots));
+			t.setRawData();
 			return t;
 		}).collect(Collectors.toCollection(()->new ArrayList<>()));
 	}

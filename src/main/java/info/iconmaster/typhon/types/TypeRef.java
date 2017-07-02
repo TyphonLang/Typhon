@@ -27,6 +27,16 @@ public class TypeRef extends TyphonModelEntity implements MemberAccess {
 	 * Must be empty if this type does not support templates.
 	 */
 	private List<TemplateArgument> templateArgs = new ArrayList<>();
+	
+	/**
+	 * True if this was declared with 'var'.
+	 */
+	private boolean isVar;
+	
+	/**
+	 * True if this was declared with 'const'.
+	 */
+	private boolean isConst;
 
 	public TypeRef(TyphonInput tni) {
 		super(tni);
@@ -83,5 +93,33 @@ public class TypeRef extends TyphonModelEntity implements MemberAccess {
 		}
 		
 		return type.getName();
+	}
+
+	/**
+	 * @return True if this was declared with 'var'.
+	 */
+	public boolean isVar() {
+		return isVar;
+	}
+
+	/**
+	 * @param isVar True if this was declared with 'var'.
+	 */
+	public void isVar(boolean isVar) {
+		this.isVar = isVar;
+	}
+
+	/**
+	 * @return True if this was declared with 'const'.
+	 */
+	public boolean isConst() {
+		return isConst;
+	}
+
+	/**
+	 * @param isConst True if this was declared with 'const'.
+	 */
+	public void isConst(boolean isConst) {
+		this.isConst = isConst;
 	}
 }

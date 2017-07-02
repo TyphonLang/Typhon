@@ -3,6 +3,7 @@ package info.iconmaster.typhon.model;
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.types.AnyType;
 import info.iconmaster.typhon.types.SystemType;
+import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.UserType;
 
@@ -19,11 +20,25 @@ public class CorePackage extends Package {
 	/**
 	 * Constants for built-in types.
 	 */
-	public Type TYPE_ANY, TYPE_NUMBER, TYPE_INT;
+	public AnyType TYPE_ANY;
+	
+	/**
+	 * Constants for built-in types.
+	 */
+	public UserType TYPE_NUMBER, TYPE_LIST, TYPE_MAP;
+	
+	/**
+	 * Constants for built-in types.
+	 */
+	public SystemType TYPE_INT;
 	
 	public CorePackage(TyphonInput tni) {
 		super(tni, "core");
 		
+		// an awful hack to make sure everything runs smoothly
+		tni.corePackage = this;
+		
+		// form the core type tree
 		TYPE_ANY = new AnyType(tni);
 		addType(TYPE_ANY);
 		
@@ -32,6 +47,15 @@ public class CorePackage extends Package {
 		
 		TYPE_INT = new SystemType("int", TYPE_NUMBER);
 		addType(TYPE_INT);
+		
+		TYPE_LIST = new UserType("List", TYPE_ANY);
+		TYPE_LIST.getTemplates().add(new TemplateType(tni, "T"));
+		addType(TYPE_LIST);
+		
+		TYPE_MAP = new UserType("Map", TYPE_ANY);
+		TYPE_MAP.getTemplates().add(new TemplateType(tni, "K"));
+		TYPE_MAP.getTemplates().add(new TemplateType(tni, "V"));
+		addType(TYPE_MAP);
 	}
 	
 	/**

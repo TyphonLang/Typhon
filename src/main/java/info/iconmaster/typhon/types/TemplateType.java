@@ -41,11 +41,17 @@ public class TemplateType extends Type {
 	public TemplateType(TyphonInput input, String name) {
 		super(input);
 		this.name = name;
+		
+		baseType = new TypeRef(input.corePackage.TYPE_ANY);
+		defaultValue = new TypeRef(input.corePackage.TYPE_ANY);
 	}
 	
 	public TemplateType(TyphonInput input, SourceInfo source, String name) {
 		super(input, source);
 		this.name = name;
+		
+		baseType = new TypeRef(input.corePackage.TYPE_ANY);
+		defaultValue = new TypeRef(input.corePackage.TYPE_ANY);
 	}
 
 	@Override

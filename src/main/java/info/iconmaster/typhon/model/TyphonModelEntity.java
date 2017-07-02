@@ -31,9 +31,8 @@ public class TyphonModelEntity {
 	
 	/**
 	 * True if we have raw data, and need to be compiled.
-	 * May be set to false even if there is raw data (if a user-supplied type has been compiled already, for example).
 	 */
-	private boolean hasRawData = false;
+	private boolean needsCompiled = false;
 	
 	public TyphonModelEntity(TyphonInput tni) {
 		this.tni = tni;
@@ -56,7 +55,7 @@ public class TyphonModelEntity {
 	 * May be set to false even if there is raw data (if a user-supplied type has been compiled already, for example).
 	 */
 	public boolean needsCompiled() {
-		return hasRawData;
+		return needsCompiled;
 	}
 
 	/**
@@ -64,7 +63,7 @@ public class TyphonModelEntity {
 	 * May be set to false even if there is raw data (if a user-supplied type has been compiled already, for example).
 	 */
 	public void needsCompiled(boolean hasRawData) {
-		this.hasRawData = hasRawData;
+		this.needsCompiled = hasRawData;
 	}
 	
 	/**
@@ -72,7 +71,8 @@ public class TyphonModelEntity {
 	 * Subclasses should call this in thier own setRawData; this function updates important flags.
 	 */
 	public void setRawData() {
-		this.hasRawData = true;
+		this.needsCompiled = true;
+		this.needsTypesResolved = true;
 	}
 	
 	/**
@@ -92,5 +92,24 @@ public class TyphonModelEntity {
 	 */
 	public void markAsLibrary() {
 		this.isLibrary = true;
+	}
+
+	/**
+	 * True if we have raw data, and need our types resolved.
+	 */
+	private boolean needsTypesResolved = false;
+	
+	/**
+	 * @return True if we have raw data, and need our types resolved.
+	 */
+	public boolean needsTypesResolved() {
+		return needsTypesResolved;
+	}
+
+	/**
+	 * @param needsTypesResolved True if we have raw data, and need our types resolved.
+	 */
+	public void needsTypesResolved(boolean needsTypesResolved) {
+		this.needsTypesResolved = needsTypesResolved;
 	}
 }

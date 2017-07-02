@@ -148,7 +148,7 @@ public class TyphonTypeResolver {
 			return;
 		}
 		
-		
+		// TODO
 		
 		a.needsTypesResolved(false);
 	}
@@ -198,6 +198,7 @@ public class TyphonTypeResolver {
 			ref.isConst(true);
 			return ref;
 		} else if (rule instanceof BasicTypeContext) {
+			// TODO
 			return null;
 		} else {
 			throw new IllegalArgumentException("Unknown subclass of TypeContext");

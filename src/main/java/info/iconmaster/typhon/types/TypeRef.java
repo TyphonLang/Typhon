@@ -122,4 +122,9 @@ public class TypeRef extends TyphonModelEntity implements MemberAccess {
 	public void isConst(boolean isConst) {
 		this.isConst = isConst;
 	}
+	
+	@Override
+	public MemberAccess getParent() {
+		return type.getParent();
+	}
 }

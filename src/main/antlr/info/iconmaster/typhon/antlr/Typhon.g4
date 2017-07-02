@@ -34,7 +34,7 @@ types:
 |	'(' (tnTypes+=type (',' tnTypes+=type)*)? ')'	#multiTypes
 |	'void'											#voidTypes
 ;
-typeMemberItem: '.' tnAnnots+=annotation* tnName=WORD tnTemplate=templateArgs?;
+typeMemberItem: ('.'|'?.') tnAnnots+=annotation* tnName=WORD tnTemplate=templateArgs?;
 
 expr:
 	tnLhs=expr tnLookup+=memberItem* (tnOp='.'|tnOp='?.') tnAnnots+=annotation* tnValue=WORD												#memberExpr

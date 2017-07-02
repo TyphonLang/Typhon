@@ -26,15 +26,14 @@ type:
 |	tnAnnots+=annotation* '{' tnKeyType=type ':' tnValueType=type '}'															#mapType
 |	tnAnnots+=annotation* 'var'																									#varType
 |	tnAnnots+=annotation* 'const' tnType=type																					#constType
-|	tnExpr=expr tnLookup+=typeMemberItem* '.' tnAnnots+=annotation* tnName=WORD tnTemplate=templateDecls?						#memberType
-|	tnAnnots+=annotation* tnName=WORD tnTemplate=templateDecls?																	#basicType
+|	(tnLookup+=typeMemberItem '.')* tnLookup+=typeMemberItem																	#basicType
 ;
 types:
 	tnType=type										#singleTypes
 |	'(' (tnTypes+=type (',' tnTypes+=type)*)? ')'	#multiTypes
 |	'void'											#voidTypes
 ;
-typeMemberItem: ('.'|'?.') tnAnnots+=annotation* tnName=WORD tnTemplate=templateArgs?;
+typeMemberItem: tnAnnots+=annotation* tnName=WORD tnTemplate=templateArgs?;
 
 expr:
 	tnLhs=expr tnLookup+=memberItem* (tnOp='.'|tnOp='?.') tnAnnots+=annotation* tnValue=WORD												#memberExpr

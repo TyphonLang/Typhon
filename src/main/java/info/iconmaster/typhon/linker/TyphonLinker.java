@@ -72,30 +72,25 @@ public class TyphonLinker {
 			PackageImport i = (PackageImport) toResolve;
 			
 			Package base = i.getParent();
-			String baseName = i.getPackageName().get(0);
 			outOfLoop: {
 				while (base != null) {
-					for (Package p : base.getSubpackges()) {
-						if (baseName.equals(p.getName())) {
-							List<Package> matches = new ArrayList<>();
-							matches.add(base);
-							
-							for (String s : i.getPackageName()) {
-								List<Package> newMatches = new ArrayList<>();
-								
-								for (Package match : matches) {
-									newMatches.addAll(match.getSubpackagesWithName(s));
-								}
-								
-								matches = newMatches;
-							}
-							
-							if (!matches.isEmpty()) {
-								i.getResolvedTo().addAll(matches);
-								i.isResolved(true);
-								break outOfLoop;
-							}
+					List<Package> matches = new ArrayList<>();
+					matches.add(base);
+					
+					for (String s : i.getPackageName()) {
+						List<Package> newMatches = new ArrayList<>();
+						
+						for (Package match : matches) {
+							newMatches.addAll(match.getSubpackagesWithName(s));
 						}
+						
+						matches = newMatches;
+					}
+					
+					if (!matches.isEmpty()) {
+						i.getResolvedTo().addAll(matches);
+						i.isResolved(true);
+						break outOfLoop;
 					}
 					
 					base = base.getParent();

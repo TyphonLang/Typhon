@@ -12,7 +12,10 @@ import info.iconmaster.typhon.antlr.TyphonParser.FuncTypeContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MapTypeContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TemplateArgContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
+import info.iconmaster.typhon.antlr.TyphonParser.TypeMemberItemContext;
 import info.iconmaster.typhon.antlr.TyphonParser.VarTypeContext;
+import info.iconmaster.typhon.errors.AmbiguousTypeError;
+import info.iconmaster.typhon.errors.TypeNotFoundError;
 import info.iconmaster.typhon.model.Annotation;
 import info.iconmaster.typhon.model.Field;
 import info.iconmaster.typhon.model.Function;
@@ -198,8 +201,41 @@ public class TyphonTypeResolver {
 			ref.isConst(true);
 			return ref;
 		} else if (rule instanceof BasicTypeContext) {
-			// TODO
-			return null;
+			MemberAccess base = lookup;
+			
+			while (base != null) {
+				List<MemberAccess> matches = new ArrayList<>();
+				matches.add(base);
+				
+				for (TypeMemberItemContext name : ((BasicTypeContext) rule).tnLookup) {
+					List<MemberAccess> newMatches = new ArrayList<>();
+					
+					for (MemberAccess match : matches) {
+						newMatches.addAll(match.getMembers(name.tnName.getText()));
+					}
+					
+					matches = newMatches;
+				}
+				
+				List<Type> candidates = matches.stream().filter((e)->e instanceof Type).map((e)->(Type)e).collect(Collectors.toList());
+				if (!candidates.isEmpty()) {
+					if (candidates.size() != 1) {
+						tni.errors.add(new AmbiguousTypeError(((BasicTypeContext) rule).tnLookup, candidates));
+						return new TypeRef(tni.corePackage.TYPE_ANY);
+					}
+					
+					TypeMemberItemContext lastLookup = ((BasicTypeContext) rule).tnLookup.get(((BasicTypeContext) rule).tnLookup.size()-1);
+					
+					TypeRef ref = new TypeRef(new SourceInfo(rule), candidates.get(0));
+					if (lastLookup.tnTemplate != null) ref.getTemplateArgs().addAll(readTemplateArgs(tni, lastLookup.tnTemplate.tnArgs, lookup));
+					return ref;
+				}
+				
+				base = base.getParent();
+			}
+			
+			tni.errors.add(new TypeNotFoundError(((BasicTypeContext) rule).tnLookup));
+			return new TypeRef(tni.corePackage.TYPE_ANY);
 		} else {
 			throw new IllegalArgumentException("Unknown subclass of TypeContext");
 		}

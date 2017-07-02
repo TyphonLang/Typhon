@@ -172,7 +172,7 @@ public class Package extends TyphonModelEntity implements MemberAccess {
 	 * @return The list of child packages.
 	 */
 	public List<Package> getSubpackagesWithName(String name) {
-		return subpackages.get(name);
+		return subpackages.containsKey(name) ? subpackages.get(name) : new ArrayList<>();
 	}
 
 	/**
@@ -244,7 +244,7 @@ public class Package extends TyphonModelEntity implements MemberAccess {
 	 * @return The list of functions.
 	 */
 	public List<Function> getFunctionsWithName(String name) {
-		return functions.get(name);
+		return functions.containsKey(name) ? functions.get(name) : new ArrayList<>();
 	}
 
 	/**
@@ -445,7 +445,7 @@ public class Package extends TyphonModelEntity implements MemberAccess {
 	 * @return The list of annotation definitions.
 	 */
 	public List<AnnotationDefinition> getAnnotDefsWithName(String name) {
-		return definedAnnots.get(name);
+		return definedAnnots.containsKey(name) ? definedAnnots.get(name) : new ArrayList<>();
 	}
 
 	/**

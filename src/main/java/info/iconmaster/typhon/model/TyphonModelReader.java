@@ -326,7 +326,7 @@ public class TyphonModelReader {
 			f.getParams().addAll(readParams(tni, rule.tnArgs.tnArgs));
 		}
 		if (rule.tnTemplate != null) {
-			f.getTemplate().addAll(readTemplateParams(tni, rule.tnTemplate.tnArgs));
+			f.getMemberTemplate().addAll(readTemplateParams(tni, rule.tnTemplate.tnArgs));
 		}
 		
 		if (rule.tnExprForm == null && rule.tnStubForm == null) {

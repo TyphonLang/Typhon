@@ -1,6 +1,9 @@
 package info.iconmaster.typhon.types;
 
+import java.util.List;
+
 import info.iconmaster.typhon.TyphonInput;
+import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.model.Package;
 import info.iconmaster.typhon.model.TyphonModelEntity;
 import info.iconmaster.typhon.util.SourceInfo;
@@ -11,7 +14,7 @@ import info.iconmaster.typhon.util.SourceInfo;
  * @author iconmaster
  *
  */
-public abstract class Type extends TyphonModelEntity {
+public abstract class Type extends TyphonModelEntity implements MemberAccess {
 	/**
 	 * The package that contains methods, fields, etc. for this type.
 	 * 
@@ -76,5 +79,10 @@ public abstract class Type extends TyphonModelEntity {
 		super.markAsLibrary();
 		
 		getTypePackage().markAsLibrary();
+	}
+	
+	@Override
+	public List<MemberAccess> getMembers() {
+		return getTypePackage().getMembers();
 	}
 }

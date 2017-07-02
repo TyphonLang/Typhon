@@ -5,6 +5,7 @@ import java.util.List;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.model.Argument;
+import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.model.TyphonModelEntity;
 import info.iconmaster.typhon.util.SourceInfo;
 
@@ -23,7 +24,7 @@ public class EnumType extends UserType {
 	 * @author iconmaster
 	 *
 	 */
-	public static class EnumChoice extends TyphonModelEntity {
+	public static class EnumChoice extends TyphonModelEntity implements MemberAccess {
 		/**
 		 * The choice's name. Must be a valid Typhon identifier.
 		 */
@@ -71,6 +72,11 @@ public class EnumType extends UserType {
 		public EnumType getParent() {
 			return parent;
 		}
+		
+		@Override
+		public List<MemberAccess> getMembers() {
+			return parent.getMembers();
+		}
 	}
 	
 	/**
@@ -99,5 +105,14 @@ public class EnumType extends UserType {
 	 */
 	public List<EnumChoice> getChoices() {
 		return choices;
+	}
+	
+	@Override
+	public List<MemberAccess> getMembers() {
+		List<MemberAccess> a = super.getMembers();
+		
+		a.addAll(getChoices());
+		
+		return a;
 	}
 }

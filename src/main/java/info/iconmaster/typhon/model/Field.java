@@ -1,5 +1,8 @@
 package info.iconmaster.typhon.model;
 
+import java.util.Arrays;
+import java.util.List;
+
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
@@ -13,7 +16,7 @@ import info.iconmaster.typhon.util.SourceInfo;
  * @author iconmaster
  *
  */
-public class Field extends TyphonModelEntity {
+public class Field extends TyphonModelEntity implements MemberAccess {
 	/**
 	 * The name of this field. Must be a valid Typhon identifier.
 	 */
@@ -133,5 +136,14 @@ public class Field extends TyphonModelEntity {
 	 */
 	public void setParent(Package parent) {
 		this.parent = parent;
+	}
+	
+	@Override
+	public List<MemberAccess> getMembers() {
+		if (type == null) {
+			return Arrays.asList();
+		}
+		
+		return type.getMembers();
 	}
 }

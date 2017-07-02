@@ -16,7 +16,7 @@ import info.iconmaster.typhon.util.SourceInfo;
  * @author iconmaster
  *
  */
-public class Package extends TyphonModelEntity {
+public class Package extends TyphonModelEntity implements MemberAccess {
 	/**
 	 * This package's parent.
 	 */
@@ -152,6 +152,7 @@ public class Package extends TyphonModelEntity {
 	 * Lists the child packages.
 	 * Note that multiple packages may have the same name.
 	 * Do not modify the list this function returns!
+	 * This DOES NOT take into account imports.
 	 * 
 	 * @return The list of child packages.
 	 */
@@ -165,6 +166,7 @@ public class Package extends TyphonModelEntity {
 	/**
 	 * Lists the child packages with a given name.
 	 * Do not modify the list this function returns!
+	 * This DOES NOT take into account imports.
 	 * 
 	 * @param name
 	 * @return The list of child packages.
@@ -222,6 +224,7 @@ public class Package extends TyphonModelEntity {
 	 * Lists the available functions.
 	 * Note that multiple functions may have the same name.
 	 * Do not modify the list this function returns!
+	 * This DOES NOT take into account imports.
 	 * 
 	 * @return The list of functions.
 	 */
@@ -235,6 +238,7 @@ public class Package extends TyphonModelEntity {
 	/**
 	 * Lists the available functions with a certain name.
 	 * Do not modify the list this function returns!
+	 * This DOES NOT take into account imports.
 	 * 
 	 * @param name
 	 * @return The list of functions.
@@ -271,6 +275,7 @@ public class Package extends TyphonModelEntity {
 	/**
 	 * Lists the available fields.
 	 * Do not modify the list this function returns!
+	 * This DOES NOT take into account imports.
 	 * 
 	 * @return The list of fields.
 	 */
@@ -280,6 +285,7 @@ public class Package extends TyphonModelEntity {
 
 	/**
 	 * Gets a field with a certain name.
+	 * This DOES NOT take into account imports.
 	 * 
 	 * @param name
 	 * @return A field with the given name.
@@ -322,6 +328,7 @@ public class Package extends TyphonModelEntity {
 	/**
 	 * Lists the available types.
 	 * Do not modify the list this function returns!
+	 * This DOES NOT take into account imports.
 	 * 
 	 * @return The list of types.
 	 */
@@ -331,6 +338,7 @@ public class Package extends TyphonModelEntity {
 	
 	/**
 	 * Gets a type with a certain name.
+	 * This DOES NOT take into account imports.
 	 * 
 	 * @param name
 	 * @return A type.
@@ -366,6 +374,8 @@ public class Package extends TyphonModelEntity {
 	/**
 	 * Lists the imports.
 	 * Do not modify the list this function returns!
+	 * This DOES NOT take into account imports.
+	 * 
 	 * @return
 	 */
 	public List<Import> getImports() {
@@ -415,6 +425,7 @@ public class Package extends TyphonModelEntity {
 	 * Lists the available annotation definitions.
 	 * Note that multiple annotation definitions may have the same name.
 	 * Do not modify the list this function returns!
+	 * This DOES NOT take into account imports.
 	 * 
 	 * @return The list of annotation definitions.
 	 */
@@ -428,6 +439,7 @@ public class Package extends TyphonModelEntity {
 	/**
 	 * Lists the available annotation definitions with a certain name.
 	 * Do not modify the list this function returns!
+	 * This DOES NOT take into account imports.
 	 * 
 	 * @param name
 	 * @return The list of annotation definitions.
@@ -463,6 +475,7 @@ public class Package extends TyphonModelEntity {
 	/**
 	 * Lists the static init blocks.
 	 * Do not modify the list this function returns!
+	 * This DOES NOT take into account imports.
 	 * 
 	 * @return
 	 */
@@ -480,5 +493,23 @@ public class Package extends TyphonModelEntity {
 		getTypes().stream().forEach((e)->e.markAsLibrary());
 		getImports().stream().forEach((e)->e.markAsLibrary());
 		getStaticInitBlocks().stream().forEach((e)->e.markAsLibrary());
+	}
+	
+	@Override
+	public List<MemberAccess> getMembers() {
+		ArrayList<MemberAccess> a = new ArrayList<>();
+		
+		a.addAll(getSubpackges());
+		a.addAll(getFunctions());
+		a.addAll(getFields());
+		a.addAll(getTypes());
+		
+		for (Import i : getImports()) {
+			for (Package p : i.getResolvedTo()) {
+				a.addAll(p.getMembers());
+			}
+		}
+		
+		return a;
 	}
 }

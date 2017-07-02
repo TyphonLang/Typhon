@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
+import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.util.SourceInfo;
 
 /**
@@ -104,5 +105,21 @@ public class UserType extends Type {
 		super.setRawData();
 		getTypePackage().setRawData();
 		this.rawParentTypes = rawParentTypes;
+	}
+	
+	@Override
+	public List<MemberAccess> getMembers() {
+		List<MemberAccess> a = super.getMembers();
+		
+		for (TypeRef t : getParentTypes()) {
+			a.addAll(t.getMembers());
+		}
+		
+		return a;
+	}
+	
+	@Override
+	public List<TemplateType> getMemberTemplate() {
+		return getTemplates();
 	}
 }

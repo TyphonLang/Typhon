@@ -1,6 +1,7 @@
 package info.iconmaster.typhon.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -21,7 +22,7 @@ import info.iconmaster.typhon.util.SourceInfo;
  * @author iconmaster
  *
  */
-public class Function extends TyphonModelEntity {
+public class Function extends TyphonModelEntity implements MemberAccess {
 	/**
 	 * The name of this function.
 	 * Must be a valid Typhon identifier.
@@ -117,7 +118,7 @@ public class Function extends TyphonModelEntity {
 	/**
 	 * @return The template parameters for this function.
 	 */
-	public List<TemplateType> getTemplate() {
+	public List<TemplateType> getMemberTemplate() {
 		return template;
 	}
 

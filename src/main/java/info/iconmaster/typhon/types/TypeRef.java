@@ -1,9 +1,11 @@
 package info.iconmaster.typhon.types;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import info.iconmaster.typhon.TyphonInput;
+import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.model.TemplateArgument;
 import info.iconmaster.typhon.model.TyphonModelEntity;
 import info.iconmaster.typhon.util.SourceInfo;
@@ -14,7 +16,7 @@ import info.iconmaster.typhon.util.SourceInfo;
  * @author iconmaster
  *
  */
-public class TypeRef extends TyphonModelEntity {
+public class TypeRef extends TyphonModelEntity implements MemberAccess {
 	/**
 	 * The type definition of this reference.
 	 */
@@ -63,5 +65,23 @@ public class TypeRef extends TyphonModelEntity {
 	 */
 	public List<TemplateArgument> getTemplateArgs() {
 		return templateArgs;
+	}
+	
+	@Override
+	public List<MemberAccess> getMembers() {
+		if (type == null) {
+			return Arrays.asList();
+		}
+		
+		return type.getMembers();
+	}
+	
+	@Override
+	public String getName() {
+		if (type == null) {
+			return null;
+		}
+		
+		return type.getName();
 	}
 }

@@ -1,7 +1,6 @@
 package info.iconmaster.typhon.model;
 
 import info.iconmaster.typhon.TyphonInput;
-import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.util.SourceInfo;
 
@@ -25,17 +24,22 @@ public class TemplateArgument extends TyphonModelEntity {
 	 */
 	private TypeRef value;
 
-	/**
-	 * The ANTLR rule corresponding to the value.
-	 */
-	private TypeContext rawValue;
-
 	public TemplateArgument(TyphonInput input) {
 		super(input);
 	}
 
 	public TemplateArgument(TyphonInput input, SourceInfo source) {
 		super(input, source);
+	}
+	
+	public TemplateArgument(TypeRef value) {
+		super(value.tni);
+		this.value = value;
+	}
+	
+	public TemplateArgument(SourceInfo source, TypeRef value) {
+		super(value.tni, source);
+		this.value = value;
 	}
 
 	/**
@@ -64,22 +68,5 @@ public class TemplateArgument extends TyphonModelEntity {
 	 */
 	public void setValue(TypeRef value) {
 		this.value = value;
-	}
-
-	/**
-	 * Sets the raw ANTLR data for this annotation.
-	 * 
-	 * @param rawValue The ANTLR rule corresponding to the value.
-	 */
-	public void setRawData(TypeContext rawValue) {
-		super.setRawData();
-		this.rawValue = rawValue;
-	}
-
-	/**
-	 * @return The ANTLR rule corresponding to the value.
-	 */
-	public TypeContext getRawValue() {
-		return rawValue;
 	}
 }

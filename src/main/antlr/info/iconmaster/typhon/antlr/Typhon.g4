@@ -21,7 +21,7 @@ constructorParam:
 ;
 
 type:
-	tnAnnots+=annotation* tnTemplate=templateDecls? '(' (tnArgTypes+=type (',' tnArgTypes+=type)*)? ')' '->' tnRetType=types	#funcType
+	tnAnnots+=annotation* tnTemplate=templateArgs? '(' (tnArgTypes+=type (',' tnArgTypes+=type)*)? ')' '->' tnRetType=types		#funcType
 |	tnAnnots+=annotation* '[' tnBaseType=type ']'																				#arrayType
 |	tnAnnots+=annotation* '{' tnKeyType=type ':' tnValueType=type '}'															#mapType
 |	tnAnnots+=annotation* 'var'																									#varType

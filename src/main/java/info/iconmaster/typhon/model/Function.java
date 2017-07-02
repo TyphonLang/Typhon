@@ -118,7 +118,7 @@ public class Function extends TyphonModelEntity implements MemberAccess {
 	/**
 	 * @return The template parameters for this function.
 	 */
-	public List<TemplateType> getMemberTemplate() {
+	public List<TemplateType> getTemplate() {
 		return template;
 	}
 
@@ -197,5 +197,10 @@ public class Function extends TyphonModelEntity implements MemberAccess {
 	 */
 	public void setParent(Package parent) {
 		this.parent = parent;
+	}
+	
+	@Override
+	public List<TemplateType> getMemberTemplate() {
+		return getTemplate();
 	}
 }

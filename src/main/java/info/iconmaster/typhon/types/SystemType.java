@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import info.iconmaster.typhon.TyphonInput;
+import info.iconmaster.typhon.model.MemberAccess;
 
 /**
  * These types are created by the system.
@@ -63,5 +64,16 @@ public class SystemType extends Type {
 	 */
 	public List<TypeRef> getParentTypes() {
 		return parentTypes;
+	}
+	
+	@Override
+	public List<MemberAccess> getMembers() {
+		List<MemberAccess> a = super.getMembers();
+		
+		for (TypeRef t : getParentTypes()) {
+			a.addAll(t.getMembers());
+		}
+		
+		return a;
 	}
 }

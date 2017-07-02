@@ -37,7 +37,7 @@ public class TestFunctionReader extends TyphonTest {
 		return TyphonTest.makeData(new CaseValid("void f() {}", (f)->{
 			Assert.assertEquals("f", f.getName());
 			Assert.assertEquals(0, f.getParams().size());
-			Assert.assertEquals(0, f.getMemberTemplate().size());
+			Assert.assertEquals(0, f.getTemplate().size());
 			Assert.assertEquals(0, f.getRawRetType().size());
 			
 			Assert.assertEquals(Function.Form.BLOCK, f.getForm());
@@ -45,7 +45,7 @@ public class TestFunctionReader extends TyphonTest {
 		}),new CaseValid("void f() => ()", (f)->{
 			Assert.assertEquals("f", f.getName());
 			Assert.assertEquals(0, f.getParams().size());
-			Assert.assertEquals(0, f.getMemberTemplate().size());
+			Assert.assertEquals(0, f.getTemplate().size());
 			Assert.assertEquals(0, f.getRawRetType().size());
 			
 			Assert.assertEquals(Function.Form.EXPR, f.getForm());
@@ -53,7 +53,7 @@ public class TestFunctionReader extends TyphonTest {
 		}),new CaseValid("int f() {}", (f)->{
 			Assert.assertEquals("f", f.getName());
 			Assert.assertEquals(0, f.getParams().size());
-			Assert.assertEquals(0, f.getMemberTemplate().size());
+			Assert.assertEquals(0, f.getTemplate().size());
 			Assert.assertEquals(1, f.getRawRetType().size());
 			
 			Assert.assertEquals(Function.Form.BLOCK, f.getForm());
@@ -61,7 +61,7 @@ public class TestFunctionReader extends TyphonTest {
 		}),new CaseValid("(int,int) f() {}", (f)->{
 			Assert.assertEquals("f", f.getName());
 			Assert.assertEquals(0, f.getParams().size());
-			Assert.assertEquals(0, f.getMemberTemplate().size());
+			Assert.assertEquals(0, f.getTemplate().size());
 			Assert.assertEquals(2, f.getRawRetType().size());
 			
 			Assert.assertEquals(Function.Form.BLOCK, f.getForm());
@@ -69,7 +69,7 @@ public class TestFunctionReader extends TyphonTest {
 		}),new CaseValid("void f(var x) {}", (f)->{
 			Assert.assertEquals("f", f.getName());
 			Assert.assertEquals(1, f.getParams().size());
-			Assert.assertEquals(0, f.getMemberTemplate().size());
+			Assert.assertEquals(0, f.getTemplate().size());
 			Assert.assertEquals(0, f.getRawRetType().size());
 			
 			Assert.assertEquals(Function.Form.BLOCK, f.getForm());
@@ -80,7 +80,7 @@ public class TestFunctionReader extends TyphonTest {
 		}),new CaseValid("void f(var x, var y, var z) {}", (f)->{
 			Assert.assertEquals("f", f.getName());
 			Assert.assertEquals(3, f.getParams().size());
-			Assert.assertEquals(0, f.getMemberTemplate().size());
+			Assert.assertEquals(0, f.getTemplate().size());
 			Assert.assertEquals(0, f.getRawRetType().size());
 			
 			Assert.assertEquals(Function.Form.BLOCK, f.getForm());
@@ -97,18 +97,18 @@ public class TestFunctionReader extends TyphonTest {
 		}),new CaseValid("void f<T>() {}", (f)->{
 			Assert.assertEquals("f", f.getName());
 			Assert.assertEquals(0, f.getParams().size());
-			Assert.assertEquals(1, f.getMemberTemplate().size());
+			Assert.assertEquals(1, f.getTemplate().size());
 			Assert.assertEquals(0, f.getRawRetType().size());
 			
 			Assert.assertEquals(Function.Form.BLOCK, f.getForm());
 			Assert.assertEquals(0, f.getRawCode().size());
 			
-			TemplateType t = f.getMemberTemplate().get(0);
+			TemplateType t = f.getTemplate().get(0);
 			Assert.assertEquals("T", t.getName());
 		}),new CaseValid("void f<K,V>() {}", (f)->{
 			Assert.assertEquals("f", f.getName());
 			Assert.assertEquals(0, f.getParams().size());
-			Assert.assertEquals(2, f.getMemberTemplate().size());
+			Assert.assertEquals(2, f.getTemplate().size());
 			Assert.assertEquals(0, f.getRawRetType().size());
 			
 			Assert.assertEquals(Function.Form.BLOCK, f.getForm());
@@ -116,20 +116,20 @@ public class TestFunctionReader extends TyphonTest {
 			
 			TemplateType t;
 			
-			t = f.getMemberTemplate().get(0);
+			t = f.getTemplate().get(0);
 			Assert.assertEquals("K", t.getName());
-			t = f.getMemberTemplate().get(1);
+			t = f.getTemplate().get(1);
 			Assert.assertEquals("V", t.getName());
 		}),new CaseValid("void f<T:a=b>() {}", (f)->{
 			Assert.assertEquals("f", f.getName());
 			Assert.assertEquals(0, f.getParams().size());
-			Assert.assertEquals(1, f.getMemberTemplate().size());
+			Assert.assertEquals(1, f.getTemplate().size());
 			Assert.assertEquals(0, f.getRawRetType().size());
 			
 			Assert.assertEquals(Function.Form.BLOCK, f.getForm());
 			Assert.assertEquals(0, f.getRawCode().size());
 			
-			TemplateType t = f.getMemberTemplate().get(0);
+			TemplateType t = f.getTemplate().get(0);
 			Assert.assertEquals("T", t.getName());
 			
 			Assert.assertNotNull(t.getRawBaseType());
@@ -139,7 +139,7 @@ public class TestFunctionReader extends TyphonTest {
 		}),new CaseConstructorValid("new() {}", (f)->{
 			Assert.assertEquals("new", f.getName());
 			Assert.assertEquals(0, f.getParams().size());
-			Assert.assertEquals(0, f.getMemberTemplate().size());
+			Assert.assertEquals(0, f.getTemplate().size());
 			Assert.assertNull(f.getRawRetType());
 			
 			Assert.assertEquals(Function.Form.BLOCK, f.getForm());
@@ -147,7 +147,7 @@ public class TestFunctionReader extends TyphonTest {
 		}),new CaseConstructorValid("new(var a) {}", (f)->{
 			Assert.assertEquals("new", f.getName());
 			Assert.assertEquals(1, f.getParams().size());
-			Assert.assertEquals(0, f.getMemberTemplate().size());
+			Assert.assertEquals(0, f.getTemplate().size());
 			Assert.assertNull(f.getRawRetType());
 			
 			Assert.assertEquals(Function.Form.BLOCK, f.getForm());
@@ -159,7 +159,7 @@ public class TestFunctionReader extends TyphonTest {
 		}),new CaseConstructorValid("new(this.a) {}", (f)->{
 			Assert.assertEquals("new", f.getName());
 			Assert.assertEquals(1, f.getParams().size());
-			Assert.assertEquals(0, f.getMemberTemplate().size());
+			Assert.assertEquals(0, f.getTemplate().size());
 			Assert.assertNull(f.getRawRetType());
 			
 			Assert.assertEquals(Function.Form.BLOCK, f.getForm());
@@ -171,7 +171,7 @@ public class TestFunctionReader extends TyphonTest {
 		}),new CaseConstructorValid("new(var a, this.b, var c) {}", (f)->{
 			Assert.assertEquals("new", f.getName());
 			Assert.assertEquals(3, f.getParams().size());
-			Assert.assertEquals(0, f.getMemberTemplate().size());
+			Assert.assertEquals(0, f.getTemplate().size());
 			Assert.assertNull(f.getRawRetType());
 			
 			Assert.assertEquals(Function.Form.BLOCK, f.getForm());
@@ -193,7 +193,7 @@ public class TestFunctionReader extends TyphonTest {
 		}),new CaseConstructorValid("new(var @a a = 1, @b this.b = 2, var @c c = 3) {}", (f)->{
 			Assert.assertEquals("new", f.getName());
 			Assert.assertEquals(3, f.getParams().size());
-			Assert.assertEquals(0, f.getMemberTemplate().size());
+			Assert.assertEquals(0, f.getTemplate().size());
 			Assert.assertNull(f.getRawRetType());
 			
 			Assert.assertEquals(Function.Form.BLOCK, f.getForm());

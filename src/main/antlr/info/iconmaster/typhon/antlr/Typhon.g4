@@ -40,7 +40,7 @@ expr:
 |	tnLhs=expr '::' tnValue=WORD tnTemplate=templateArgs? '(' (tnFuncPtrArg+=templateArg (',' tnFuncPtrArg+=templateArg)*)? ')'				#funcPtrExpr
 |	tnCallee=expr tnAnnots+=annotation* tnTemplate=templateArgs? '(' tnArgs=argsDecl ')'													#funcCallExpr
 |	tnCallee=expr tnAnnots+=annotation* tnTemplate=templateArgs? '[' tnArgs=argsDecl ']'													#indexCallExpr
-|	tnLhs=expr 'as' tnRhs=type																												#castExpr
+|	tnLhs=expr (tnOp='as'|tnOp='as?') tnRhs=type																							#castExpr
 |	tnAnnots+=annotation* 'new' tnType=type '(' tnArgs=argsDecl ')' ('{' tnDecls+=decl* '}')?												#newExpr
 |	tnAnnots+=annotation* (tnOp='-'|tnOp='+'|tnOp='!'|tnOp='~') tnArg=expr																	#unOpsExpr
 |	tnLhs=expr (tnOp='*'|tnOp='/'|tnOp='%') tnRhs=expr																						#binOps1Expr

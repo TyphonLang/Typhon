@@ -193,6 +193,10 @@ public class TestGrammar extends TyphonTest {
 			new CaseValid("a as int as long", (parser)->{parser.expr();}),
 			new CaseValid("(a+b) as int", (parser)->{parser.expr();}),
 			new CaseInvalid("a as 3", (parser)->{parser.expr();}),
+			new CaseValid("a as? int", (parser)->{parser.expr();}),
+			new CaseValid("a as? int as long", (parser)->{parser.expr();}),
+			new CaseValid("(a+b) as? int", (parser)->{parser.expr();}),
+			new CaseInvalid("a as? 3", (parser)->{parser.expr();}),
 			//newExpr
 			new CaseValid("new int()", (parser)->{parser.expr();}),
 			new CaseValid("new int(a)", (parser)->{parser.expr();}),

@@ -25,12 +25,24 @@ public class CorePackage extends Package {
 	/**
 	 * Constants for built-in types.
 	 */
-	public UserType TYPE_NUMBER, TYPE_LIST, TYPE_MAP;
+	public UserType TYPE_NUMBER, TYPE_INTEGER, TYPE_REAL, TYPE_LIST, TYPE_MAP;
 	
 	/**
 	 * Constants for built-in types.
 	 */
-	public SystemType TYPE_INT;
+	public SystemType TYPE_BYTE, TYPE_SHORT, TYPE_INT, TYPE_LONG, TYPE_UBYTE, TYPE_USHORT, TYPE_UINT, TYPE_ULONG, TYPE_CHAR, TYPE_BOOL, TYPE_STRING, TYPE_FLOAT, TYPE_DOUBLE;
+	
+	private UserType makeUserType(String name, Type parent) {
+		UserType type = new UserType(name, parent);
+		addType(type);
+		return type;
+	}
+	
+	private SystemType makeSystemType(String name, Type parent) {
+		SystemType type = new SystemType(name, parent);
+		addType(type);
+		return type;
+	}
 	
 	public CorePackage(TyphonInput tni) {
 		super(tni, "core");
@@ -39,23 +51,31 @@ public class CorePackage extends Package {
 		tni.corePackage = this;
 		
 		// form the core type tree
-		TYPE_ANY = new AnyType(tni);
-		addType(TYPE_ANY);
+		TYPE_ANY = new AnyType(tni); addType(TYPE_ANY);
 		
-		TYPE_NUMBER = new UserType("Number", TYPE_ANY);
-		addType(TYPE_NUMBER);
+		TYPE_NUMBER = makeUserType("Number", TYPE_ANY);
+		TYPE_INTEGER = makeUserType("Integer", TYPE_NUMBER);
+		TYPE_REAL = makeUserType("Real", TYPE_NUMBER);
 		
-		TYPE_INT = new SystemType("int", TYPE_NUMBER);
-		addType(TYPE_INT);
+		TYPE_BYTE = makeSystemType("byte", TYPE_INTEGER);
+		TYPE_SHORT = makeSystemType("short", TYPE_INTEGER);
+		TYPE_INT = makeSystemType("int", TYPE_INTEGER);
+		TYPE_LONG = makeSystemType("long", TYPE_INTEGER);
+		TYPE_UBYTE = makeSystemType("ubyte", TYPE_INTEGER);
+		TYPE_USHORT = makeSystemType("ushort", TYPE_INTEGER);
+		TYPE_UINT = makeSystemType("uint", TYPE_INTEGER);
+		TYPE_ULONG = makeSystemType("ulong", TYPE_INTEGER);
+		TYPE_CHAR = makeSystemType("char", TYPE_INTEGER);
+		TYPE_FLOAT = makeSystemType("float", TYPE_REAL);
+		TYPE_DOUBLE = makeSystemType("double", TYPE_REAL);
+		TYPE_STRING = makeSystemType("string", TYPE_ANY);
 		
-		TYPE_LIST = new UserType("List", TYPE_ANY);
+		TYPE_LIST = makeUserType("List", TYPE_ANY);
 		TYPE_LIST.getTemplates().add(new TemplateType(tni, "T"));
-		addType(TYPE_LIST);
 		
-		TYPE_MAP = new UserType("Map", TYPE_ANY);
+		TYPE_MAP = makeUserType("Map", TYPE_ANY);
 		TYPE_MAP.getTemplates().add(new TemplateType(tni, "K"));
 		TYPE_MAP.getTemplates().add(new TemplateType(tni, "V"));
-		addType(TYPE_MAP);
 	}
 	
 	/**

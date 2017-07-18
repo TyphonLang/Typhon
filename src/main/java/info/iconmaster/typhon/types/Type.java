@@ -85,4 +85,17 @@ public abstract class Type extends TyphonModelEntity implements MemberAccess {
 	public List<MemberAccess> getMembers() {
 		return getTypePackage().getMembers();
 	}
+	
+	/**
+	 * This is called by {@link TypeRef} to check for casting.
+	 * Returns true if <tt>a</tt> can be safely converted to <tt>b</tt>.
+	 * If canCastTo(a, b), then a is a subtype of b.
+	 * 
+	 * @param a A type. <tt>a.getType()</tt> must be equal to <tt>this</tt>.
+	 * @param b Another type.
+	 * @return True if <tt>a</tt> can be safely converted to <tt>b</tt>.
+	 */
+	public boolean canCastTo(TypeRef a, TypeRef b) {
+		return a.equals(b);
+	}
 }

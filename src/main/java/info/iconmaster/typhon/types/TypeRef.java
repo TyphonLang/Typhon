@@ -127,4 +127,46 @@ public class TypeRef extends TyphonModelEntity implements MemberAccess {
 	public MemberAccess getParent() {
 		return type.getParent();
 	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((templateArgs == null) ? 0 : templateArgs.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		return result;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		TypeRef other = (TypeRef) obj;
+		if (templateArgs == null) {
+			if (other.templateArgs != null)
+				return false;
+		} else if (!templateArgs.equals(other.templateArgs))
+			return false;
+		if (type == null) {
+			if (other.type != null)
+				return false;
+		} else if (!type.equals(other.type))
+			return false;
+		return true;
+	}
+
+	/**
+	 * Returns true if this type can be safely converted to the specified type.
+	 * If a.canCastTo(b), then a is a subtype of b.
+	 * 
+	 * @param other The type to check.
+	 * @return True if this type can be safely converted to the specified type.
+	 */
+	public boolean canCastTo(TypeRef other) {
+		return this.type.canCastTo(this, other);
+	}
 }

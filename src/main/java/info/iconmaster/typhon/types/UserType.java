@@ -139,7 +139,8 @@ public class UserType extends Type {
 	@Override
 	public boolean canCastTo(TypeRef a, TypeRef b) {
 		for (TypeRef parent : ((UserType)a.getType()).getParentTypes()) {
-			if (parent.canCastTo(b)) {
+			TypeRef trueParent = TemplateUtils.replaceTemplates(parent, TemplateUtils.matchTemplateArgs(a, getTemplates(), a.getTemplateArgs()));
+			if (trueParent.canCastTo(b)) {
 				return true;
 			}
 		}

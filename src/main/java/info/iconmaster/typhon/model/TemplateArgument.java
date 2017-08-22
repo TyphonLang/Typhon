@@ -1,6 +1,7 @@
 package info.iconmaster.typhon.model;
 
 import info.iconmaster.typhon.TyphonInput;
+import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.util.SourceInfo;
 
@@ -30,6 +31,11 @@ public class TemplateArgument extends TyphonModelEntity {
 
 	public TemplateArgument(TyphonInput input, SourceInfo source) {
 		super(input, source);
+	}
+	
+	public TemplateArgument(Type value) {
+		super(value.tni);
+		this.value = new TypeRef(value);
 	}
 	
 	public TemplateArgument(TypeRef value) {

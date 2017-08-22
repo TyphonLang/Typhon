@@ -46,14 +46,15 @@ public class TypeRef extends TyphonModelEntity implements MemberAccess {
 		super(tni, source);
 	}
 	
-	public TypeRef(Type type) {
-		super(type.tni, type.source);
-		this.type = type;
-	}
-	
 	public TypeRef(SourceInfo source, Type type) {
 		super(type.tni, source);
 		this.type = type;
+	}
+	
+	public TypeRef(Type type, TemplateArgument... args) {
+		super(type.tni, type.source);
+		this.type = type;
+		getTemplateArgs().addAll(Arrays.asList(args));
 	}
 
 	/**

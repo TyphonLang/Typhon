@@ -9,6 +9,7 @@ import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.TyphonTest;
 import info.iconmaster.typhon.linker.TyphonLinker;
 import info.iconmaster.typhon.model.CorePackage;
+import info.iconmaster.typhon.model.TemplateArgument;
 
 /**
  * Tests <tt>{@link TyphonLinker}</tt>.
@@ -22,12 +23,18 @@ public class TestCastingRules extends TyphonTest {
     	TyphonInput tni = new TyphonInput();
     	CorePackage p = tni.corePackage;
     	
+    	UserType a = new UserType(tni, "a");
+    	a.getTemplates().add(new TemplateType(tni, "T"));
+    	a.getParentTypes().add(new TypeRef(p.TYPE_LIST, new TemplateArgument(a.getTemplates().get(0))));
+    	
 		return TyphonTest.makeData(
 				new TestCase(p.TYPE_INT, p.TYPE_INT),
 				new TestCase(p.TYPE_NUMBER, p.TYPE_NUMBER),
 				new TestCase(p.TYPE_INT, p.TYPE_NUMBER),
 				new TestCase(p.TYPE_INT, p.TYPE_ANY),
 				new TestCase(p.TYPE_NUMBER, p.TYPE_ANY),
+				new TestCase(a, p.TYPE_ANY),
+				new TestCase(new TypeRef(a, new TemplateArgument(p.TYPE_INT)), new TypeRef(p.TYPE_LIST, new TemplateArgument(p.TYPE_INT))),
 				new InvalidCase(p.TYPE_ANY, p.TYPE_INT),
 				new InvalidCase(p.TYPE_NUMBER, p.TYPE_INT),
 				new InvalidCase(p.TYPE_INT, p.TYPE_FLOAT),

@@ -63,7 +63,21 @@ public class TestTypeResolver extends TyphonTest {
 			Assert.assertEquals(0, p.tni.errors.size());
 		}),new TestCase("package p {package q {class a {}}} import p; q.a x;", (p)->{
 			Assert.assertEquals(0, p.tni.errors.size());
-		}),new TestCase("<int>(int)->(int) x;", (p)->{
+		}),new TestCase("()->() x;", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+			
+			Assert.assertTrue(p.getField("x").getType().getType() instanceof FunctionType);
+			Assert.assertEquals(0, ((FunctionType)p.getField("x").getType().getType()).getArgTypes().size());
+			Assert.assertEquals(0, ((FunctionType)p.getField("x").getType().getType()).getRetTypes().size());
+			Assert.assertEquals(0, ((FunctionType)p.getField("x").getType().getType()).getTemplate().size());
+		}),new TestCase("<T>(int)->(int) x;", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+			
+			Assert.assertTrue(p.getField("x").getType().getType() instanceof FunctionType);
+			Assert.assertEquals(1, ((FunctionType)p.getField("x").getType().getType()).getArgTypes().size());
+			Assert.assertEquals(1, ((FunctionType)p.getField("x").getType().getType()).getRetTypes().size());
+			Assert.assertEquals(1, ((FunctionType)p.getField("x").getType().getType()).getTemplate().size());
+		}),new TestCase("<T>(T)->(T) x;", (p)->{
 			Assert.assertEquals(0, p.tni.errors.size());
 			
 			Assert.assertTrue(p.getField("x").getType().getType() instanceof FunctionType);

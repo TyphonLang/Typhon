@@ -128,6 +128,16 @@ public class TyphonTypeResolver {
 				// error; default value must be a subtype of the base value
 				t.tni.errors.add(new TemplateDefaultTypeError(tempType));
 			}
+		} else if (t instanceof FunctionType) {
+			FunctionType funcType = (FunctionType) t;
+			
+			for (TypeRef argType : funcType.getArgTypes()) {
+				resolve(argType.getType());
+			}
+			
+			for (TypeRef retType : funcType.getRetTypes()) {
+				resolve(retType.getType());
+			}
 		}
 		
 		resolve(t.getTypePackage());

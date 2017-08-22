@@ -9,7 +9,6 @@ import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
 import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.model.Package;
-import info.iconmaster.typhon.model.TemplateArgument;
 import info.iconmaster.typhon.util.SourceInfo;
 
 /**

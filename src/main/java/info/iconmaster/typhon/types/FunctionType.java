@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import info.iconmaster.typhon.TyphonInput;
-import info.iconmaster.typhon.model.TemplateArgument;
+import info.iconmaster.typhon.model.MemberAccess;
+import info.iconmaster.typhon.model.Package;
 import info.iconmaster.typhon.util.SourceInfo;
 
 public class FunctionType extends Type {
@@ -78,5 +79,17 @@ public class FunctionType extends Type {
 	@Override
 	public List<TemplateType> getMemberTemplate() {
 		return getTemplate();
+	}
+	
+	@Override
+	public Package getTypePackage() {
+		if (typePackage == null) {
+			typePackage = new Package(source, null, getParent() == null ? tni.corePackage : getParent());
+			for (TemplateType t : template) {
+				typePackage.addType(t);
+			}
+		}
+		
+		return typePackage;
 	}
 }

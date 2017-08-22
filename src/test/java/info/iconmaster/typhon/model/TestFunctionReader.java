@@ -1,4 +1,4 @@
-package info.iconmaster.typhon.compiler;
+package info.iconmaster.typhon.model;
 
 import java.util.Collection;
 import java.util.function.Consumer;

@@ -417,9 +417,8 @@ public class TyphonModelReader {
 			TemplateType t = new TemplateType(tni, new SourceInfo(rule), rule.tnName.getText());
 			
 			t.setRawData(rule.tnBaseType, rule.tnDefaultType);
-			
 			t.getAnnots().addAll(readAnnots(tni, rule.tnAnnots));
-			t.setRawData();
+			
 			return t;
 		}).collect(Collectors.toCollection(()->new ArrayList<>()));
 	}

@@ -1,4 +1,4 @@
-package info.iconmaster.typhon.compiler;
+package info.iconmaster.typhon.model;
 
 import java.util.Collection;
 import java.util.function.Consumer;
@@ -18,8 +18,8 @@ import info.iconmaster.typhon.antlr.TyphonParser;
 import info.iconmaster.typhon.antlr.TyphonParser.ClassDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.EnumDeclContext;
-import info.iconmaster.typhon.model.TyphonModelReader;
 import info.iconmaster.typhon.types.EnumType;
+import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.UserType;
 
 /**
@@ -44,7 +44,9 @@ public class TestClassReader extends TyphonTest {
 			Assert.assertEquals(0, t.getRawParentTypes().size());
 			Assert.assertEquals(1, t.getTemplates().size());
 			
-			Assert.assertEquals(0, t.getTypePackage().getTypes().size());
+			Assert.assertEquals(1, t.getTypePackage().getTypes().size());
+			Type tt = t.getTypePackage().getType("t");
+			Assert.assertNotNull(tt);
 		}),new CaseValid("class x : y {}", (t)->{
 			Assert.assertEquals("x", t.getName());
 			Assert.assertEquals(0, t.getAnnots().size());
@@ -65,7 +67,11 @@ public class TestClassReader extends TyphonTest {
 			Assert.assertEquals(2, t.getRawParentTypes().size());
 			Assert.assertEquals(2, t.getTemplates().size());
 			
-			Assert.assertEquals(0, t.getTypePackage().getTypes().size());
+			Assert.assertEquals(2, t.getTypePackage().getTypes().size());
+			Type tt = t.getTypePackage().getType("a");
+			Assert.assertNotNull(tt);
+			tt = t.getTypePackage().getType("b");
+			Assert.assertNotNull(tt);
 		}),new CaseValid("class x {class y {}}", (t)->{
 			Assert.assertEquals("x", t.getName());
 			Assert.assertEquals(0, t.getAnnots().size());

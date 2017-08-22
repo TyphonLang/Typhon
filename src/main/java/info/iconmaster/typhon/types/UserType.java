@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
 import info.iconmaster.typhon.model.MemberAccess;
+import info.iconmaster.typhon.model.Package;
 import info.iconmaster.typhon.util.SourceInfo;
 
 /**
@@ -121,5 +122,17 @@ public class UserType extends Type {
 	@Override
 	public List<TemplateType> getMemberTemplate() {
 		return getTemplates();
+	}
+	
+	@Override
+	public Package getTypePackage() {
+		if (typePackage == null) {
+			typePackage = new Package(source, null, getParent() == null ? tni.corePackage : getParent());
+			for (TemplateType t : templates) {
+				typePackage.addType(t);
+			}
+		}
+		
+		return typePackage;
 	}
 }

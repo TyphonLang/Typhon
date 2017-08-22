@@ -93,6 +93,22 @@ public class TestTypeResolver extends TyphonTest {
 			
 			Assert.assertEquals(p.tni.corePackage.TYPE_INT, p.getField("x").getType().getType());
 			Assert.assertTrue(p.getField("x").getType().isConst());
+		}),new TestCase("class x<T> : List<T> {}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+			
+			Assert.assertEquals(p.getType("x").getTypePackage().getType("T"), ((UserType)p.getType("x")).getParentTypes().get(0).getTemplateArgs().get(0).getValue().getType());
+		}),new TestCase("class x<T> {class y<T> {T z;}}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+			
+			Assert.assertEquals(p.getType("x").getTypePackage().getType("y").getTypePackage().getType("T"), p.getType("x").getTypePackage().getType("y").getTypePackage().getField("z").getType().getType());
+		}),new TestCase("class x<T> {class y<T> {x.T z;}}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+			
+			Assert.assertEquals(p.getType("x").getTypePackage().getType("T"), p.getType("x").getTypePackage().getType("y").getTypePackage().getField("z").getType().getType());
+		}),new TestCase("class x {class y {}} class z<T : x> {T.y t;}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+			
+			Assert.assertEquals(p.getType("x").getTypePackage().getType("y"), p.getType("z").getTypePackage().getField("t").getType().getType());
 		}));
 	}
     

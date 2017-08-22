@@ -17,10 +17,8 @@ import info.iconmaster.typhon.util.SourceInfo;
 public abstract class Type extends TyphonModelEntity implements MemberAccess {
 	/**
 	 * The package that contains methods, fields, etc. for this type.
-	 * 
-	 * TODO: set this up properly.
 	 */
-	private Package typePackage;
+	protected Package typePackage;
 	
 	public Type(TyphonInput input) {
 		super(input);

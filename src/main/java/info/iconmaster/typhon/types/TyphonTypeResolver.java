@@ -47,14 +47,14 @@ public class TyphonTypeResolver {
 		if (!p.needsTypesResolved()) {
 			return;
 		}
+		p.needsTypesResolved(false);
 		
 		p.getFields().stream().forEach((e)->resolve(e));
 		p.getFunctions().stream().forEach((e)->resolve(e));
-		p.getTypes().stream().forEach((e)->resolve(e, p));
+		p.getTypes().stream().forEach((e)->resolve(e));
 		p.getSubpackges().stream().forEach((e)->resolve(e));
 		
 		p.getAnnots().stream().forEach((e)->resolve(e, p));
-		p.needsTypesResolved(false);
 	}
 	
 	/**
@@ -66,6 +66,7 @@ public class TyphonTypeResolver {
 		if (!f.needsTypesResolved()) {
 			return;
 		}
+		f.needsTypesResolved(false);
 		
 		for (TypeContext rule : f.getRawRetType()) {
 			f.getRetType().add(readType(f.tni, rule, f.getParent()));
@@ -76,7 +77,6 @@ public class TyphonTypeResolver {
 		}
 		
 		f.getAnnots().stream().forEach((e)->resolve(e, f.getParent()));
-		f.needsTypesResolved(false);
 	}
 	
 	/**
@@ -88,11 +88,11 @@ public class TyphonTypeResolver {
 		if (!f.needsTypesResolved()) {
 			return;
 		}
+		f.needsTypesResolved(false);
 		
 		f.setType(readType(f.tni, f.getRawType(), f.getParent()));
 		
 		f.getAnnots().stream().forEach((e)->resolve(e, f.getParent()));
-		f.needsTypesResolved(false);
 	}
 	
 	/**
@@ -101,26 +101,27 @@ public class TyphonTypeResolver {
 	 * @param f The type to resolve.
 	 * @param lookup The package in which this type occurs.
 	 */
-	public static void resolve(Type t, MemberAccess lookup) {
+	public static void resolve(Type t) {
 		if (!t.needsTypesResolved()) {
 			return;
 		}
+		t.needsTypesResolved(false);
 		
 		if (t instanceof UserType) {
 			UserType userType = (UserType) t;
+
 			for (TypeContext rule : userType.getRawParentTypes()) {
-				userType.getParentTypes().add(readType(userType.tni, rule, lookup));
+				userType.getParentTypes().add(readType(userType.tni, rule, t));
 			}
 		} else if (t instanceof TemplateType) {
 			TemplateType tempType = (TemplateType) t;
-			tempType.setBaseType(readType(tempType.tni, tempType.getRawBaseType(), lookup));
-			tempType.setDefaultValue(readType(tempType.tni, tempType.getRawDefaultValue(), lookup));
+			tempType.setBaseType(readType(tempType.tni, tempType.getRawBaseType(), t));
+			tempType.setDefaultValue(readType(tempType.tni, tempType.getRawDefaultValue(), t));
 		}
 		
 		resolve(t.getTypePackage());
 		
-		t.getAnnots().stream().forEach((e)->resolve(e, lookup));
-		t.needsTypesResolved(false);
+		t.getAnnots().stream().forEach((e)->resolve(e, t));
 	}
 	
 	/**
@@ -133,11 +134,11 @@ public class TyphonTypeResolver {
 		if (!p.needsTypesResolved()) {
 			return;
 		}
+		p.needsTypesResolved(false);
 		
 		p.setType(readType(p.tni, p.getRawType(), lookup));
 		
 		p.getAnnots().stream().forEach((e)->resolve(e, lookup));
-		p.needsTypesResolved(false);
 	}
 	
 	/**
@@ -150,10 +151,9 @@ public class TyphonTypeResolver {
 		if (!a.needsTypesResolved()) {
 			return;
 		}
+		a.needsTypesResolved(false);
 		
 		// TODO
-		
-		a.needsTypesResolved(false);
 	}
 	
 	/**
@@ -208,6 +208,14 @@ public class TyphonTypeResolver {
 				matches.add(base);
 				
 				for (TypeMemberItemContext name : ((BasicTypeContext) rule).tnLookup) {
+					// ensure all lookup members are resolved already
+					for (MemberAccess match : matches) {
+						if (match instanceof Type) {
+							resolve((Type)match);
+						}
+					}
+					
+					// do the lookup of a single member
 					List<MemberAccess> newMatches = new ArrayList<>();
 					
 					for (MemberAccess match : matches) {

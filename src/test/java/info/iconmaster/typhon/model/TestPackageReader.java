@@ -1,4 +1,4 @@
-package info.iconmaster.typhon.compiler;
+package info.iconmaster.typhon.model;
 
 import java.io.File;
 import java.io.IOException;

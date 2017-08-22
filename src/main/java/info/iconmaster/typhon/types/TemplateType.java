@@ -1,7 +1,11 @@
 package info.iconmaster.typhon.types;
 
+import java.util.List;
+
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
+import info.iconmaster.typhon.model.MemberAccess;
+import info.iconmaster.typhon.model.Package;
 import info.iconmaster.typhon.util.SourceInfo;
 
 /**
@@ -113,7 +117,18 @@ public class TemplateType extends Type {
 	 * @param rawDefaultValue The ANTLR rule representing the default type.
 	 */
 	public void setRawData(TypeContext rawBaseType, TypeContext rawDefaultValue) {
+		super.setRawData();
 		this.rawBaseType = rawBaseType;
 		this.rawDefaultValue = rawDefaultValue;
+	}
+	
+	@Override
+	public List<MemberAccess> getMembers() {
+		return baseType.getMembers();
+	}
+	
+	@Override
+	public Package getTypePackage() {
+		return baseType.getType().getTypePackage();
 	}
 }

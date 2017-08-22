@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import info.iconmaster.typhon.errors.UnresolvedImportError;
+import info.iconmaster.typhon.model.CorePackage;
 import info.iconmaster.typhon.model.Import;
 import info.iconmaster.typhon.model.Package;
 import info.iconmaster.typhon.model.TyphonModelReader;
@@ -81,7 +82,13 @@ public class TyphonLinker {
 						List<Package> newMatches = new ArrayList<>();
 						
 						for (Package match : matches) {
-							newMatches.addAll(match.getSubpackagesWithName(s));
+							if (match instanceof CorePackage) {
+								// if we're looking at the core package, we need to check for library names
+								newMatches.addAll(((CorePackage)match).getCoreSubpackagesWithName(s));
+							} else {
+								// Else, look at subpackages
+								newMatches.addAll(match.getSubpackagesWithName(s));
+							}
 						}
 						
 						matches = newMatches;

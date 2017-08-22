@@ -1,5 +1,8 @@
 package info.iconmaster.typhon.model;
 
+import java.util.Arrays;
+import java.util.List;
+
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.types.AnyType;
 import info.iconmaster.typhon.types.SystemType;
@@ -94,5 +97,39 @@ public class CorePackage extends Package {
 	@Override
 	public void setParent(Package parent) {
 		throw new IllegalArgumentException("Cannot set parent of core package");
+	}
+	
+	/**
+	 * Overriden to make it appear as if there are no subpackages.
+	 * This is to make imports mandatory and optimize library inclusions.
+	 */
+	@Override
+	public List<Package> getSubpackges() {
+		return Arrays.asList();
+	}
+	
+	/**
+	 * Overriden to make it appear as if there are no subpackages.
+	 * This is to make imports mandatory and optimize library inclusions.
+	 */
+	@Override
+	public List<Package> getSubpackagesWithName(String name) {
+		return Arrays.asList();
+	}
+	
+	/**
+	 * @return The actual subpackages for this core package.
+	 * This includes libraries that have been imported and user packages.
+	 */
+	public List<Package> getCoreSubpackages() {
+		return super.getSubpackges();
+	}
+	
+	/**
+	 * @return The actual subpackages for this core package.
+	 * This includes libraries that have been imported and user packages.
+	 */
+	public List<Package> getCoreSubpackagesWithName(String s) {
+		return super.getSubpackagesWithName(s);
 	}
 }

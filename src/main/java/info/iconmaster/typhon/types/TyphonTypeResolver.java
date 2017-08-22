@@ -308,7 +308,7 @@ public class TyphonTypeResolver {
 		return rules.stream().map((rule)->{
 			TemplateArgument arg = new TemplateArgument(tni, new SourceInfo(rule));
 			
-			if (rule.tnLabel != null) arg.setLabel(rule.tnLabel.toString());
+			if (rule.tnLabel != null) arg.setLabel(rule.tnLabel.getText());
 			arg.setValue(readType(tni, rule.tnType, lookup));
 			
 			return arg;

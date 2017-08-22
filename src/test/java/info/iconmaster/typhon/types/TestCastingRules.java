@@ -34,6 +34,7 @@ public class TestCastingRules extends TyphonTest {
 				new TestCase(p.TYPE_INT, p.TYPE_ANY),
 				new TestCase(p.TYPE_NUMBER, p.TYPE_ANY),
 				new TestCase(a, p.TYPE_ANY),
+				new TestCase(new TypeRef(a, new TemplateArgument(p.TYPE_INT)), new TypeRef(p.TYPE_ANY)),
 				new TestCase(new TypeRef(a, new TemplateArgument(p.TYPE_INT)), new TypeRef(p.TYPE_LIST, new TemplateArgument(p.TYPE_INT))),
 				new InvalidCase(p.TYPE_ANY, p.TYPE_INT),
 				new InvalidCase(p.TYPE_NUMBER, p.TYPE_INT),

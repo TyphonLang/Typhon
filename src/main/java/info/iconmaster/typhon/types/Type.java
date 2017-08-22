@@ -94,6 +94,9 @@ public abstract class Type extends TyphonModelEntity implements MemberAccess {
 	 * @return True if <tt>a</tt> can be safely converted to <tt>b</tt>.
 	 */
 	public boolean canCastTo(TypeRef a, TypeRef b) {
+		if (b.getType() instanceof TemplateType) {
+			return a.equals(((TemplateType)b.getType()).getBaseType());
+		}
 		return a.equals(b);
 	}
 }

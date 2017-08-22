@@ -139,4 +139,9 @@ public class TemplateType extends Type {
 		sb.append(getName());
 		return sb.toString();
 	}
+	
+	@Override
+	public boolean canCastTo(TypeRef a, TypeRef b) {
+		return getBaseType().canCastTo(b);
+	}
 }

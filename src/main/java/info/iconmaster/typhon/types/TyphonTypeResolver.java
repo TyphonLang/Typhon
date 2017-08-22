@@ -279,7 +279,10 @@ public class TyphonTypeResolver {
 					TypeMemberItemContext lastLookup = ((BasicTypeContext) rule).tnLookup.get(((BasicTypeContext) rule).tnLookup.size()-1);
 					
 					TypeRef ref = new TypeRef(new SourceInfo(rule), candidates.get(0));
-					if (lastLookup.tnTemplate != null) ref.getTemplateArgs().addAll(readTemplateArgs(tni, lastLookup.tnTemplate.tnArgs, lookup));
+					if (lastLookup.tnTemplate != null) {
+						ref.getTemplateArgs().addAll(readTemplateArgs(tni, lastLookup.tnTemplate.tnArgs, lookup));
+						TemplateUtils.checkTemplateArgs(ref, ref.getType().getMemberTemplate(), ref.getTemplateArgs());
+					}
 					return ref;
 				}
 				

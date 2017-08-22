@@ -135,4 +135,15 @@ public class UserType extends Type {
 		
 		return typePackage;
 	}
+	
+	@Override
+	public boolean canCastTo(TypeRef a, TypeRef b) {
+		for (TypeRef parent : ((UserType)a.getType()).getParentTypes()) {
+			if (parent.canCastTo(b)) {
+				return true;
+			}
+		}
+		
+		return super.canCastTo(a, b);
+	}
 }

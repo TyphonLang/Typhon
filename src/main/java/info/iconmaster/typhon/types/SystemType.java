@@ -76,4 +76,15 @@ public class SystemType extends Type {
 		
 		return a;
 	}
+	
+	@Override
+	public boolean canCastTo(TypeRef a, TypeRef b) {
+		for (TypeRef parent : ((SystemType)a.getType()).getParentTypes()) {
+			if (parent.canCastTo(b)) {
+				return true;
+			}
+		}
+		
+		return super.canCastTo(a, b);
+	}
 }

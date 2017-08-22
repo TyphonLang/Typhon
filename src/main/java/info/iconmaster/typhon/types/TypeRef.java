@@ -3,6 +3,7 @@ package info.iconmaster.typhon.types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.model.MemberAccess;
@@ -147,11 +148,13 @@ public class TypeRef extends TyphonModelEntity implements MemberAccess {
 		if (getClass() != obj.getClass())
 			return false;
 		TypeRef other = (TypeRef) obj;
-		if (templateArgs == null) {
-			if (other.templateArgs != null)
-				return false;
-		} else if (!templateArgs.equals(other.templateArgs))
+		
+		Map<TemplateType, TypeRef> map1 = TemplateUtils.matchTemplateArgs(this, getType().getMemberTemplate(), getTemplateArgs());
+		Map<TemplateType, TypeRef> map2 = TemplateUtils.matchTemplateArgs(this, other.getType().getMemberTemplate(), getTemplateArgs());
+		if (!map1.equals(map2)) {
 			return false;
+		}
+		
 		if (type == null) {
 			if (other.type != null)
 				return false;

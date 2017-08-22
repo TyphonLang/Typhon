@@ -87,4 +87,11 @@ public class SystemType extends Type {
 		
 		return super.canCastTo(a, b);
 	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("sys:");
+		sb.append(getName());
+		return sb.toString();
+	}
 }

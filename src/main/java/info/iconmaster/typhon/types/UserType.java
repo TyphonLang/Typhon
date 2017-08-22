@@ -9,6 +9,7 @@ import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
 import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.model.Package;
+import info.iconmaster.typhon.model.TemplateArgument;
 import info.iconmaster.typhon.util.SourceInfo;
 
 /**
@@ -146,5 +147,21 @@ public class UserType extends Type {
 		}
 		
 		return super.canCastTo(a, b);
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("user:");
+		sb.append(getName());
+		if (!getTemplates().isEmpty()) {
+			sb.append('<');
+			for (TemplateType arg : getTemplates()) {
+				sb.append(arg);
+				sb.append(',');
+			}
+			sb.deleteCharAt(sb.length()-1);
+			sb.append('>');
+		}
+		return sb.toString();
 	}
 }

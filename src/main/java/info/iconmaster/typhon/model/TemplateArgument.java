@@ -75,4 +75,9 @@ public class TemplateArgument extends TyphonModelEntity {
 	public void setValue(TypeRef value) {
 		this.value = value;
 	}
+	
+	@Override
+	public String toString() {
+		return getLabel()+"->"+getValue();
+	}
 }

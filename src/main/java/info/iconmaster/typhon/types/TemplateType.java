@@ -6,6 +6,7 @@ import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
 import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.model.Package;
+import info.iconmaster.typhon.model.TemplateArgument;
 import info.iconmaster.typhon.util.SourceInfo;
 
 /**
@@ -130,5 +131,12 @@ public class TemplateType extends Type {
 	@Override
 	public Package getTypePackage() {
 		return baseType.getType().getTypePackage();
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("temp:");
+		sb.append(getName());
+		return sb.toString();
 	}
 }

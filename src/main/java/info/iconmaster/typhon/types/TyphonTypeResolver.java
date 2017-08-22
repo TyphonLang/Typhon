@@ -228,7 +228,7 @@ public class TyphonTypeResolver {
 				type.getRetTypes().add(readType(tni, retRule, lookup));
 			}
 			if (((FuncTypeContext) rule).tnTemplate != null) {
-				type.getTemplate().addAll(readTemplateArgs(tni, ((FuncTypeContext) rule).tnTemplate.tnArgs, lookup));
+				type.getTemplate().addAll(TyphonModelReader.readTemplateParams(tni, ((FuncTypeContext) rule).tnTemplate.tnArgs));
 			}
 			
 			return new TypeRef(new SourceInfo(rule), type);

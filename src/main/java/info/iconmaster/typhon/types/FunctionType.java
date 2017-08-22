@@ -10,7 +10,7 @@ import info.iconmaster.typhon.util.SourceInfo;
 public class FunctionType extends Type {
 	private List<TypeRef> argTypes = new ArrayList<>();
 	private List<TypeRef> retTypes = new ArrayList<>();
-	private List<TemplateArgument> template = new ArrayList<>();
+	private List<TemplateType> template = new ArrayList<>();
 
 	public FunctionType(TyphonInput input) {
 		super(input);
@@ -28,7 +28,7 @@ public class FunctionType extends Type {
 		return retTypes;
 	}
 
-	public List<TemplateArgument> getTemplate() {
+	public List<TemplateType> getTemplate() {
 		return template;
 	}
 	
@@ -73,5 +73,10 @@ public class FunctionType extends Type {
 	public boolean canCastTo(TypeRef a, TypeRef b) {
 		// TODO: function types need to be castable to each other
 		return super.canCastTo(a, b);
+	}
+	
+	@Override
+	public List<TemplateType> getMemberTemplate() {
+		return getTemplate();
 	}
 }

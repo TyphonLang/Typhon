@@ -4,6 +4,7 @@ import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
 import info.iconmaster.typhon.tnil.CodeBlock;
+import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.util.SourceInfo;
 
@@ -107,5 +108,53 @@ public class Parameter extends TyphonModelEntity {
 		super.setRawData();
 		this.rawType = rawType;
 		this.rawDefaultValue = rawDefaultValue;
+	}
+	
+	/**
+	 * If this is a library function, optionalOverride determines this parameter's status as optional.
+	 */
+	private boolean optionalOverride;
+	
+	/**
+	 * Constructs a parameter for a library function.
+	 * 
+	 * @param tni
+	 * @param name
+	 * @param type
+	 * @param optional
+	 */
+	public Parameter(TyphonInput tni, String name, TypeRef type, boolean optional) {
+		super(tni);
+		
+		setName(name);
+		setType(type);
+		optionalOverride = optional;
+		
+		markAsLibrary();
+	}
+	
+	/**
+	 * Constructs a parameter for a library function.
+	 * 
+	 * @param tni
+	 * @param name
+	 * @param type
+	 * @param optional
+	 */
+	public Parameter(TyphonInput tni, String name, Type type, boolean optional) {
+		super(tni);
+		
+		setName(name);
+		setType(new TypeRef(type));
+		optionalOverride = optional;
+		
+		markAsLibrary();
+	}
+	
+	/**
+	 * @return If this argument can be omitted; that is, if it has a default value.
+	 */
+	public boolean isOptional() {
+		return rawDefaultValue != null || defaultValue != null || (isLibrary() && optionalOverride);
 	}
 }

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import info.iconmaster.typhon.TyphonInput;
+import info.iconmaster.typhon.model.libs.CoreLibraryMath;
 import info.iconmaster.typhon.types.AnyType;
 import info.iconmaster.typhon.types.SystemType;
 import info.iconmaster.typhon.types.TemplateType;
@@ -79,6 +80,9 @@ public class CorePackage extends Package {
 		TYPE_MAP = makeUserType("Map", TYPE_ANY);
 		TYPE_MAP.getTemplates().add(new TemplateType(tni, "K"));
 		TYPE_MAP.getTemplates().add(new TemplateType(tni, "V"));
+		
+		// add any core libraries
+		addSubpackage(new CoreLibraryMath(tni));
 	}
 	
 	/**

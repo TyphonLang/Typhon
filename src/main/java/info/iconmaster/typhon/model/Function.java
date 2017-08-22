@@ -3,8 +3,7 @@ package info.iconmaster.typhon.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.antlr.v4.runtime.ParserRuleContext;
+import java.util.stream.Collectors;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
@@ -12,6 +11,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.StatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
 import info.iconmaster.typhon.tnil.CodeBlock;
 import info.iconmaster.typhon.types.TemplateType;
+import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.util.SourceInfo;
 
@@ -202,5 +202,41 @@ public class Function extends TyphonModelEntity implements MemberAccess {
 	@Override
 	public List<TemplateType> getMemberTemplate() {
 		return getTemplate();
+	}
+	
+	/**
+	 * Constructs a library function.
+	 * 
+	 * @param tni
+	 * @param name
+	 * @param args
+	 * @param retTypes
+	 */
+	public Function(TyphonInput tni, String name, TemplateType[] template, Parameter[] args, TypeRef[] retTypes) {
+		this(tni, name);
+		
+		getTemplate().addAll(Arrays.asList(template));
+		getParams().addAll(Arrays.asList(args));
+		getRetType().addAll(Arrays.asList(retTypes));
+		
+		markAsLibrary();
+	}
+	
+	/**
+	 * Constructs a library function.
+	 * 
+	 * @param tni
+	 * @param name
+	 * @param args
+	 * @param retTypes
+	 */
+	public Function(TyphonInput tni, String name, TemplateType[] template, Parameter[] args, Type[] retTypes) {
+		this(tni, name);
+		
+		getTemplate().addAll(Arrays.asList(template));
+		getParams().addAll(Arrays.asList(args));
+		getRetType().addAll(Arrays.asList(retTypes).stream().map((a)->new TypeRef(a)).collect(Collectors.toList()));
+		
+		markAsLibrary();
 	}
 }

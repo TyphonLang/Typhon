@@ -1,6 +1,7 @@
 package info.iconmaster.typhon.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import info.iconmaster.typhon.TyphonInput;
@@ -13,7 +14,7 @@ import info.iconmaster.typhon.util.SourceInfo;
  * @author iconmaster
  *
  */
-public class AnnotationDefinition extends TyphonModelEntity {
+public class AnnotationDefinition extends TyphonModelEntity implements MemberAccess {
 	/**
 	 * The name of the annotation. Must be a valid Typhon identifier.
 	 */
@@ -45,6 +46,19 @@ public class AnnotationDefinition extends TyphonModelEntity {
 	public AnnotationDefinition(TyphonInput tni, SourceInfo source, String name) {
 		super(tni, source);
 		this.name = name;
+	}
+	
+	/**
+	 * Construct a library annotation.
+	 * 
+	 * @param tni
+	 * @param source
+	 * @param name
+	 */
+	public AnnotationDefinition(TyphonInput tni, String name, Parameter[] params) {
+		this(tni, name);
+		getParams().addAll(Arrays.asList(params));
+		markAsLibrary();
 	}
 	
 	/**

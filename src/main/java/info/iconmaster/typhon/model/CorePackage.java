@@ -83,6 +83,9 @@ public class CorePackage extends Package {
 		
 		// add any core libraries
 		addSubpackage(new CoreLibraryMath(tni));
+		
+		// add the annotations defined
+		addAnnotDef(new AnnotationDefinition(tni, "main", new Parameter[] {}));
 	}
 	
 	/**

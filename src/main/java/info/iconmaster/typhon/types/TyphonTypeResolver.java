@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.antlr.v4.runtime.Token;
+
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonParser.ArrayTypeContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BasicTypeContext;
@@ -14,9 +16,12 @@ import info.iconmaster.typhon.antlr.TyphonParser.TemplateArgContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeMemberItemContext;
 import info.iconmaster.typhon.antlr.TyphonParser.VarTypeContext;
+import info.iconmaster.typhon.errors.AmbiguousAnnotError;
 import info.iconmaster.typhon.errors.AmbiguousTypeError;
+import info.iconmaster.typhon.errors.AnnotNotFoundError;
 import info.iconmaster.typhon.errors.TypeNotFoundError;
 import info.iconmaster.typhon.model.Annotation;
+import info.iconmaster.typhon.model.AnnotationDefinition;
 import info.iconmaster.typhon.model.Field;
 import info.iconmaster.typhon.model.Function;
 import info.iconmaster.typhon.model.MemberAccess;
@@ -153,7 +158,46 @@ public class TyphonTypeResolver {
 		}
 		a.needsTypesResolved(false);
 		
-		// TODO
+		MemberAccess base = lookup;
+		
+		while (base != null) {
+			List<MemberAccess> matches = new ArrayList<>();
+			matches.add(base);
+			
+			for (Token name : a.getRawDefinition().tnName) {
+				// ensure all lookup members are resolved already
+				for (MemberAccess match : matches) {
+					if (match instanceof Type) {
+						resolve((Type)match);
+					}
+				}
+				
+				// do the lookup of a single member
+				List<MemberAccess> newMatches = new ArrayList<>();
+				
+				for (MemberAccess match : matches) {
+					newMatches.addAll(match.getMembers(name.getText()));
+				}
+				
+				matches = newMatches;
+			}
+			
+			List<AnnotationDefinition> candidates = matches.stream().filter((e)->e instanceof AnnotationDefinition).map((e)->(AnnotationDefinition)e).collect(Collectors.toList());
+			if (!candidates.isEmpty()) {
+				if (candidates.size() != 1) {
+					a.tni.errors.add(new AmbiguousAnnotError(a.getRawDefinition().tnName, candidates));
+					return;
+				}
+				
+				a.setDefinition(candidates.get(0));
+				return;
+			}
+			
+			base = base.getParent();
+		}
+		
+		a.tni.errors.add(new AnnotNotFoundError(a.getRawDefinition().tnName));
+		return;
 	}
 	
 	/**

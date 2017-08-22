@@ -503,6 +503,7 @@ public class Package extends TyphonModelEntity implements MemberAccess {
 		a.addAll(getFunctions());
 		a.addAll(getFields());
 		a.addAll(getTypes());
+		a.addAll(getAnnotDefs());
 		
 		for (Import i : getImports()) {
 			for (Package p : i.getResolvedTo()) {

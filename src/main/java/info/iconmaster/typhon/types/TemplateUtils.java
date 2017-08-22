@@ -27,8 +27,8 @@ public class TemplateUtils {
 	 */
 	public static TypeRef replaceTemplates(TypeRef typeToReplace, Map<TemplateType, TypeRef> newTypes) {
 		if (typeToReplace.getType() instanceof TemplateType) {
-			if (newTypes.containsKey(typeToReplace)) {
-				return newTypes.get(typeToReplace);
+			if (newTypes.containsKey(typeToReplace.getType())) {
+				return newTypes.get(typeToReplace.getType());
 			}
 			return typeToReplace;
 		} else if (typeToReplace.getType() instanceof UserType) {

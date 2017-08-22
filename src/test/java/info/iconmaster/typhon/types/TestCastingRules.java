@@ -24,7 +24,7 @@ public class TestCastingRules extends TyphonTest {
     	CorePackage p = tni.corePackage;
     	
     	UserType a = new UserType(tni, "a");
-    	a.getTemplates().add(new TemplateType(tni, "T"));
+    	a.getTemplates().add(new TemplateType(tni, "X"));
     	a.getParentTypes().add(new TypeRef(p.TYPE_LIST, new TemplateArgument(a.getTemplates().get(0))));
     	
 		return TyphonTest.makeData(

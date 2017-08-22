@@ -19,6 +19,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.VarTypeContext;
 import info.iconmaster.typhon.errors.AmbiguousAnnotError;
 import info.iconmaster.typhon.errors.AmbiguousTypeError;
 import info.iconmaster.typhon.errors.AnnotNotFoundError;
+import info.iconmaster.typhon.errors.TemplateDefaultTypeError;
 import info.iconmaster.typhon.errors.TypeNotFoundError;
 import info.iconmaster.typhon.model.Annotation;
 import info.iconmaster.typhon.model.AnnotationDefinition;
@@ -121,7 +122,12 @@ public class TyphonTypeResolver {
 		} else if (t instanceof TemplateType) {
 			TemplateType tempType = (TemplateType) t;
 			tempType.setBaseType(readType(tempType.tni, tempType.getRawBaseType(), t));
-			tempType.setDefaultValue(readType(tempType.tni, tempType.getRawDefaultValue(), t));
+			if (tempType.getRawDefaultValue() != null) tempType.setDefaultValue(readType(tempType.tni, tempType.getRawDefaultValue(), t));
+			
+			if (tempType.getDefaultValue() != null && !tempType.getDefaultValue().canCastTo(tempType.getBaseType())) {
+				// error; default value must be a subtype of the base value
+				t.tni.errors.add(new TemplateDefaultTypeError(tempType));
+			}
 		}
 		
 		resolve(t.getTypePackage());

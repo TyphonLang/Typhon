@@ -48,7 +48,6 @@ public class TemplateType extends Type {
 		this.name = name;
 		
 		baseType = new TypeRef(input.corePackage.TYPE_ANY);
-		defaultValue = new TypeRef(input.corePackage.TYPE_ANY);
 	}
 	
 	public TemplateType(TyphonInput input, SourceInfo source, String name) {
@@ -56,7 +55,6 @@ public class TemplateType extends Type {
 		this.name = name;
 		
 		baseType = new TypeRef(input.corePackage.TYPE_ANY);
-		defaultValue = new TypeRef(input.corePackage.TYPE_ANY);
 	}
 
 	@Override
@@ -81,6 +79,7 @@ public class TemplateType extends Type {
 	/**
 	 * If no value is supplied at instantiation, this value is used.
 	 * Must be castable to this.baseType.
+	 * May be null if no default value is specified. In that case, use the base type.
 	 * @return The default type.
 	 */
 	public TypeRef getDefaultValue() {

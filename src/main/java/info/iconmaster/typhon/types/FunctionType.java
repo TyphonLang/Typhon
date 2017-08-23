@@ -1,7 +1,9 @@
 package info.iconmaster.typhon.types;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.model.MemberAccess;
@@ -72,8 +74,32 @@ public class FunctionType extends Type {
 	
 	@Override
 	public boolean canCastTo(TypeRef a, TypeRef b) {
-		// TODO: function types need to be castable to each other
-		return super.canCastTo(a, b);
+		if (b.getType() instanceof AnyType) {
+			return true;
+		}
+		
+		if (b.getType() instanceof TemplateType) {
+			return canCastTo(a, ((TemplateType)b.getType()).getBaseType());
+		}
+		
+		if (!(b.getType() instanceof FunctionType)) return false;
+		
+		FunctionType other = ((FunctionType)b.getType());
+		if (getArgTypes().size() != other.getArgTypes().size()) return false;
+		if (getRetTypes().size() != other.getRetTypes().size()) return false;
+		
+		FunctionType realA = (FunctionType) TemplateUtils.replaceTemplates(a, TemplateUtils.matchTemplateArgs(a, ((FunctionType)a.getType()).getTemplate(), a.getTemplateArgs())).getType();
+		FunctionType realB = (FunctionType) TemplateUtils.replaceTemplates(b, TemplateUtils.matchTemplateArgs(b, ((FunctionType)b.getType()).getTemplate(), b.getTemplateArgs())).getType();
+		
+		for (int i = 0; i < realA.getArgTypes().size(); i++) {
+			if (!realB.getArgTypes().get(i).canCastTo(realA.getArgTypes().get(i))) return false;
+		}
+		
+		for (int i = 0; i < realA.getRetTypes().size(); i++) {
+			if (!realA.getRetTypes().get(i).canCastTo(realB.getRetTypes().get(i))) return false;
+		}
+		
+		return true;
 	}
 	
 	@Override
@@ -113,5 +139,39 @@ public class FunctionType extends Type {
 	 */
 	public void setLookupLocation(MemberAccess lookupLocation) {
 		this.lookupLocation = lookupLocation;
+	}
+	
+	/**
+	 * Creates a library function type.
+	 * 
+	 * @param tni
+	 * @param args
+	 * @param rets
+	 */
+	public FunctionType(TyphonInput tni, TypeRef[] args, TypeRef[] rets, TemplateType... templates) {
+		super(tni);
+		
+		getArgTypes().addAll(Arrays.asList(args));
+		getRetTypes().addAll(Arrays.asList(rets));
+		getTemplate().addAll(Arrays.asList(templates));
+		
+		markAsLibrary();
+	}
+	
+	/**
+	 * Creates a library function type.
+	 * 
+	 * @param tni
+	 * @param args
+	 * @param rets
+	 */
+	public FunctionType(TyphonInput tni, Type[] args, Type[] rets, TemplateType... templates) {
+		super(tni);
+		
+		getArgTypes().addAll(Arrays.asList(args).stream().map((a)->new TypeRef(a)).collect(Collectors.toList()));
+		getRetTypes().addAll(Arrays.asList(rets).stream().map((a)->new TypeRef(a)).collect(Collectors.toList()));
+		getTemplate().addAll(Arrays.asList(templates));
+		
+		markAsLibrary();
 	}
 }

@@ -27,6 +27,9 @@ public class TestCastingRules extends TyphonTest {
     	a.getTemplates().add(new TemplateType(tni, "X"));
     	a.getParentTypes().add(new TypeRef(p.TYPE_LIST, new TemplateArgument(a.getTemplates().get(0))));
     	
+    	TemplateType f1 = new TemplateType(tni, "F1");
+    	TemplateType f2 = new TemplateType(tni, "F2");
+    	
 		return TyphonTest.makeData(
 				new TestCase(p.TYPE_INT, p.TYPE_INT),
 				new TestCase(p.TYPE_NUMBER, p.TYPE_NUMBER),
@@ -36,10 +39,22 @@ public class TestCastingRules extends TyphonTest {
 				new TestCase(a, p.TYPE_ANY),
 				new TestCase(new TypeRef(a, new TemplateArgument(p.TYPE_INT)), new TypeRef(p.TYPE_ANY)),
 				new TestCase(new TypeRef(a, new TemplateArgument(p.TYPE_INT)), new TypeRef(p.TYPE_LIST, new TemplateArgument(p.TYPE_INT))),
+				new TestCase(new FunctionType(tni, new Type[] {}, new Type[] {}), p.TYPE_ANY),
+				new TestCase(new FunctionType(tni, new Type[] {}, new Type[] {}), new FunctionType(tni, new Type[] {}, new Type[] {})),
+				new TestCase(new FunctionType(tni, new Type[] {p.TYPE_INT}, new Type[] {}), new FunctionType(tni, new Type[] {p.TYPE_INT}, new Type[] {})),
+				new TestCase(new FunctionType(tni, new Type[] {}, new Type[] {p.TYPE_INT}), new FunctionType(tni, new Type[] {}, new Type[] {p.TYPE_INT})),
+				new TestCase(new FunctionType(tni, new Type[] {p.TYPE_ANY}, new Type[] {}), new FunctionType(tni, new Type[] {p.TYPE_INT}, new Type[] {})),
+				new TestCase(new FunctionType(tni, new Type[] {}, new Type[] {p.TYPE_INT}), new FunctionType(tni, new Type[] {}, new Type[] {p.TYPE_ANY})),
+				new TestCase(new FunctionType(tni, new Type[] {f1}, new Type[] {}, f1), new FunctionType(tni, new Type[] {f2}, new Type[] {}, f2)),
 				new InvalidCase(p.TYPE_ANY, p.TYPE_INT),
 				new InvalidCase(p.TYPE_NUMBER, p.TYPE_INT),
 				new InvalidCase(p.TYPE_INT, p.TYPE_FLOAT),
 				new InvalidCase(p.TYPE_ANY, p.TYPE_NUMBER),
+				new InvalidCase(new FunctionType(tni, new Type[] {}, new Type[] {}), p.TYPE_INT),
+				new InvalidCase(new FunctionType(tni, new Type[] {p.TYPE_INT}, new Type[] {}), new FunctionType(tni, new Type[] {}, new Type[] {})),
+				new InvalidCase(new FunctionType(tni, new Type[] {}, new Type[] {}), new FunctionType(tni, new Type[] {}, new Type[] {p.TYPE_INT})),
+				new InvalidCase(new FunctionType(tni, new Type[] {p.TYPE_FLOAT}, new Type[] {}), new FunctionType(tni, new Type[] {p.TYPE_INT}, new Type[] {})),
+				new InvalidCase(new FunctionType(tni, new Type[] {}, new Type[] {p.TYPE_FLOAT}), new FunctionType(tni, new Type[] {}, new Type[] {p.TYPE_INT})),
 				new TestCase(p.TYPE_ANY, p.TYPE_ANY)
 		);
 	}

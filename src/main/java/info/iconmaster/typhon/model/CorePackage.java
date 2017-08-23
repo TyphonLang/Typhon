@@ -73,6 +73,7 @@ public class CorePackage extends Package {
 		TYPE_FLOAT = makeSystemType("float", TYPE_REAL);
 		TYPE_DOUBLE = makeSystemType("double", TYPE_REAL);
 		TYPE_STRING = makeSystemType("string", TYPE_ANY);
+		TYPE_BOOL = makeSystemType("bool", TYPE_ANY);
 		
 		TYPE_LIST = makeUserType("List", TYPE_ANY);
 		TYPE_LIST.getTemplates().add(new TemplateType(tni, "T"));

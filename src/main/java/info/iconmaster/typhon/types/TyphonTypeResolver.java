@@ -230,6 +230,7 @@ public class TyphonTypeResolver {
 		
 		if (rule instanceof FuncTypeContext) {
 			FunctionType type = new FunctionType(tni, new SourceInfo(rule));
+			type.setLookupLocation(lookup);
 			
 			for (TypeContext argRule : ((FuncTypeContext) rule).tnArgTypes) {
 				type.getArgTypes().add(readType(tni, argRule, lookup));

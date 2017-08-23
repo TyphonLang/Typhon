@@ -92,4 +92,21 @@ public class FunctionType extends Type {
 		
 		return typePackage;
 	}
+	
+	/**
+	 * The scope that this function type was declared in.
+	 */
+	private MemberAccess lookupLocation;
+	
+	@Override
+	public MemberAccess getMemberParent() {
+		return lookupLocation;
+	}
+	
+	/**
+	 * @param lookupLocation The scope that this function type was declared in.
+	 */
+	public void setLookupLocation(MemberAccess lookupLocation) {
+		this.lookupLocation = lookupLocation;
+	}
 }

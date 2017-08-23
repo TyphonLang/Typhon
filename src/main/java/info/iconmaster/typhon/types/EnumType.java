@@ -80,8 +80,7 @@ public class EnumType extends UserType {
 
 		@Override
 		public MemberAccess getMemberParent() {
-			// TODO Auto-generated method stub
-			return null;
+			return parent;
 		}
 	}
 	

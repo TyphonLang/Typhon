@@ -75,14 +75,14 @@ public class TyphonTypeResolver {
 		f.needsTypesResolved(false);
 		
 		for (TypeContext rule : f.getRawRetType()) {
-			f.getRetType().add(readType(f.tni, rule, f.getParent()));
+			f.getRetType().add(readType(f.tni, rule, f.getMemberParent()));
 		}
 		
 		for (Parameter p : f.getParams()) {
-			resolve(p, f.getParent());
+			resolve(p, f.getMemberParent());
 		}
 		
-		f.getAnnots().stream().forEach((e)->resolve(e, f.getParent()));
+		f.getAnnots().stream().forEach((e)->resolve(e, f.getMemberParent()));
 	}
 	
 	/**
@@ -96,9 +96,9 @@ public class TyphonTypeResolver {
 		}
 		f.needsTypesResolved(false);
 		
-		f.setType(readType(f.tni, f.getRawType(), f.getParent()));
+		f.setType(readType(f.tni, f.getRawType(), f.getMemberParent()));
 		
-		f.getAnnots().stream().forEach((e)->resolve(e, f.getParent()));
+		f.getAnnots().stream().forEach((e)->resolve(e, f.getMemberParent()));
 	}
 	
 	/**
@@ -209,7 +209,7 @@ public class TyphonTypeResolver {
 				return;
 			}
 			
-			base = base.getParent();
+			base = base.getMemberParent();
 		}
 		
 		a.tni.errors.add(new AnnotNotFoundError(a.getRawDefinition().tnName));
@@ -302,7 +302,7 @@ public class TyphonTypeResolver {
 					return ref;
 				}
 				
-				base = base.getParent();
+				base = base.getMemberParent();
 			}
 			
 			tni.errors.add(new TypeNotFoundError(((BasicTypeContext) rule).tnLookup));

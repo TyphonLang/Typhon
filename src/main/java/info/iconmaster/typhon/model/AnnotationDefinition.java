@@ -95,4 +95,9 @@ public class AnnotationDefinition extends TyphonModelEntity implements MemberAcc
 	public void setParent(Package parent) {
 		this.parent = parent;
 	}
+
+	@Override
+	public MemberAccess getMemberParent() {
+		return getParent();
+	}
 }

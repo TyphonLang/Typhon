@@ -77,6 +77,12 @@ public class EnumType extends UserType {
 		public List<MemberAccess> getMembers() {
 			return parent.getMembers();
 		}
+
+		@Override
+		public MemberAccess getMemberParent() {
+			// TODO Auto-generated method stub
+			return null;
+		}
 	}
 	
 	/**

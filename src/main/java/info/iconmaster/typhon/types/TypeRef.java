@@ -126,11 +126,6 @@ public class TypeRef extends TyphonModelEntity implements MemberAccess {
 	}
 	
 	@Override
-	public MemberAccess getParent() {
-		return type.getParent();
-	}
-	
-	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -189,5 +184,10 @@ public class TypeRef extends TyphonModelEntity implements MemberAccess {
 			sb.append('>');
 		}
 		return sb.toString();
+	}
+	
+	@Override
+	public MemberAccess getMemberParent() {
+		return type.getParent();
 	}
 }

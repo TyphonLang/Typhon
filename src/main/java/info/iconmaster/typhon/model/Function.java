@@ -239,4 +239,9 @@ public class Function extends TyphonModelEntity implements MemberAccess {
 		
 		markAsLibrary();
 	}
+	
+	@Override
+	public MemberAccess getMemberParent() {
+		return getParent();
+	}
 }

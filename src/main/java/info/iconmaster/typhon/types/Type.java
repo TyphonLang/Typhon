@@ -61,6 +61,11 @@ public abstract class Type extends TyphonModelEntity implements MemberAccess {
 	public Package getParent() {
 		return parent;
 	}
+	
+	@Override
+	public MemberAccess getMemberParent() {
+		return getParent();
+	}
 
 	/**
 	 * NOTE: Don't call this, call <tt>{@link Package}.addType()</tt> instead.

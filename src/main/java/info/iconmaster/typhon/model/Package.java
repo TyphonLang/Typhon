@@ -513,4 +513,9 @@ public class Package extends TyphonModelEntity implements MemberAccess {
 		
 		return a;
 	}
+	
+	@Override
+	public MemberAccess getMemberParent() {
+		return getParent();
+	}
 }

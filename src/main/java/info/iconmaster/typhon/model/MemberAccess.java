@@ -29,7 +29,7 @@ public interface MemberAccess {
 	/**
 	 * @return The parent of this member. May be null.
 	 */
-	public MemberAccess getParent();
+	public MemberAccess getMemberParent();
 	
 	/**
 	 * @return A list of all members that can be looked up from this entity.

@@ -146,4 +146,9 @@ public class Field extends TyphonModelEntity implements MemberAccess {
 		
 		return type.getMembers();
 	}
+
+	@Override
+	public MemberAccess getMemberParent() {
+		return getParent();
+	}
 }

@@ -232,14 +232,15 @@ public class TyphonTypeResolver {
 			FunctionType type = new FunctionType(tni, new SourceInfo(rule));
 			type.setLookupLocation(lookup);
 			
-			for (TypeContext argRule : ((FuncTypeContext) rule).tnArgTypes) {
-				type.getArgTypes().add(readType(tni, argRule, lookup));
-			}
-			for (TypeContext retRule : TyphonModelReader.readTypes(((FuncTypeContext) rule).tnRetType)) {
-				type.getRetTypes().add(readType(tni, retRule, lookup));
-			}
 			if (((FuncTypeContext) rule).tnTemplate != null) {
 				type.getTemplate().addAll(TyphonModelReader.readTemplateParams(tni, ((FuncTypeContext) rule).tnTemplate.tnArgs));
+			}
+			
+			for (TypeContext argRule : ((FuncTypeContext) rule).tnArgTypes) {
+				type.getArgTypes().add(readType(tni, argRule, type));
+			}
+			for (TypeContext retRule : TyphonModelReader.readTypes(((FuncTypeContext) rule).tnRetType)) {
+				type.getRetTypes().add(readType(tni, retRule, type));
 			}
 			
 			return new TypeRef(new SourceInfo(rule), type);

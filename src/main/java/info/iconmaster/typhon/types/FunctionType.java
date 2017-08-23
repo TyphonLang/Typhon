@@ -84,7 +84,12 @@ public class FunctionType extends Type {
 	@Override
 	public Package getTypePackage() {
 		if (typePackage == null) {
-			typePackage = new Package(source, null, tni.corePackage);
+			typePackage = new Package(source, null, tni.corePackage) {
+				@Override
+				public MemberAccess getMemberParent() {
+					return FunctionType.this;
+				}
+			};
 			for (TemplateType t : template) {
 				typePackage.addType(t);
 			}

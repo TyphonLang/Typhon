@@ -1,14 +1,19 @@
 package info.iconmaster.typhon.compiler;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import info.iconmaster.typhon.antlr.TyphonBaseVisitor;
+import info.iconmaster.typhon.antlr.TyphonParser.DefStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.LvalueContext;
 import info.iconmaster.typhon.antlr.TyphonParser.StatContext;
 import info.iconmaster.typhon.model.Field;
 import info.iconmaster.typhon.model.Function;
 import info.iconmaster.typhon.model.Package;
 import info.iconmaster.typhon.model.Parameter;
 import info.iconmaster.typhon.tnil.CodeBlock;
+import info.iconmaster.typhon.tnil.Instruction;
 import info.iconmaster.typhon.types.TypeRef;
 
 /**
@@ -66,8 +71,11 @@ public class TyphonCompiler {
 			}
 		} else {
 			// expr form
+			List<Variable> vars = new ArrayList<>(block.returnVars);
+			
 			for (ExprContext expr : (List<ExprContext>) f.getRawCode()) {
-				// TODO
+				int used = compileExpr(scope, expr, vars);
+				vars = vars.subList(0, used);
 			}
 		}
 	}
@@ -95,6 +103,12 @@ public class TyphonCompiler {
 	 */
 	public void compileStat(Scope scope, StatContext rule, List<TypeRef> expectedType) {
 		// TODO
+		
+		TyphonBaseVisitor<Void> visitor = new TyphonBaseVisitor<Void>() {
+			
+		};
+		
+		visitor.visit(rule);
 	}
 	
 	/**
@@ -104,9 +118,34 @@ public class TyphonCompiler {
 	 * @param scope The current scope. Instructions get placed in this scope's code block.
 	 * @param rule The rule representing the expression.
 	 * @param insertInto The variables that the expression will be evaluated into in runtime.
-	 * @param expectedType The expected type signature of the expression. May be null.
+	 * @return The number of variables that were filled.
 	 */
-	public void compileExpr(Scope scope, ExprContext rule, List<Variable> insertInto, List<TypeRef> expectedType) {
+	public int compileExpr(Scope scope, ExprContext rule, List<Variable> insertInto) {
 		// TODO
+		
+		TyphonBaseVisitor<Integer> visitor = new TyphonBaseVisitor<Integer>() {
+			
+		};
+		
+		return visitor.visit(rule);
+	}
+	
+	/**
+	 * Produces the instructions and variable necessary to assign to the lvalue provided.
+	 * 
+	 * @param scope The current scope.
+	 * @param rule The rule representing the lvalue.
+	 * @param postfix This function inserts postfix instructions into this list.
+	 * After you assign the expression to the variable returned, add these instructions to the code block.
+	 * @return The variable you need to assign the rvalue to (before adding the postfix).
+	 */
+	public Variable compileLvalue(Scope scope, LvalueContext rule, List<Instruction> postfix) {
+		// TODO
+		
+		TyphonBaseVisitor<Variable> visitor = new TyphonBaseVisitor<Variable>() {
+			
+		};
+		
+		return visitor.visit(rule);
 	}
 }

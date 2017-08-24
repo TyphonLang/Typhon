@@ -197,9 +197,21 @@ public class TypeRef extends TyphonModelEntity implements MemberAccess {
 	public TypeRef copy() {
 		TypeRef t = new TypeRef(tni, source);
 		t.setType(type);
+		t.isVar(isVar);
+		t.isConst(isConst);
 		for (TemplateArgument arg : getTemplateArgs()) {
 			t.getTemplateArgs().add(arg.copy());
 		}
+		return t;
+	}
+	
+	/**
+	 * @param tni
+	 * @return The typeref universally understood as 'var'.
+	 */
+	public static TypeRef var(TyphonInput tni) {
+		TypeRef t = new TypeRef(tni);
+		t.isVar(true);
 		return t;
 	}
 }

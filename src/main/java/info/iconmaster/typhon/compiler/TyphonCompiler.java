@@ -5,11 +5,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import info.iconmaster.typhon.TyphonInput;
+import org.antlr.v4.runtime.ParserRuleContext;
+
 import info.iconmaster.typhon.antlr.TyphonBaseVisitor;
 import info.iconmaster.typhon.antlr.TyphonParser.DefStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.LvalueContext;
+import info.iconmaster.typhon.antlr.TyphonParser.MemberExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.NumConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ParamNameContext;
 import info.iconmaster.typhon.antlr.TyphonParser.StatContext;
@@ -192,6 +194,7 @@ public class TyphonCompiler {
 							return Arrays.asList(f.type);
 						}
 						
+						// TODO: handle method vs. static calls
 						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {Arrays.asList(insertInto.get(0)), f.getGetter(), new ArrayList<>()}));
 						return Arrays.asList(f.type);
 					} else {
@@ -201,9 +204,70 @@ public class TyphonCompiler {
 					}
 				}
 			}
+			
+			@Override
+			public List<TypeRef> visitMemberExpr(MemberExprContext ctx) {
+				// TODO: we assume all are .'s and no .?'s
+				//List<ParserRuleContext> rules = new ArrayList<>();
+				List<String> names = new ArrayList<>();
+				ExprContext expr = ctx;
+				
+				while (true) {
+					if (expr instanceof MemberExprContext) {
+						//rules.addAll(0, ((MemberExprContext) expr).tnValue);
+						names.add(0, ((MemberExprContext) expr).tnValue.getText());
+						
+						//rules.addAll(0, ((MemberExprContext) expr).tnLookup);
+						names.addAll(0, ((MemberExprContext) expr).tnLookup.stream().map((e)->e.tnName.getText()).collect(Collectors.toList()));
+						
+						expr = ((MemberExprContext) expr).tnLhs;
+					} else if (expr instanceof VarExprContext) {
+						//rules.add(0, ((VarExprContext) expr).tnValue);
+						names.add(0, ((VarExprContext) expr).tnValue.getText());
+						expr = null;
+						break;
+					} else {
+						break;
+					}
+				}
+				
+				Variable exprVar = null;
+				MemberAccess base;
+				if (expr == null) {
+					base = scope.getCodeBlock().lookup;
+				} else {
+					TypeRef t = TypeRef.var(core.tni);
+					exprVar = scope.addTempVar(t, null);
+					compileExpr(scope, expr, Arrays.asList(exprVar));
+					base = exprVar.type;
+				}
+				
+				List<MemberAccess> access = lookup(base, names);
+				access = access.stream().filter((a)->a instanceof Field).collect(Collectors.toList());
+				
+				if (!access.isEmpty()) {
+					// it's a field
+					Field f = (Field)access.get(0);
+					
+					if (f.getGetter() == null) {
+						// error; field is write-only
+						core.tni.errors.add(new WriteOnlyError(new SourceInfo(ctx), f));
+						return Arrays.asList(f.type);
+					}
+					
+					// TODO: handle method vs. static calls
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {Arrays.asList(insertInto.get(0)), f.getGetter(), new ArrayList<>()}));
+					return Arrays.asList(f.type);
+				} else {
+					// error, not found
+					core.tni.errors.add(new UndefinedVariableError(new SourceInfo(ctx), ctx.tnValue.getText()));
+					return Arrays.asList(new TypeRef(core.TYPE_ANY));
+				}
+			}
 		};
 		
 		List<TypeRef> a = visitor.visit(rule);
+		if (a == null) return 0;
 		
 		int i = 0;
 		for (TypeRef t : a) {

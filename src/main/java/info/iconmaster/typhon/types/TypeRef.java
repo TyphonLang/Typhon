@@ -190,4 +190,16 @@ public class TypeRef extends TyphonModelEntity implements MemberAccess {
 	public MemberAccess getMemberParent() {
 		return type.getParent();
 	}
+	
+	/**
+	 * @return A copy of this type.
+	 */
+	public TypeRef copy() {
+		TypeRef t = new TypeRef(tni, source);
+		t.setType(type);
+		for (TemplateArgument arg : getTemplateArgs()) {
+			t.getTemplateArgs().add(arg.copy());
+		}
+		return t;
+	}
 }

@@ -126,4 +126,14 @@ public class Scope {
 		a.addAll(tempVars);
 		return a;
 	}
+	
+	/**
+	 * Returns true if there is a variable with a given name in this scope. It does not check the parent scope. 
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public boolean inThisScope(String name) {
+		return vars.containsKey(name);
+	}
 }

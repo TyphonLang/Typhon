@@ -80,4 +80,14 @@ public class TemplateArgument extends TyphonModelEntity {
 	public String toString() {
 		return getLabel()+"->"+getValue();
 	}
+	
+	/**
+	 * @return A copy of this template argument and its ecnlosing type.
+	 */
+	public TemplateArgument copy() {
+		TemplateArgument t = new TemplateArgument(tni, source);
+		t.label = label;
+		t.value = value.copy();
+		return t;
+	}
 }

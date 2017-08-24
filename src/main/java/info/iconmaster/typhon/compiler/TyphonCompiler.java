@@ -175,18 +175,13 @@ public class TyphonCompiler {
 			public List<TypeRef> visitVarExpr(VarExprContext ctx) {
 				if (insertInto.size() == 0) return Arrays.asList();
 				
-				Variable var = scope.getVar(ctx.tnValue.getText());
-				if (var != null) {
-					// it's a local variable
-					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.MOV, new Object[] {insertInto.get(0), var}));
-					return Arrays.asList(var.type);
-				} else {
-					List<MemberAccess> access = lookup(scope.getCodeBlock().lookup, Arrays.asList(ctx.tnValue.getText()));
-					access = access.stream().filter((a)->a instanceof Field).collect(Collectors.toList());
-					
-					if (!access.isEmpty()) {
+				List<MemberAccess> access = lookup(scope, Arrays.asList(ctx.tnValue.getText()));
+				access = access.stream().filter((a)->a instanceof Field || a instanceof Variable).collect(Collectors.toList());
+				
+				if (!access.isEmpty()) {
+					if (access.get(0) instanceof Field) {
 						// it's a field
-						Field f = (Field)access.get(0);
+						Field f = (Field) access.get(0);
 						
 						if (f.getGetter() == null) {
 							// error; field is write-only
@@ -198,10 +193,15 @@ public class TyphonCompiler {
 						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {Arrays.asList(insertInto.get(0)), f.getGetter(), new ArrayList<>()}));
 						return Arrays.asList(f.type);
 					} else {
-						// error, not found
-						core.tni.errors.add(new UndefinedVariableError(new SourceInfo(ctx), ctx.tnValue.getText()));
-						return Arrays.asList(new TypeRef(core.TYPE_ANY));
+						// it's a local variable
+						Variable var = (Variable) access.get(0);
+						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.MOV, new Object[] {insertInto.get(0), var}));
+						return Arrays.asList(var.type);
 					}
+				} else {
+					// error, not found
+					core.tni.errors.add(new UndefinedVariableError(new SourceInfo(ctx), ctx.tnValue.getText()));
+					return Arrays.asList(new TypeRef(core.TYPE_ANY));
 				}
 			}
 			
@@ -234,7 +234,7 @@ public class TyphonCompiler {
 				Variable exprVar = null;
 				MemberAccess base;
 				if (expr == null) {
-					base = scope.getCodeBlock().lookup;
+					base = scope;
 				} else {
 					TypeRef t = TypeRef.var(core.tni);
 					exprVar = scope.addTempVar(t, null);

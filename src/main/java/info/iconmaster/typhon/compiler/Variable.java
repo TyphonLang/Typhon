@@ -1,5 +1,8 @@
 package info.iconmaster.typhon.compiler;
 
+import java.util.List;
+
+import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.util.SourceInfo;
 
@@ -9,7 +12,7 @@ import info.iconmaster.typhon.util.SourceInfo;
  * @author iconmaster
  *
  */
-public class Variable {
+public class Variable implements MemberAccess {
 	/**
 	 * The name. May be null.
 	 */
@@ -44,5 +47,20 @@ public class Variable {
 		this.scope = scope;
 		this.type = type;
 		this.declaredAt = declaredAt;
+	}
+
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	@Override
+	public MemberAccess getMemberParent() {
+		return scope;
+	}
+	
+	@Override
+	public List<MemberAccess> getMembers() {
+		return type.getMembers();
 	}
 }

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.tnil.CodeBlock;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.util.SourceInfo;
@@ -16,7 +17,7 @@ import info.iconmaster.typhon.util.SourceInfo;
  * @author iconmaster
  *
  */
-public class Scope {
+public class Scope implements MemberAccess {
 	/**
 	 * User variables in this scope.
 	 */
@@ -135,5 +136,20 @@ public class Scope {
 	 */
 	public boolean inThisScope(String name) {
 		return vars.containsKey(name);
+	}
+
+	@Override
+	public String getName() {
+		return null;
+	}
+
+	@Override
+	public MemberAccess getMemberParent() {
+		return parent == null ? codeBlock.lookup : parent;
+	}
+	
+	@Override
+	public List<MemberAccess> getMembers() {
+		return (List) getVars();
 	}
 }

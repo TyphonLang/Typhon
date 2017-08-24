@@ -1,12 +1,16 @@
 package info.iconmaster.typhon.model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
 import info.iconmaster.typhon.tnil.CodeBlock;
+import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.util.SourceInfo;
 
@@ -150,5 +154,49 @@ public class Field extends TyphonModelEntity implements MemberAccess {
 	@Override
 	public MemberAccess getMemberParent() {
 		return getParent();
+	}
+	
+	/**
+	 * The getter function for this field.
+	 */
+	private Function getter;
+	
+	/**
+	 * The library function that is the default getter function for this field.
+	 */
+	private Function defaultGetter;
+	
+	/**
+	 * False if this field is write-only.
+	 */
+	private boolean hasGetter = true;
+	
+	/**
+	 * @return The getter function for this field. May be null if this field is write-only.
+	 */
+	public Function getGetter() {
+		if (!hasGetter) return null;
+		
+		return getter == null ? defaultGetter() : getter;
+	}
+	
+	/**
+	 * @param f The getter function for this field. May be null if this field is write-only.
+	 */
+	public void setGetter(Function f) {
+		getter = f;
+		hasGetter = (f != null);
+	}
+	
+	/**
+	 * @return The library function that is the default getter function for this field.
+	 */
+	public Function defaultGetter() {
+		if (defaultGetter == null) {
+			// make the default getter function
+			defaultGetter = new Function(tni, getName(), new TemplateType[0], new Parameter[0], new TypeRef[] {type});
+		}
+		
+		return defaultGetter;
 	}
 }

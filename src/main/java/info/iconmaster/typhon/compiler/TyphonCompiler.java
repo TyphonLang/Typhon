@@ -17,6 +17,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.VarExprContext;
 import info.iconmaster.typhon.errors.DuplicateVarNameError;
 import info.iconmaster.typhon.errors.TypeError;
 import info.iconmaster.typhon.errors.UndefinedVariableError;
+import info.iconmaster.typhon.errors.WriteOnlyError;
 import info.iconmaster.typhon.model.CorePackage;
 import info.iconmaster.typhon.model.Field;
 import info.iconmaster.typhon.model.Function;
@@ -184,12 +185,19 @@ public class TyphonCompiler {
 					if (!access.isEmpty()) {
 						// it's a field
 						Field f = (Field)access.get(0);
-						// TODO: call the getter function of this field
+						
+						if (f.getGetter() == null) {
+							// error; field is write-only
+							core.tni.errors.add(new WriteOnlyError(new SourceInfo(ctx), f));
+							return Arrays.asList(f.type);
+						}
+						
+						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {Arrays.asList(insertInto.get(0)), f.getGetter(), new ArrayList<>()}));
 						return Arrays.asList(f.type);
 					} else {
 						// error, not found
 						core.tni.errors.add(new UndefinedVariableError(new SourceInfo(ctx), ctx.tnValue.getText()));
-						return Arrays.asList();
+						return Arrays.asList(new TypeRef(core.TYPE_ANY));
 					}
 				}
 			}

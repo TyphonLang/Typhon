@@ -5,8 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-
 import info.iconmaster.typhon.antlr.TyphonBaseVisitor;
 import info.iconmaster.typhon.antlr.TyphonParser.DefStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
@@ -29,6 +27,7 @@ import info.iconmaster.typhon.model.Parameter;
 import info.iconmaster.typhon.tnil.CodeBlock;
 import info.iconmaster.typhon.tnil.Instruction;
 import info.iconmaster.typhon.tnil.Instruction.OpCode;
+import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.types.TyphonTypeResolver;
 import info.iconmaster.typhon.util.SourceInfo;
@@ -189,8 +188,14 @@ public class TyphonCompiler {
 							return Arrays.asList(f.type);
 						}
 						
-						// TODO: handle method vs. static calls
-						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {Arrays.asList(insertInto.get(0)), f.getGetter(), new ArrayList<>()}));
+						Type fieldOf = f.getFieldOf();
+						if (fieldOf == null) {
+							scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALLSTATIC, new Object[] {Arrays.asList(insertInto.get(0)), f.getGetter(), new ArrayList<>()}));
+						} else {
+							// TODO: this?
+							scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {Arrays.asList(insertInto.get(0)), null, f.getGetter(), new ArrayList<>()}));
+						}
+						
 						return Arrays.asList(f.type);
 					} else {
 						// it's a local variable
@@ -255,8 +260,14 @@ public class TyphonCompiler {
 						return Arrays.asList(f.type);
 					}
 					
-					// TODO: handle method vs. static calls
-					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {Arrays.asList(insertInto.get(0)), f.getGetter(), new ArrayList<>()}));
+					Type fieldOf = f.getFieldOf();
+					if (fieldOf == null) {
+						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALLSTATIC, new Object[] {Arrays.asList(insertInto.get(0)), f.getGetter(), new ArrayList<>()}));
+					} else {
+						// TODO: this?
+						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {Arrays.asList(insertInto.get(0)), null, f.getGetter(), new ArrayList<>()}));
+					}
+					
 					return Arrays.asList(f.type);
 				} else {
 					// error, not found

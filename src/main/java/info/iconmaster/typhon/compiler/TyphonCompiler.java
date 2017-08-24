@@ -7,6 +7,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.StatContext;
 import info.iconmaster.typhon.model.Field;
 import info.iconmaster.typhon.model.Function;
 import info.iconmaster.typhon.model.Package;
+import info.iconmaster.typhon.model.Parameter;
 import info.iconmaster.typhon.tnil.CodeBlock;
 import info.iconmaster.typhon.types.TypeRef;
 
@@ -42,12 +43,33 @@ public class TyphonCompiler {
 	 * @param f
 	 */
 	public void compile(Function f) {
-		if (!f.needsCompiled()) {
+		if (!f.needsCompiled() || f.getForm() == Function.Form.STUB) {
 			return;
 		}
 		f.needsCompiled(false);
 		
-		// TODO
+		CodeBlock block = new CodeBlock(f.tni, f.source, f);
+		f.setCode(block);
+		Scope scope = new Scope(block);
+		
+		for (Parameter param : f.getParams()) {
+			scope.addVar(param.getName(), param.getType(), param.source);
+		}
+		for (TypeRef retType : f.getRetType()) {
+			block.returnVars.add(scope.addTempVar(retType, null));
+		}
+		
+		if (f.getForm() == Function.Form.BLOCK) {
+			// block form
+			for (StatContext stat : (List<StatContext>) f.getRawCode()) {
+				compileStat(scope, stat, f.getRetType());
+			}
+		} else {
+			// expr form
+			for (ExprContext expr : (List<ExprContext>) f.getRawCode()) {
+				// TODO
+			}
+		}
 	}
 	
 	/**

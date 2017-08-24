@@ -35,7 +35,7 @@ public class CodeBlock extends TyphonModelEntity {
 	/**
 	 * The slots in which this block places its return values.
 	 */
-	public List<Integer> returnVars = new ArrayList<>();
+	public List<Variable> returnVars = new ArrayList<>();
 	
 	/**
 	 * The local variables present in this code block.

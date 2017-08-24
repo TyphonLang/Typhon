@@ -42,6 +42,7 @@ public class Instruction extends TyphonModelEntity {
 		CALL,
 		CALLSTATIC,
 		CALLFPTR,
+		LABEL,
 		JUMP,
 		JUMPTRUE,
 		JUMPFALSE,

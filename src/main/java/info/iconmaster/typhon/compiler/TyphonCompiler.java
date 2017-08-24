@@ -11,8 +11,10 @@ import info.iconmaster.typhon.antlr.TyphonParser.LvalueContext;
 import info.iconmaster.typhon.antlr.TyphonParser.NumConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ParamNameContext;
 import info.iconmaster.typhon.antlr.TyphonParser.StatContext;
+import info.iconmaster.typhon.antlr.TyphonParser.VarExprContext;
 import info.iconmaster.typhon.errors.DuplicateVarNameError;
 import info.iconmaster.typhon.errors.TypeError;
+import info.iconmaster.typhon.errors.UndefinedVariableError;
 import info.iconmaster.typhon.model.CorePackage;
 import info.iconmaster.typhon.model.Field;
 import info.iconmaster.typhon.model.Function;
@@ -164,6 +166,20 @@ public class TyphonCompiler {
 				
 				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.MOVINT, new Object[] {insertInto.get(0), ctx.tnValue.getText()}));
 				return Arrays.asList(new TypeRef(core.TYPE_INT));
+			}
+			
+			@Override
+			public List<TypeRef> visitVarExpr(VarExprContext ctx) {
+				if (insertInto.size() == 0) return Arrays.asList();
+				
+				Variable var = scope.getVar(ctx.tnValue.getText());
+				if (var == null) {
+					core.tni.errors.add(new UndefinedVariableError(new SourceInfo(ctx), ctx.tnValue.getText()));
+					return Arrays.asList();
+				}
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.MOV, new Object[] {insertInto.get(0), var}));
+				return Arrays.asList(var.type);
 			}
 		};
 		

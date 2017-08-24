@@ -32,6 +32,19 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(1, code.ops.size());
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
 			Assert.assertEquals("1", code.ops.get(0).arg(1));
+		}),new TestCase("int f() => 1", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals("1", code.ops.get(0).arg(1));
+		}),new TestCase("void f() {var x = 1; var y = x;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(2, code.ops.size());
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals("1", code.ops.get(0).arg(1));
+			Assert.assertEquals(OpCode.MOV, code.ops.get(1).op);
 		}));
 	}
     

@@ -38,6 +38,8 @@ public class TestCompileExpr extends TyphonTest {
 			Assert.assertEquals(1, code.ops.size());
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
 			Assert.assertEquals("1", code.ops.get(0).arg(1));
+		}),new TestCase("x", 1, (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
 		}));
 	}
     

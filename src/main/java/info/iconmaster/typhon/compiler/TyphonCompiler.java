@@ -3,7 +3,9 @@ package info.iconmaster.typhon.compiler;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonBaseVisitor;
 import info.iconmaster.typhon.antlr.TyphonParser.DefStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
@@ -18,6 +20,7 @@ import info.iconmaster.typhon.errors.UndefinedVariableError;
 import info.iconmaster.typhon.model.CorePackage;
 import info.iconmaster.typhon.model.Field;
 import info.iconmaster.typhon.model.Function;
+import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.model.Package;
 import info.iconmaster.typhon.model.Parameter;
 import info.iconmaster.typhon.tnil.CodeBlock;
@@ -113,8 +116,6 @@ public class TyphonCompiler {
 	 * @param expectedType The expected return type of the block. May be null.
 	 */
 	public static void compileStat(Scope scope, StatContext rule, List<TypeRef> expectedType) {
-		// TODO
-		
 		TyphonBaseVisitor<Void> visitor = new TyphonBaseVisitor<Void>() {
 			@Override
 			public Void visitDefStat(DefStatContext ctx) {
@@ -156,7 +157,6 @@ public class TyphonCompiler {
 	 * @return The number of variables that were filled.
 	 */
 	public static int compileExpr(Scope scope, ExprContext rule, List<Variable> insertInto) {
-		// TODO
 		CorePackage core = scope.getCodeBlock().tni.corePackage;
 		
 		TyphonBaseVisitor<List<TypeRef>> visitor = new TyphonBaseVisitor<List<TypeRef>>() {
@@ -173,13 +173,25 @@ public class TyphonCompiler {
 				if (insertInto.size() == 0) return Arrays.asList();
 				
 				Variable var = scope.getVar(ctx.tnValue.getText());
-				if (var == null) {
-					core.tni.errors.add(new UndefinedVariableError(new SourceInfo(ctx), ctx.tnValue.getText()));
-					return Arrays.asList();
+				if (var != null) {
+					// it's a local variable
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.MOV, new Object[] {insertInto.get(0), var}));
+					return Arrays.asList(var.type);
+				} else {
+					List<MemberAccess> access = lookup(scope.getCodeBlock().lookup, Arrays.asList(ctx.tnValue.getText()));
+					access = access.stream().filter((a)->a instanceof Field).collect(Collectors.toList());
+					
+					if (!access.isEmpty()) {
+						// it's a field
+						Field f = (Field)access.get(0);
+						// TODO: call the getter function of this field
+						return Arrays.asList(f.type);
+					} else {
+						// error, not found
+						core.tni.errors.add(new UndefinedVariableError(new SourceInfo(ctx), ctx.tnValue.getText()));
+						return Arrays.asList();
+					}
 				}
-				
-				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.MOV, new Object[] {insertInto.get(0), var}));
-				return Arrays.asList(var.type);
 			}
 		};
 		
@@ -215,5 +227,29 @@ public class TyphonCompiler {
 		};
 		
 		return visitor.visit(rule);
+	}
+	
+	public static List<MemberAccess> lookup(MemberAccess base, List<String> members) {
+		List<MemberAccess> result = new ArrayList<>();
+		
+		while (base != null) {
+			List<MemberAccess> matches = new ArrayList<>();
+			matches.add(base);
+			
+			for (String name : members) {
+				List<MemberAccess> newMatches = new ArrayList<>();
+				
+				for (MemberAccess match : matches) {
+					newMatches.addAll(match.getMembers(name));
+				}
+				
+				matches = newMatches;
+			}
+			
+			result.addAll(matches);
+			base = base.getMemberParent();
+		}
+		
+		return result;
 	}
 }

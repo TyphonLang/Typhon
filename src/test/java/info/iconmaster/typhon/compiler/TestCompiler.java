@@ -45,6 +45,8 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
 			Assert.assertEquals("1", code.ops.get(0).arg(1));
 			Assert.assertEquals(OpCode.MOV, code.ops.get(1).op);
+		}),new TestCase("var a; void f() {var x = a;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
 		}));
 	}
     

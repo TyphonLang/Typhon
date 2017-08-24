@@ -10,9 +10,20 @@ import info.iconmaster.typhon.model.Package;
 import info.iconmaster.typhon.tnil.CodeBlock;
 import info.iconmaster.typhon.types.TypeRef;
 
+/**
+ * The Typhon compiler.
+ * 
+ * @author iconmaster
+ *
+ */
 public class TyphonCompiler {
 	private TyphonCompiler() {}
 	
+	/**
+	 * Compiles all the members of a package.
+	 * 
+	 * @param p
+	 */
 	public void compile(Package p) {
 		if (!p.needsCompiled()) {
 			return;
@@ -25,6 +36,11 @@ public class TyphonCompiler {
 		p.getSubpackges().stream().forEach((f)->compile(f));
 	}
 	
+	/**
+	 * Compiles a function. Updates the contents of the argument.
+	 * 
+	 * @param f
+	 */
 	public void compile(Function f) {
 		if (!f.needsCompiled()) {
 			return;
@@ -34,6 +50,11 @@ public class TyphonCompiler {
 		// TODO
 	}
 	
+	/**
+	 * Compiles a field. Updates the contents of the argument.
+	 * 
+	 * @param f
+	 */
 	public void compile(Field f) {
 		if (!f.needsCompiled()) {
 			return;
@@ -43,20 +64,26 @@ public class TyphonCompiler {
 		// TODO
 	}
 	
-	public CodeBlock compileBlock(List<StatContext> rules, List<TypeRef> expectedType) {
+	/**
+	 * Compiles a statement, placing the translated instructions in the provided code block.
+	 * 
+	 * @param scope The current scope. Instructions get placed in this scope's code block.
+	 * @param rule The rule representing the statement.
+	 * @param expectedType The expected return type of the block. May be null.
+	 */
+	public void compileStat(Scope scope, StatContext rule, List<TypeRef> expectedType) {
 		// TODO
-		return null;
 	}
 	
-	public void compileBlock(Scope scope, List<StatContext> rules, List<TypeRef> expectedType) {
-		// TODO
-	}
-	
-	public CodeBlock compileExpr(ExprContext rule, List<TypeRef> expectedType) {
-		// TODO
-		return null;
-	}
-	
+	/**
+	 * Compiles an expression, placing the translated instructions in the provided code block.
+	 * It translates it into instructions that place the results of the expression into <tt>insertInto</tt>.
+	 * 
+	 * @param scope The current scope. Instructions get placed in this scope's code block.
+	 * @param rule The rule representing the expression.
+	 * @param insertInto The variables that the expression will be evaluated into in runtime.
+	 * @param expectedType The expected type signature of the expression. May be null.
+	 */
 	public void compileExpr(Scope scope, ExprContext rule, List<Variable> insertInto, List<TypeRef> expectedType) {
 		// TODO
 	}

@@ -17,19 +17,50 @@ import info.iconmaster.typhon.util.SourceInfo;
  *
  */
 public class CodeBlock extends TyphonModelEntity {
+	/**
+	 * Where this code block occurs, scope-wise.
+	 */
 	public MemberAccess lookup;
 	
+	/**
+	 * The instructions that compose this block.
+	 */
 	public List<Instruction> ops = new ArrayList<>();
+	
+	/**
+	 * The types that this code block returns.
+	 */
 	public List<TypeRef> returnType = new ArrayList<>();
+	
+	/**
+	 * The slots in which this block places its return values.
+	 */
 	public List<Integer> returnVars = new ArrayList<>();
-	public int slotsUsed = 0;
+	
+	/**
+	 * The local variables present in this code block.
+	 */
 	public List<Variable> vars = new ArrayList<>();
 	
+	/**
+	 * Create a new code block.
+	 * 
+	 * @param input
+	 * @param source
+	 * @param lookup Where this code block occurs, scope-wise.
+	 */
 	public CodeBlock(TyphonInput input, SourceInfo source, MemberAccess lookup) {
 		super(input, source);
 		this.lookup = lookup;
 	}
 
+	/**
+	 * Create a new code block.
+	 * 
+	 * @param input
+	 * @param source
+	 * @param lookup Where this code block occurs, scope-wise.
+	 */
 	public CodeBlock(TyphonInput input, MemberAccess lookup) {
 		super(input);
 		this.lookup = lookup;

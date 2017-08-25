@@ -7,7 +7,7 @@ apply plugin: 'maven'
 // variables
 
 group = 'info.iconmaster'
-version = '0.2.3'
+version = '0.3.0'
 
 def mainClass = 'info.iconmaster.typhon.Typhon'
 def processedSrcDir = "${buildDir}/generated-src/java/main"

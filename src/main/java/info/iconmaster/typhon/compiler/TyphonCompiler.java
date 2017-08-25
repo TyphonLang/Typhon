@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import info.iconmaster.typhon.antlr.TyphonBaseVisitor;
+import info.iconmaster.typhon.antlr.TyphonParser.AssignStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DefStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.LvalueContext;
@@ -126,6 +127,8 @@ public class TyphonCompiler {
 	 * @param expectedType The expected return type of the block. May be null.
 	 */
 	public static void compileStat(Scope scope, StatContext rule, List<TypeRef> expectedType) {
+		CorePackage core = scope.getCodeBlock().tni.corePackage;
+		
 		TyphonBaseVisitor<Void> visitor = new TyphonBaseVisitor<Void>() {
 			@Override
 			public Void visitDefStat(DefStatContext ctx) {
@@ -148,6 +151,41 @@ public class TyphonCompiler {
 					for (ExprContext expr : ctx.tnValues) {
 						vars = vars.subList(compileExpr(scope, expr, vars), vars.size());
 					}
+				}
+				
+				return null;
+			}
+			
+			@Override
+			public Void visitAssignStat(AssignStatContext ctx) {
+				// move all the right hand sides to temp vars
+				List<Variable> rhs = new ArrayList<>();
+				
+				for (LvalueContext lval : ctx.tnLvals) {
+					Variable var = scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(lval));
+					rhs.add(var);
+				}
+				
+				List<Variable> tempRhs = rhs;
+				for (ExprContext expr : ctx.tnValues) {
+					tempRhs = tempRhs.subList(compileExpr(scope, expr, tempRhs), tempRhs.size());
+				}
+				
+				// assign to the lvalues
+				int i = 0;
+				for (LvalueContext lval : ctx.tnLvals) {
+					Variable src = rhs.get(i);
+					List<Instruction> postfix = new ArrayList<>();
+					
+					Variable dest = compileLvalue(scope, lval, postfix);
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.MOV, new Object[] {dest, src}));
+					scope.getCodeBlock().ops.addAll(postfix);
+					
+					if (!src.type.canCastTo(dest.type)) {
+						core.tni.errors.add(new TypeError(new SourceInfo(rule), src.type, dest.type));
+					}
+					
+					i++;
 				}
 				
 				return null;

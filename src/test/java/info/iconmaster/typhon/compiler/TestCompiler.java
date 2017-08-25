@@ -58,6 +58,16 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(0, code.tni.errors.size());
 		}),new TestCase("class a {int b;} a x; void f() {int y = (x).b;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("void f() {int x; x = 1;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("void f() {[int] x; x = 1;}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("void f() {int x, y; x, y = 1, 2;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("void f() {int x, y = 1, 2; x, y = y, x;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("int x; void f() {x = 1;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
 		}));
 	}
     

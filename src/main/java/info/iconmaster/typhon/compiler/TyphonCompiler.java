@@ -5,12 +5,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.antlr.v4.runtime.ParserRuleContext;
+
 import info.iconmaster.typhon.antlr.TyphonBaseVisitor;
 import info.iconmaster.typhon.antlr.TyphonParser.AssignStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DefStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.LvalueContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MemberExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.MemberLvalueContext;
 import info.iconmaster.typhon.antlr.TyphonParser.NumConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ParamNameContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ParensExprContext;
@@ -313,6 +316,7 @@ public class TyphonCompiler {
 					return Arrays.asList(TypeRef.var(core.tni));
 				}
 				
+				// process the chosen path
 				List<MemberAccess> path = paths.get(0);
 				Variable var = LookupUtils.getSubjectOfPath(scope, path, names);
 				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.MOV, new Object[] {insertInto.get(0), var}));
@@ -395,6 +399,89 @@ public class TyphonCompiler {
 				// error, not found
 				core.tni.errors.add(new UndefinedVariableError(new SourceInfo(ctx), ctx.tnName.getText()));
 				return scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(ctx));
+			}
+			
+			@Override
+			public Variable visitMemberLvalue(MemberLvalueContext ctx) {
+				// TODO: we assume all are .'s and no .?'s
+				
+				// turn the rule into a list of member accesses
+				List<LookupElement> names = new ArrayList<>();
+				ParserRuleContext lval = ctx;
+				
+				while (true) {
+					if (lval instanceof MemberLvalueContext) {
+						if (((MemberLvalueContext) lval).tnRhs instanceof VarLvalueContext) {
+							names.add(0, new LookupElement(((MemberLvalueContext) lval).tnRhs.getText(), new SourceInfo(lval)));
+						} else {
+							// TODO
+						}
+						
+						names.addAll(0, ((MemberLvalueContext) lval).tnLookup.stream().map((e)->{
+							List<TemplateArgument> template = TyphonTypeResolver.readTemplateArgs(core.tni, e.tnTemplate.tnArgs, scope);
+							return new LookupElement(e.tnName.getText(), new SourceInfo(e), template);
+						}).collect(Collectors.toList()));
+						
+						lval = ((MemberLvalueContext) lval).tnLhs;
+					} else if (lval instanceof MemberExprContext) {
+						names.add(0, new LookupElement(((MemberExprContext) lval).tnValue.getText(), new SourceInfo(lval)));
+						
+						names.addAll(0, ((MemberExprContext) lval).tnLookup.stream().map((e)->{
+							List<TemplateArgument> template = TyphonTypeResolver.readTemplateArgs(core.tni, e.tnTemplate.tnArgs, scope);
+							return new LookupElement(e.tnName.getText(), new SourceInfo(e), template);
+						}).collect(Collectors.toList()));
+						
+						lval = ((MemberExprContext) lval).tnLhs;
+					} else if (lval instanceof VarExprContext) {
+						names.add(0, new LookupElement(((VarExprContext) lval).tnValue.getText(), new SourceInfo(lval)));
+						
+						lval = null;
+						break;
+					} else {
+						break;
+					}
+				}
+				
+				// create a list of possible member access routes
+				MemberAccess base = scope;
+				if (lval instanceof ExprContext) {
+					Variable exprVar = scope.addTempVar(TypeRef.var(core.tni), null);
+					base = exprVar;
+					
+					compileExpr(scope, (ExprContext) lval, Arrays.asList(exprVar));
+				}
+				
+				List<List<MemberAccess>> paths = LookupUtils.findPaths(scope, base, names);
+				paths.removeIf((path)->!(path.get(path.size()-1) instanceof Field));
+				
+				if (paths.isEmpty()) {
+					// error, no path found
+					core.tni.errors.add(new UndefinedVariableError(new SourceInfo(ctx), ctx.tnRhs.getText()));
+					return null;
+				}
+				List<MemberAccess> path = paths.get(0);
+				
+				// process the chosen path
+				
+				Field f = (Field) path.remove(path.size()-1);
+				Type fieldOf = f.getFieldOf();
+				
+				if (f.getSetter() == null) {
+					// error; field is read-only
+					core.tni.errors.add(new ReadOnlyError(new SourceInfo(ctx), f));
+					return null;
+				}
+				
+				Variable var = scope.addTempVar(f.type, new SourceInfo(ctx));
+				
+				if (fieldOf == null) {
+					postfix.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALLSTATIC, new Object[] {Arrays.asList(), f.getSetter(), Arrays.asList(var)}));
+				} else {
+					Variable fieldsInstance = LookupUtils.getSubjectOfPath(scope, path, names);
+					postfix.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {Arrays.asList(), fieldsInstance, f.getSetter(), Arrays.asList(var)}));
+				}
+				
+				return var;
 			}
 		};
 		

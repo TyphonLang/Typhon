@@ -101,20 +101,85 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(OpCode.MOV, code.ops.get(2).op);
 		}),new TestCase("class a {int b;} a x; void f() {int y = (x).b;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(3, code.ops.size());
+			
+			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(0).op);
+			Assert.assertEquals(1, code.ops.get(0).<List<Variable>>arg(0).size());
+			Assert.assertEquals("x", code.ops.get(0).<Function>arg(1).getName());
+			Assert.assertEquals(0, code.ops.get(0).<List<Variable>>arg(2).size());
+			
+			Assert.assertEquals(OpCode.CALL, code.ops.get(1).op);
+			Assert.assertEquals(1, code.ops.get(1).<List<Variable>>arg(0).size());
+			Assert.assertEquals("b", code.ops.get(1).<Function>arg(2).getName());
+			Assert.assertEquals(0, code.ops.get(1).<List<Variable>>arg(3).size());
+			
+			Assert.assertEquals(OpCode.MOV, code.ops.get(2).op);
 		}),new TestCase("void f() {int x; x = 1;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(2, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals("1", code.ops.get(0).arg(1));
+			
+			Assert.assertEquals(OpCode.MOV, code.ops.get(1).op);
 		}),new TestCase("void f() {[int] x; x = 1;}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
 		}),new TestCase("void f() {int x, y; x, y = 1, 2;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(4, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals("1", code.ops.get(0).arg(1));
+			
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(1).op);
+			Assert.assertEquals("2", code.ops.get(1).arg(1));
+			
+			Assert.assertEquals(OpCode.MOV, code.ops.get(2).op);
+			Assert.assertEquals(OpCode.MOV, code.ops.get(3).op);
 		}),new TestCase("void f() {int x, y = 1, 2; x, y = y, x;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(6, code.ops.size());
 		}),new TestCase("int x; void f() {x = 1;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(3, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals("1", code.ops.get(0).arg(1));
+			
+			Assert.assertEquals(OpCode.MOV, code.ops.get(1).op);
+			
+			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(2).op);
+			Assert.assertEquals(0, code.ops.get(2).<List<Variable>>arg(0).size());
+			Assert.assertEquals("x", code.ops.get(2).<Function>arg(1).getName());
+			Assert.assertEquals(1, code.ops.get(2).<List<Variable>>arg(2).size());
 		}),new TestCase("class a {int x; void f() {x = 1;}}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(3, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals("1", code.ops.get(0).arg(1));
+			
+			Assert.assertEquals(OpCode.MOV, code.ops.get(1).op);
+			
+			Assert.assertEquals(OpCode.CALL, code.ops.get(2).op);
+			Assert.assertEquals(0, code.ops.get(2).<List<Variable>>arg(0).size());
+			Assert.assertEquals("x", code.ops.get(2).<Function>arg(2).getName());
+			Assert.assertEquals(1, code.ops.get(2).<List<Variable>>arg(3).size());
 		}),new TestCase("class a {int x; void f() {var y = x;}}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			
+			Assert.assertEquals(OpCode.CALL, code.ops.get(0).op);
+			Assert.assertEquals(1, code.ops.get(0).<List<Variable>>arg(0).size());
+			Assert.assertEquals("x", code.ops.get(0).<Function>arg(2).getName());
+			Assert.assertEquals(0, code.ops.get(0).<List<Variable>>arg(3).size());
 		}));
 	}
     

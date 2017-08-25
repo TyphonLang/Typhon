@@ -1,4 +1,4 @@
-package info.iconmaster.typhon.tnil;
+package info.iconmaster.typhon.compiler;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.model.TyphonModelEntity;

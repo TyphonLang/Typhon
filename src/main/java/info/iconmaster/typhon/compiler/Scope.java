@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import info.iconmaster.typhon.model.MemberAccess;
-import info.iconmaster.typhon.tnil.CodeBlock;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.util.SourceInfo;
 

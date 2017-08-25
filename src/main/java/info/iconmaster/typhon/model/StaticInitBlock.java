@@ -4,7 +4,7 @@ import java.util.List;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonParser.StatContext;
-import info.iconmaster.typhon.tnil.CodeBlock;
+import info.iconmaster.typhon.compiler.CodeBlock;
 import info.iconmaster.typhon.util.SourceInfo;
 
 /**

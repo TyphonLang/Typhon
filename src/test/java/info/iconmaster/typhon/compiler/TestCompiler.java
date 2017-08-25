@@ -8,11 +8,10 @@ import org.junit.runners.Parameterized;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.TyphonTest;
+import info.iconmaster.typhon.compiler.Instruction.OpCode;
 import info.iconmaster.typhon.linker.TyphonLinker;
 import info.iconmaster.typhon.model.Package;
 import info.iconmaster.typhon.model.TyphonModelReader;
-import info.iconmaster.typhon.tnil.CodeBlock;
-import info.iconmaster.typhon.tnil.Instruction.OpCode;
 import info.iconmaster.typhon.types.TyphonTypeResolver;
 
 /**

@@ -1,10 +1,9 @@
-package info.iconmaster.typhon.tnil;
+package info.iconmaster.typhon.compiler;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import info.iconmaster.typhon.TyphonInput;
-import info.iconmaster.typhon.compiler.Variable;
 import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.model.TyphonModelEntity;
 import info.iconmaster.typhon.types.TypeRef;

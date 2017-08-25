@@ -16,9 +16,8 @@ import info.iconmaster.typhon.TyphonTest;
 import info.iconmaster.typhon.antlr.TyphonLexer;
 import info.iconmaster.typhon.antlr.TyphonParser;
 import info.iconmaster.typhon.antlr.TyphonParser.StatContext;
+import info.iconmaster.typhon.compiler.Instruction.OpCode;
 import info.iconmaster.typhon.linker.TyphonLinker;
-import info.iconmaster.typhon.tnil.CodeBlock;
-import info.iconmaster.typhon.tnil.Instruction.OpCode;
 
 /**
  * Tests <tt>{@link TyphonLinker}</tt>.

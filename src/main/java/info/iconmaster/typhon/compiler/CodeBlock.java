@@ -42,6 +42,11 @@ public class CodeBlock extends TyphonModelEntity {
 	public List<Variable> vars = new ArrayList<>();
 	
 	/**
+	 * The instance the code block is executing on. 'this', essentially. May be null if we're in a static context.
+	 */
+	public Variable instance;
+	
+	/**
 	 * Create a new code block.
 	 * 
 	 * @param input

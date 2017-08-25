@@ -244,4 +244,18 @@ public class Function extends TyphonModelEntity implements MemberAccess {
 	public MemberAccess getMemberParent() {
 		return getParent();
 	}
+	
+	/**
+	 * @return If this is an instance function: The type this function is part of. If this is a static function: Null.
+	 */
+	public Type getFieldOf() {
+		MemberAccess access = this;
+		while (access != null) {
+			if (access instanceof Type) {
+				return (Type) access;
+			}
+			access = access.getMemberParent();
+		}
+		return null;
+	}
 }

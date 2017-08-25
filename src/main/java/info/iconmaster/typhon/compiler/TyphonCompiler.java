@@ -71,6 +71,11 @@ public class TyphonCompiler {
 		f.setCode(block);
 		Scope scope = new Scope(block);
 		
+		Type fieldOf = f.getFieldOf();
+		if (fieldOf != null) {
+			block.instance = scope.addTempVar(new TypeRef(fieldOf), null);
+		}
+		
 		for (Parameter param : f.getParams()) {
 			scope.addVar(param.getName(), param.getType(), param.source);
 		}
@@ -190,8 +195,7 @@ public class TyphonCompiler {
 						if (fieldOf == null) {
 							scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALLSTATIC, new Object[] {Arrays.asList(insertInto.get(0)), f.getGetter(), new ArrayList<>()}));
 						} else {
-							// TODO: this?
-							scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {Arrays.asList(insertInto.get(0)), null, f.getGetter(), new ArrayList<>()}));
+							scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {Arrays.asList(insertInto.get(0)), scope.getCodeBlock().instance, f.getGetter(), new ArrayList<>()}));
 						}
 						
 						return Arrays.asList(f.type);
@@ -262,7 +266,7 @@ public class TyphonCompiler {
 					if (fieldOf == null) {
 						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALLSTATIC, new Object[] {Arrays.asList(insertInto.get(0)), f.getGetter(), new ArrayList<>()}));
 					} else {
-						// TODO: this?
+						// TODO: find the subject of the call
 						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {Arrays.asList(insertInto.get(0)), null, f.getGetter(), new ArrayList<>()}));
 					}
 					

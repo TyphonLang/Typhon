@@ -127,7 +127,13 @@ public class UserType extends Type {
 	@Override
 	public Package getTypePackage() {
 		if (typePackage == null) {
-			typePackage = new Package(source, null, getParent() == null ? tni.corePackage : getParent());
+			typePackage = new Package(source, null, getParent() == null ? tni.corePackage : getParent()) {
+				@Override
+				public MemberAccess getMemberParent() {
+					return UserType.this;
+				}
+			};
+			
 			for (TemplateType t : templates) {
 				typePackage.addType(t);
 			}

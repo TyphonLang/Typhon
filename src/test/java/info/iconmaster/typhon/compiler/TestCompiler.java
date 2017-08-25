@@ -1,6 +1,7 @@
 package info.iconmaster.typhon.compiler;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Consumer;
 
 import org.junit.Assert;
@@ -10,6 +11,7 @@ import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.TyphonTest;
 import info.iconmaster.typhon.compiler.Instruction.OpCode;
 import info.iconmaster.typhon.linker.TyphonLinker;
+import info.iconmaster.typhon.model.Function;
 import info.iconmaster.typhon.model.Package;
 import info.iconmaster.typhon.model.TyphonModelReader;
 import info.iconmaster.typhon.types.TyphonTypeResolver;
@@ -29,33 +31,74 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(0, code.tni.errors.size());
 			
 			Assert.assertEquals(1, code.ops.size());
+			
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
 			Assert.assertEquals("1", code.ops.get(0).arg(1));
 		}),new TestCase("int f() => 1", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
 			Assert.assertEquals(1, code.ops.size());
+			
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
 			Assert.assertEquals("1", code.ops.get(0).arg(1));
 		}),new TestCase("void f() {var x = 1; var y = x;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
 			Assert.assertEquals(2, code.ops.size());
+			
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
 			Assert.assertEquals("1", code.ops.get(0).arg(1));
+			
 			Assert.assertEquals(OpCode.MOV, code.ops.get(1).op);
 		}),new TestCase("var a; void f() {var x = a;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			
+			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(0).op);
+			Assert.assertEquals(1, code.ops.get(0).<List<Variable>>arg(0).size());
+			Assert.assertEquals("a", code.ops.get(0).<Function>arg(1).getName());
+			Assert.assertEquals(0, code.ops.get(0).<List<Variable>>arg(2).size());
 		}),new TestCase("int a; void f() {int x = a;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			
+			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(0).op);
+			Assert.assertEquals(1, code.ops.get(0).<List<Variable>>arg(0).size());
+			Assert.assertEquals("a", code.ops.get(0).<Function>arg(1).getName());
+			Assert.assertEquals(0, code.ops.get(0).<List<Variable>>arg(2).size());
 		}),new TestCase("var a; void f() {int x = a;}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
 		}),new TestCase("package p {var a;} void f() {var x = p.a;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(2, code.ops.size());
+			
+			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(0).op);
+			Assert.assertEquals(1, code.ops.get(0).<List<Variable>>arg(0).size());
+			Assert.assertEquals("a", code.ops.get(0).<Function>arg(1).getName());
+			Assert.assertEquals(0, code.ops.get(0).<List<Variable>>arg(2).size());
+			
+			Assert.assertEquals(OpCode.MOV, code.ops.get(1).op);
 		}),new TestCase("package p {var a;} void f() {var x = (p).a;}", (code)->{
 			Assert.assertEquals(2, code.tni.errors.size());
 		}),new TestCase("class a {int b;} a x; void f() {int y = x.b;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(3, code.ops.size());
+			
+			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(0).op);
+			Assert.assertEquals(1, code.ops.get(0).<List<Variable>>arg(0).size());
+			Assert.assertEquals("x", code.ops.get(0).<Function>arg(1).getName());
+			Assert.assertEquals(0, code.ops.get(0).<List<Variable>>arg(2).size());
+			
+			Assert.assertEquals(OpCode.CALL, code.ops.get(1).op);
+			Assert.assertEquals(1, code.ops.get(1).<List<Variable>>arg(0).size());
+			Assert.assertEquals("b", code.ops.get(1).<Function>arg(2).getName());
+			Assert.assertEquals(0, code.ops.get(1).<List<Variable>>arg(3).size());
+			
+			Assert.assertEquals(OpCode.MOV, code.ops.get(2).op);
 		}),new TestCase("class a {int b;} a x; void f() {int y = (x).b;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 		}),new TestCase("void f() {int x; x = 1;}", (code)->{

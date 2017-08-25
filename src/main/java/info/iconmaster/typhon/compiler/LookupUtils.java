@@ -2,12 +2,16 @@ package info.iconmaster.typhon.compiler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import info.iconmaster.typhon.compiler.Instruction.OpCode;
 import info.iconmaster.typhon.errors.WriteOnlyError;
 import info.iconmaster.typhon.model.Field;
+import info.iconmaster.typhon.model.Function;
 import info.iconmaster.typhon.model.MemberAccess;
+import info.iconmaster.typhon.model.Parameter;
 import info.iconmaster.typhon.model.TemplateArgument;
 import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
@@ -15,6 +19,29 @@ import info.iconmaster.typhon.util.SourceInfo;
 
 public class LookupUtils {
 	private LookupUtils() {}
+	
+	public static class LookupElement {
+		String name;
+		List<TemplateArgument> template = new ArrayList<>();
+		SourceInfo source;
+		
+		public LookupElement(String name, SourceInfo source) {
+			this.name = name;
+			this.source = source;
+		}
+		
+		public LookupElement(String name, SourceInfo source, List<TemplateArgument> template) {
+			this.name = name;
+			this.template.addAll(template);
+			this.source = source;
+		}
+		
+		public LookupElement(String name, SourceInfo source, TemplateArgument... template) {
+			this.name = name;
+			this.template.addAll(Arrays.asList(template));
+			this.source = source;
+		}
+	}
 
 	/**
 	 * Look up all possible paths of a list of names.
@@ -80,29 +107,6 @@ public class LookupUtils {
 		return result;
 	}
 	
-	public static class LookupElement {
-		String name;
-		List<TemplateArgument> template = new ArrayList<>();
-		SourceInfo source;
-		
-		public LookupElement(String name, SourceInfo source) {
-			this.name = name;
-			this.source = source;
-		}
-		
-		public LookupElement(String name, SourceInfo source, List<TemplateArgument> template) {
-			this.name = name;
-			this.template.addAll(template);
-			this.source = source;
-		}
-		
-		public LookupElement(String name, SourceInfo source, TemplateArgument... template) {
-			this.name = name;
-			this.template.addAll(Arrays.asList(template));
-			this.source = source;
-		}
-	}
-	
 	public static Variable getSubjectOfPath(Scope scope, List<MemberAccess> path, List<LookupElement> names) {
 		Variable var = scope.getCodeBlock().instance;
 		
@@ -142,5 +146,75 @@ public class LookupUtils {
 		}
 		
 		return var;
+	}
+	
+	public static class LookupArgument {
+		public Variable var;
+		public String label;
+		
+		public LookupArgument(Variable var) {
+			super();
+			this.var = var;
+		}
+		
+		public LookupArgument(Variable var, String label) {
+			super();
+			this.var = var;
+			this.label = label;
+		}
+	}
+	
+	public static Map<Parameter, Variable> getFuncArgMap(Function f, List<LookupArgument> args) {
+		Map<Parameter, Variable> result = new HashMap<>();
+		
+		// populate map
+		for (LookupArgument arg : args) {
+			if (arg.label == null) {
+				// positional argument; find the first unallocated parameter
+				boolean found = false;
+				for (Parameter param : f.getParams()) {
+					if (!result.containsKey(param)) {
+						result.put(param, arg.var);
+						found = true;
+						break;
+					}
+				}
+				
+				if (!found) {
+					// error; too many arguments
+					return null;
+				}
+			} else {
+				// keyword argument; find the corresponding parameter
+				boolean found = false;
+				for (Parameter param : f.getParams()) {
+					if (param.getName().equals(arg.label)) {
+						if (result.containsKey(param)) {
+							// error; duplicate argument
+							return null;
+						}
+						
+						result.put(param, arg.var);
+						found = true;
+						break;
+					}
+				}
+				
+				if (!found) {
+					// error; too many arguments
+					return null;
+				}
+			}
+		}
+		
+		// check to make sure no required parameters are left out
+		for (Parameter param : f.getParams()) {
+			if (!param.isOptional() && !result.containsKey(param)) {
+				// error; parameter required
+				return null;
+			}
+		}
+		
+		return result;
 	}
 }

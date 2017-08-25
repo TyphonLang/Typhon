@@ -209,6 +209,48 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(0, code.ops.get(1).<List<Variable>>arg(0).size());
 			Assert.assertEquals("y", code.ops.get(1).<Function>arg(2).getName());
 			Assert.assertEquals(1, code.ops.get(1).<List<Variable>>arg(3).size());
+		}),new TestCase("int g() {} void f() {int x = g();}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			
+			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(0).op);
+			Assert.assertEquals(1, code.ops.get(0).<List<Variable>>arg(0).size());
+			Assert.assertEquals("g", code.ops.get(0).<Function>arg(1).getName());
+			Assert.assertEquals(0, code.ops.get(0).<List<Variable>>arg(2).size());
+		}),new TestCase("package p {int g() {}} void f() {int x = p.g();}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			
+			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(0).op);
+			Assert.assertEquals(1, code.ops.get(0).<List<Variable>>arg(0).size());
+			Assert.assertEquals("g", code.ops.get(0).<Function>arg(1).getName());
+			Assert.assertEquals(0, code.ops.get(0).<List<Variable>>arg(2).size());
+		}),new TestCase("int g(int x) {} void f() {int x = g(1);}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(2, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals("1", code.ops.get(0).arg(1));
+			
+			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(1).op);
+			Assert.assertEquals(1, code.ops.get(1).<List<Variable>>arg(0).size());
+			Assert.assertEquals("g", code.ops.get(1).<Function>arg(1).getName());
+			Assert.assertEquals(1, code.ops.get(1).<List<Variable>>arg(2).size());
+		}),new TestCase("int g(int x, int y) {} void f() {int x = g(1, 2);}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("int g(int x, int y) {} void f() {int x = g(y: 1, 2);}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("int g(int x, int y = 2) {} void f() {int x = g(1);}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("int g() {} void f() {int x = g(1);}", (code)->{
+			Assert.assertEquals(2, code.tni.errors.size());
+		}),new TestCase("int g(int x) {} void f() {int x = g();}", (code)->{
+			Assert.assertEquals(2, code.tni.errors.size());
+		}),new TestCase("int g(int x) {} void f() {var y; int x = g(y);}", (code)->{
+			Assert.assertEquals(2, code.tni.errors.size());
 		}));
 	}
     

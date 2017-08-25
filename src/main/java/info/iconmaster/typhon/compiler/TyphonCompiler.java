@@ -3,14 +3,18 @@ package info.iconmaster.typhon.compiler;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 
 import info.iconmaster.typhon.antlr.TyphonBaseVisitor;
+import info.iconmaster.typhon.antlr.TyphonParser.ArgDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.AssignStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DefStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.FuncCallExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.LvalueContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MemberExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MemberLvalueContext;
@@ -21,6 +25,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.StatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.VarExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.VarLvalueContext;
 import info.iconmaster.typhon.compiler.Instruction.OpCode;
+import info.iconmaster.typhon.compiler.LookupUtils.LookupArgument;
 import info.iconmaster.typhon.compiler.LookupUtils.LookupElement;
 import info.iconmaster.typhon.errors.DuplicateVarNameError;
 import info.iconmaster.typhon.errors.ReadOnlyError;
@@ -34,6 +39,7 @@ import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.model.Package;
 import info.iconmaster.typhon.model.Parameter;
 import info.iconmaster.typhon.model.TemplateArgument;
+import info.iconmaster.typhon.model.TyphonModelReader;
 import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.types.TyphonTypeResolver;
@@ -322,6 +328,141 @@ public class TyphonCompiler {
 				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.MOV, new Object[] {insertInto.get(0), var}));
 				
 				return Arrays.asList(var.type);
+			}
+			
+			@Override
+			public List<TypeRef> visitFuncCallExpr(FuncCallExprContext ctx) {
+				// TODO: we assume all are .'s and no .?'s
+				
+				// turn the rule into a list of member accesses
+				List<LookupElement> names = new ArrayList<>();
+				ExprContext expr = ctx.tnCallee;
+				
+				while (true) {
+					if (expr instanceof MemberExprContext) {
+						names.add(0, new LookupElement(((MemberExprContext) expr).tnValue.getText(), new SourceInfo(expr)));
+						
+						names.addAll(0, ((MemberExprContext) expr).tnLookup.stream().map((e)->{
+							List<TemplateArgument> template = TyphonTypeResolver.readTemplateArgs(core.tni, e.tnTemplate.tnArgs, scope);
+							return new LookupElement(e.tnName.getText(), new SourceInfo(e), template);
+						}).collect(Collectors.toList()));
+						
+						expr = ((MemberExprContext) expr).tnLhs;
+					} else if (expr instanceof VarExprContext) {
+						names.add(0, new LookupElement(((VarExprContext) expr).tnValue.getText(), new SourceInfo(expr)));
+						
+						expr = null;
+						break;
+					} else {
+						break;
+					}
+				}
+				
+				// create a list of possible member access routes
+				MemberAccess base = scope;
+				if (expr != null) {
+					Variable exprVar = scope.addTempVar(TypeRef.var(core.tni), null);
+					base = exprVar;
+					
+					compileExpr(scope, expr, Arrays.asList(exprVar));
+				}
+				
+				List<List<MemberAccess>> paths = LookupUtils.findPaths(scope, base, names);
+				paths.removeIf((path)->{
+					MemberAccess member = path.get(path.size()-1);
+					
+					if (member instanceof Field || member instanceof Function || member instanceof Variable) {
+						return false;
+					}
+					
+					return true;
+				});
+				
+				if (paths.isEmpty()) {
+					// error, no path found
+					core.tni.errors.add(new UndefinedVariableError(new SourceInfo(ctx), ctx.tnCallee.getText()));
+					return Arrays.asList(TypeRef.var(core.tni));
+				}
+				
+				List<LookupArgument> args = new ArrayList<>();
+				List<Variable> vars = new ArrayList<>();
+				
+				TyphonModelReader.readArgs(core.tni, ctx.tnArgs.tnArgs).stream().forEach((arg)->{
+					Variable var = scope.addTempVar(TypeRef.var(core.tni), arg.source);
+					compileExpr(scope, arg.getRawValue(), Arrays.asList(var));
+					vars.add(var);
+					
+					args.add(new LookupArgument(var, arg.getLabel()));
+				});
+				
+				paths.removeIf((path)->{
+					MemberAccess member = path.get(path.size()-1);
+					
+					if (member instanceof Function) {
+						Function f = (Function) member;
+						
+						// check if the argumnet's number/labels all match up to the signature
+						Map<Parameter, Variable> map = LookupUtils.getFuncArgMap(f, args);
+						if (map == null) {
+							return true;
+						}
+						
+						// check if the types match up to the signature
+						for (Entry<Parameter, Variable> entry : map.entrySet()) {
+							if (!entry.getValue().type.canCastTo(entry.getKey().getType())) {
+								return true;
+							}
+						}
+						
+						return false;
+					} else {
+						// TODO: CALLFPTR
+						return true;
+					}
+				});
+				
+				if (paths.isEmpty()) {
+					// error, no path found
+					core.tni.errors.add(new UndefinedVariableError(new SourceInfo(ctx), ctx.tnCallee.getText()));
+					return Arrays.asList(TypeRef.var(core.tni));
+				}
+				
+				// process the chosen path
+				List<MemberAccess> path = paths.get(0);
+				MemberAccess member = path.get(path.size()-1);
+				
+				if (member instanceof Function) {
+					Function f = (Function) member;
+					Type fieldOf = f.getFieldOf();
+					
+					List<Variable> outputVars = new ArrayList<>(insertInto.subList(0, f.getRetType().size()));
+					List<Variable> inputVars = new ArrayList<>();
+					
+					Map<Parameter, Variable> map = LookupUtils.getFuncArgMap(f, args);
+					for (Parameter param : f.getParams()) {
+						if (map.containsKey(param)) {
+							inputVars.add(map.get(param));
+						} else {
+							Variable var = scope.addTempVar(param.getType(), new SourceInfo(ctx));
+							// TODO: assign default value to variable
+							inputVars.add(var);
+						}
+					}
+					
+					if (fieldOf == null) {
+						// CALLSTATIC
+						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALLSTATIC, new Object[] {outputVars, f, inputVars}));
+					} else {
+						// CALL
+						Variable instanceVar = LookupUtils.getSubjectOfPath(scope, path, names);
+						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {outputVars, instanceVar, f, inputVars}));
+					}
+					
+					return outputVars.stream().map((var)->var.type).collect(Collectors.toList());
+				} else {
+					// TODO: CALLFPTR
+					return Arrays.asList();
+				}
 			}
 		};
 		

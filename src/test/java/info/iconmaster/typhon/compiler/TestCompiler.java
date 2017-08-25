@@ -68,6 +68,10 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(0, code.tni.errors.size());
 		}),new TestCase("int x; void f() {x = 1;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("class a {int x; void f() {x = 1;}}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("class a {int x; void f() {var y = x;}}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
 		}));
 	}
     
@@ -88,7 +92,17 @@ public class TestCompiler extends TyphonTest {
 			TyphonTypeResolver.resolve(p);
 			TyphonCompiler.compile(p);
 			
-			test.accept(p.getFunctionsWithName("f").get(0).getCode());
+			// the test is based on a function called 'f', in this package or a subpackage.
+			
+			if (p.getFunctionsWithName("f").isEmpty()) {
+				for (Package pp : p.getSubpackges()) {
+					if (!pp.getFunctionsWithName("f").isEmpty()) {
+						test.accept(pp.getFunctionsWithName("f").get(0).getCode());
+					}
+				}
+			} else {
+				test.accept(p.getFunctionsWithName("f").get(0).getCode());
+			}
 		}
     }
 }

@@ -478,6 +478,8 @@ public class TyphonCompiler {
 		
 		int i = 0;
 		for (TypeRef t : a) {
+			if (i >= insertInto.size()) break;
+			
 			if (insertInto.get(i).type.isVar()) {
 				insertInto.get(i).type = t;
 			} else if (!t.canCastTo(insertInto.get(i).type)) {

@@ -4,9 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Scanner;
 
+import info.iconmaster.typhon.antlr.TyphonLexer;
+import info.iconmaster.typhon.compiler.TyphonCompiler;
 import info.iconmaster.typhon.errors.TyphonError;
+import info.iconmaster.typhon.linker.TyphonLinker;
 import info.iconmaster.typhon.model.Package;
 import info.iconmaster.typhon.model.TyphonModelReader;
+import info.iconmaster.typhon.types.TyphonTypeResolver;
 import info.iconmaster.typhon.util.CommandLineHelper.Result;
 import info.iconmaster.typhon.util.CommandLineHelper.UnknownOptionException;
 import info.iconmaster.typhon.util.FileUtils;
@@ -107,6 +111,30 @@ public class Typhon {
 					System.err.println("error: cannot read library file '"+file.getName()+"': "+e.getMessage());
 					return;
 				}
+			}
+			
+			// link the packages
+			for (Package p : tni.libraryPackages) {
+				TyphonLinker.link(p);
+			}
+			for (Package p : tni.inputPackages) {
+				TyphonLinker.link(p);
+			}
+			
+			// resolve types
+			for (Package p : tni.libraryPackages) {
+				TyphonTypeResolver.resolve(p);
+			}
+			for (Package p : tni.inputPackages) {
+				TyphonTypeResolver.resolve(p);
+			}
+			
+			// compile
+			for (Package p : tni.libraryPackages) {
+				TyphonCompiler.compile(p);
+			}
+			for (Package p : tni.inputPackages) {
+				TyphonCompiler.compile(p);
 			}
 			
 			// check for errors

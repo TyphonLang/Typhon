@@ -12,6 +12,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.LvalueContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MemberExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.NumConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ParamNameContext;
+import info.iconmaster.typhon.antlr.TyphonParser.ParensExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.StatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.VarExprContext;
 import info.iconmaster.typhon.compiler.Instruction.OpCode;
@@ -164,6 +165,10 @@ public class TyphonCompiler {
 	 * @return The number of variables that were filled.
 	 */
 	public static int compileExpr(Scope scope, ExprContext rule, List<Variable> insertInto) {
+		if (rule instanceof ParensExprContext) {
+			return compileExpr(scope, ((ParensExprContext) rule).tnExpr, insertInto);
+		}
+		
 		CorePackage core = scope.getCodeBlock().tni.corePackage;
 		
 		TyphonBaseVisitor<List<TypeRef>> visitor = new TyphonBaseVisitor<List<TypeRef>>() {

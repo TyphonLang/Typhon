@@ -251,6 +251,19 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(2, code.tni.errors.size());
 		}),new TestCase("int g(int x) {} void f() {var y; int x = g(y);}", (code)->{
 			Assert.assertEquals(2, code.tni.errors.size());
+		}),new TestCase("void f() {1;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(0, code.ops.size());
+		}),new TestCase("int g() {} void f() {g();}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			
+			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(0).op);
+			Assert.assertEquals(0, code.ops.get(0).<List<Variable>>arg(0).size());
+			Assert.assertEquals("g", code.ops.get(0).<Function>arg(1).getName());
+			Assert.assertEquals(0, code.ops.get(0).<List<Variable>>arg(2).size());
 		}));
 	}
     

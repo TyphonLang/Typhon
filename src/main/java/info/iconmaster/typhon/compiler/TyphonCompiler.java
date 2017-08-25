@@ -14,6 +14,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.ArgDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.AssignStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DefStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.ExprStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.FuncCallExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.LvalueContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MemberExprContext;
@@ -197,6 +198,12 @@ public class TyphonCompiler {
 					i++;
 				}
 				
+				return null;
+			}
+			
+			@Override
+			public Void visitExprStat(ExprStatContext ctx) {
+				compileExpr(scope, ctx.tnExpr, Arrays.asList());
 				return null;
 			}
 		};
@@ -435,7 +442,7 @@ public class TyphonCompiler {
 					Function f = (Function) member;
 					Type fieldOf = f.getFieldOf();
 					
-					List<Variable> outputVars = new ArrayList<>(insertInto.subList(0, f.getRetType().size()));
+					List<Variable> outputVars = new ArrayList<>(insertInto.subList(0, Math.min(f.getRetType().size(), insertInto.size())));
 					List<Variable> inputVars = new ArrayList<>();
 					
 					Map<Parameter, Variable> map = LookupUtils.getFuncArgMap(f, args);

@@ -199,6 +199,50 @@ public class Field extends TyphonModelEntity implements MemberAccess {
 	}
 	
 	/**
+	 * The setter function for this field.
+	 */
+	private Function setter;
+	
+	/**
+	 * The library function that is the default setter function for this field.
+	 */
+	private Function defaultSetter;
+	
+	/**
+	 * False if this field is read-only.
+	 */
+	private boolean hasSetter = true;
+	
+	/**
+	 * @return The setter function for this field. May be null if this field is read-only.
+	 */
+	public Function getSetter() {
+		if (!hasSetter) return null;
+		
+		return setter == null ? defaultGetter() : setter;
+	}
+	
+	/**
+	 * @param f The setter function for this field. May be null if this field is read-only.
+	 */
+	public void setSetter(Function f) {
+		setter = f;
+		hasSetter = (f != null);
+	}
+	
+	/**
+	 * @return The library function that is the default setter function for this field.
+	 */
+	public Function defaultSetter() {
+		if (defaultSetter == null) {
+			// make the default setter function
+			defaultSetter = new Function(tni, getName(), new TemplateType[0], new Parameter[] {new Parameter(tni, name, type, false)}, new TypeRef[0]);
+		}
+		
+		return defaultSetter;
+	}
+	
+	/**
 	 * @return If this is an instance field: The type this field is part of. If this is a static field: Null.
 	 */
 	public Type getFieldOf() {

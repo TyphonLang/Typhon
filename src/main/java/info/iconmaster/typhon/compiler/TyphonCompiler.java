@@ -15,9 +15,11 @@ import info.iconmaster.typhon.antlr.TyphonParser.ParamNameContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ParensExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.StatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.VarExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.VarLvalueContext;
 import info.iconmaster.typhon.compiler.Instruction.OpCode;
 import info.iconmaster.typhon.compiler.LookupUtils.LookupElement;
 import info.iconmaster.typhon.errors.DuplicateVarNameError;
+import info.iconmaster.typhon.errors.ReadOnlyError;
 import info.iconmaster.typhon.errors.TypeError;
 import info.iconmaster.typhon.errors.UndefinedVariableError;
 import info.iconmaster.typhon.errors.WriteOnlyError;
@@ -307,10 +309,55 @@ public class TyphonCompiler {
 	 * @return The variable you need to assign the rvalue to (before adding the postfix).
 	 */
 	public static Variable compileLvalue(Scope scope, LvalueContext rule, List<Instruction> postfix) {
-		// TODO
+		CorePackage core = scope.getCodeBlock().tni.corePackage;
 		
 		TyphonBaseVisitor<Variable> visitor = new TyphonBaseVisitor<Variable>() {
-			
+			@Override
+			public Variable visitVarLvalue(VarLvalueContext ctx) {
+				MemberAccess access = scope;
+				while (access != null) {
+					List<MemberAccess> members = access.getMembers(ctx.tnName.getText());
+					
+					for (MemberAccess member : members) {
+						if (member instanceof Field) {
+							Field f = (Field) member;
+							Type fieldOf = f.getFieldOf();
+							Variable var = scope.addTempVar(f.type, new SourceInfo(ctx));
+							
+							if (fieldOf == null) {
+								// it's a static field!
+								if (f.getSetter() == null) {
+									// error; field is write-only
+									core.tni.errors.add(new ReadOnlyError(new SourceInfo(ctx), f));
+									return null;
+								}
+								
+								postfix.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALLSTATIC, new Object[] {Arrays.asList(), f.getSetter(), Arrays.asList(var)}));
+								return var;
+							} else if (scope.getCodeBlock().instance != null && fieldOf.equals(scope.getCodeBlock().instance.type.getType())) {
+								// it's an instance field!
+								if (f.getSetter() == null) {
+									// error; field is read-only
+									core.tni.errors.add(new ReadOnlyError(new SourceInfo(ctx), f));
+									return var;
+								}
+								
+								postfix.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {Arrays.asList(), scope.getCodeBlock().instance, f.getSetter(), Arrays.asList(var)}));
+								return var;
+							}
+						} else if (member instanceof Variable) {
+							// it's a variable!
+							return (Variable) member;
+						}
+					}
+					
+					access = access.getMemberParent();
+				}
+				
+				// error, not found
+				core.tni.errors.add(new UndefinedVariableError(new SourceInfo(ctx), ctx.tnName.getText()));
+				return scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(ctx));
+			}
 		};
 		
 		return visitor.visit(rule);

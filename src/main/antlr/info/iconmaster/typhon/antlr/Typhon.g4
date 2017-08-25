@@ -93,9 +93,9 @@ catchBlock: tnAnnots+=annotation* 'catch' tnType=type tnName=WORD tnBlock=block;
 caseBlock: tnAnnots+=annotation* 'case' tnExprs+=expr (',' tnExprs+=expr)* tnBlock=block;
 
 lvalue:
-	tnLhs=expr (tnOp='.'|tnOp='?.') tnRhs=lvalue	#memberLvalue
-|	tnCallee=expr '[' tnArgs=argsDecl ']'			#indexLvalue
-|	tnName=WORD										#varLvalue
+	tnLhs=expr tnLookup+=memberItem* (tnOp='.'|tnOp='?.') tnRhs=lvalue	#memberLvalue
+|	tnCallee=expr '[' tnArgs=argsDecl ']'								#indexLvalue
+|	tnName=WORD															#varLvalue
 ;
 
 packageName: tnName+=WORD ('.' tnName+=WORD)*;

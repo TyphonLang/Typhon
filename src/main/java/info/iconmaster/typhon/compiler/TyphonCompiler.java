@@ -15,6 +15,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.ParamNameContext;
 import info.iconmaster.typhon.antlr.TyphonParser.StatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.VarExprContext;
 import info.iconmaster.typhon.compiler.Instruction.OpCode;
+import info.iconmaster.typhon.compiler.LookupUtils.LookupElement;
 import info.iconmaster.typhon.errors.DuplicateVarNameError;
 import info.iconmaster.typhon.errors.TypeError;
 import info.iconmaster.typhon.errors.UndefinedVariableError;
@@ -25,6 +26,7 @@ import info.iconmaster.typhon.model.Function;
 import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.model.Package;
 import info.iconmaster.typhon.model.Parameter;
+import info.iconmaster.typhon.model.TemplateArgument;
 import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.types.TyphonTypeResolver;
@@ -177,60 +179,72 @@ public class TyphonCompiler {
 			public List<TypeRef> visitVarExpr(VarExprContext ctx) {
 				if (insertInto.size() == 0) return Arrays.asList();
 				
-				List<MemberAccess> access = lookup(scope, Arrays.asList(ctx.tnValue.getText()));
-				access = access.stream().filter((a)->a instanceof Field || a instanceof Variable).collect(Collectors.toList());
-				
-				if (!access.isEmpty()) {
-					if (access.get(0) instanceof Field) {
-						// it's a field
-						Field f = (Field) access.get(0);
-						
-						if (f.getGetter() == null) {
-							// error; field is write-only
-							core.tni.errors.add(new WriteOnlyError(new SourceInfo(ctx), f));
-							return Arrays.asList(f.type);
+				MemberAccess access = scope;
+				while (access != null) {
+					List<MemberAccess> members = access.getMembers(ctx.tnValue.getText());
+					
+					for (MemberAccess member : members) {
+						if (member instanceof Field) {
+							Field f = (Field) member;
+							Type fieldOf = f.getFieldOf();
+							if (fieldOf == null) {
+								// it's a static field!
+								if (f.getGetter() == null) {
+									// error; field is write-only
+									core.tni.errors.add(new WriteOnlyError(new SourceInfo(ctx), f));
+									return Arrays.asList(f.type);
+								}
+								
+								scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALLSTATIC, new Object[] {Arrays.asList(insertInto.get(0)), f.getGetter(), new ArrayList<>()}));
+								return Arrays.asList(f.type);
+							} else if (scope.getCodeBlock().instance != null && fieldOf.equals(scope.getCodeBlock().instance.type.getType())) {
+								// it's an instance field!
+								if (f.getGetter() == null) {
+									// error; field is write-only
+									core.tni.errors.add(new WriteOnlyError(new SourceInfo(ctx), f));
+									return Arrays.asList(f.type);
+								}
+								
+								scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {Arrays.asList(insertInto.get(0)), scope.getCodeBlock().instance, f.getGetter(), new ArrayList<>()}));
+								return Arrays.asList(f.type);
+							}
+						} else if (member instanceof Variable) {
+							// it's a variable!
+							Variable var = (Variable) member;
+							scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.MOV, new Object[] {insertInto.get(0), var}));
+							return Arrays.asList(var.type);
 						}
-						
-						Type fieldOf = f.getFieldOf();
-						if (fieldOf == null) {
-							scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALLSTATIC, new Object[] {Arrays.asList(insertInto.get(0)), f.getGetter(), new ArrayList<>()}));
-						} else {
-							scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {Arrays.asList(insertInto.get(0)), scope.getCodeBlock().instance, f.getGetter(), new ArrayList<>()}));
-						}
-						
-						return Arrays.asList(f.type);
-					} else {
-						// it's a local variable
-						Variable var = (Variable) access.get(0);
-						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.MOV, new Object[] {insertInto.get(0), var}));
-						return Arrays.asList(var.type);
 					}
-				} else {
-					// error, not found
-					core.tni.errors.add(new UndefinedVariableError(new SourceInfo(ctx), ctx.tnValue.getText()));
-					return Arrays.asList(new TypeRef(core.TYPE_ANY));
+					
+					access = access.getMemberParent();
 				}
+				
+				// error, not found
+				core.tni.errors.add(new UndefinedVariableError(new SourceInfo(ctx), ctx.tnValue.getText()));
+				return Arrays.asList(TypeRef.var(core.tni));
 			}
 			
 			@Override
 			public List<TypeRef> visitMemberExpr(MemberExprContext ctx) {
 				// TODO: we assume all are .'s and no .?'s
-				//List<ParserRuleContext> rules = new ArrayList<>();
-				List<String> names = new ArrayList<>();
+				
+				// turn the rule into a list of member accesses
+				List<LookupElement> names = new ArrayList<>();
 				ExprContext expr = ctx;
 				
 				while (true) {
 					if (expr instanceof MemberExprContext) {
-						//rules.addAll(0, ((MemberExprContext) expr).tnValue);
-						names.add(0, ((MemberExprContext) expr).tnValue.getText());
+						names.add(0, new LookupElement(((MemberExprContext) expr).tnValue.getText(), new SourceInfo(expr)));
 						
-						//rules.addAll(0, ((MemberExprContext) expr).tnLookup);
-						names.addAll(0, ((MemberExprContext) expr).tnLookup.stream().map((e)->e.tnName.getText()).collect(Collectors.toList()));
+						names.addAll(0, ((MemberExprContext) expr).tnLookup.stream().map((e)->{
+							List<TemplateArgument> template = TyphonTypeResolver.readTemplateArgs(core.tni, e.tnTemplate.tnArgs, scope);
+							return new LookupElement(e.tnName.getText(), new SourceInfo(e), template);
+						}).collect(Collectors.toList()));
 						
 						expr = ((MemberExprContext) expr).tnLhs;
 					} else if (expr instanceof VarExprContext) {
-						//rules.add(0, ((VarExprContext) expr).tnValue);
-						names.add(0, ((VarExprContext) expr).tnValue.getText());
+						names.add(0, new LookupElement(((VarExprContext) expr).tnValue.getText(), new SourceInfo(expr)));
+						
 						expr = null;
 						break;
 					} else {
@@ -238,44 +252,27 @@ public class TyphonCompiler {
 					}
 				}
 				
-				Variable exprVar = null;
-				MemberAccess base;
-				if (expr == null) {
-					base = scope;
-				} else {
-					TypeRef t = TypeRef.var(core.tni);
-					exprVar = scope.addTempVar(t, null);
+				// create a list of possible member access routes
+				MemberAccess base = scope;
+				if (expr != null) {
+					Variable exprVar = scope.addTempVar(TypeRef.var(core.tni), null);
+					base = exprVar;
+					
 					compileExpr(scope, expr, Arrays.asList(exprVar));
-					base = exprVar.type;
 				}
 				
-				List<MemberAccess> access = lookup(base, names);
-				access = access.stream().filter((a)->a instanceof Field).collect(Collectors.toList());
-				
-				if (!access.isEmpty()) {
-					// it's a field
-					Field f = (Field)access.get(0);
-					
-					if (f.getGetter() == null) {
-						// error; field is write-only
-						core.tni.errors.add(new WriteOnlyError(new SourceInfo(ctx), f));
-						return Arrays.asList(f.type);
-					}
-					
-					Type fieldOf = f.getFieldOf();
-					if (fieldOf == null) {
-						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALLSTATIC, new Object[] {Arrays.asList(insertInto.get(0)), f.getGetter(), new ArrayList<>()}));
-					} else {
-						// TODO: find the subject of the call
-						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {Arrays.asList(insertInto.get(0)), null, f.getGetter(), new ArrayList<>()}));
-					}
-					
-					return Arrays.asList(f.type);
-				} else {
-					// error, not found
+				List<List<MemberAccess>> paths = LookupUtils.findPaths(scope, base, names);
+				if (paths.isEmpty()) {
+					// error, no path found
 					core.tni.errors.add(new UndefinedVariableError(new SourceInfo(ctx), ctx.tnValue.getText()));
-					return Arrays.asList(new TypeRef(core.TYPE_ANY));
+					return Arrays.asList(TypeRef.var(core.tni));
 				}
+				
+				List<MemberAccess> path = paths.get(0);
+				Variable var = LookupUtils.getSubjectOfPath(scope, path, names);
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.MOV, new Object[] {insertInto.get(0), var}));
+				
+				return Arrays.asList(var.type);
 			}
 		};
 		
@@ -312,29 +309,5 @@ public class TyphonCompiler {
 		};
 		
 		return visitor.visit(rule);
-	}
-	
-	public static List<MemberAccess> lookup(MemberAccess base, List<String> members) {
-		List<MemberAccess> result = new ArrayList<>();
-		
-		while (base != null) {
-			List<MemberAccess> matches = new ArrayList<>();
-			matches.add(base);
-			
-			for (String name : members) {
-				List<MemberAccess> newMatches = new ArrayList<>();
-				
-				for (MemberAccess match : matches) {
-					newMatches.addAll(match.getMembers(name));
-				}
-				
-				matches = newMatches;
-			}
-			
-			result.addAll(matches);
-			base = base.getMemberParent();
-		}
-		
-		return result;
 	}
 }

@@ -211,6 +211,7 @@ public class TypeRef extends TyphonModelEntity implements MemberAccess {
 	 */
 	public static TypeRef var(TyphonInput tni) {
 		TypeRef t = new TypeRef(tni);
+		t.setType(tni.corePackage.TYPE_ANY);
 		t.isVar(true);
 		return t;
 	}

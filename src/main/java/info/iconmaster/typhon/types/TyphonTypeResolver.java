@@ -254,9 +254,7 @@ public class TyphonTypeResolver {
 			ref.getTemplateArgs().add(new TemplateArgument(new SourceInfo(rule), readType(tni, ((MapTypeContext) rule).tnValueType, lookup)));
 			return ref;
 		} else if (rule instanceof VarTypeContext) {
-			TypeRef ref = new TypeRef(new SourceInfo(rule), tni.corePackage.TYPE_ANY);
-			ref.isVar(true);
-			return ref;
+			return TypeRef.var(tni);
 		} else if (rule instanceof ConstTypeContext) {
 			TypeRef ref = readType(tni, ((ConstTypeContext) rule).tnType, lookup);
 			ref.source = new SourceInfo(rule);

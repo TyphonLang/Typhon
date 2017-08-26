@@ -133,6 +133,14 @@ public class TestTypeResolver extends TyphonTest {
 			Assert.assertEquals(1, p.tni.errors.size());
 		}),new TestCase("class x<A:short,B:int,C:long> {} class y : x<B:int,short,long> {}", (p)->{
 			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("class a<T> {} class b {class c {}} a<b>.T.c x;", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("class a<T> {} class b {class c {}} a<b>.T.c x;", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("class a<A> {} class b<B> {} class c {class C {}} a<b<c>>.A.B.C x;", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("class a<A> {} class b {class B {}} a<a<b>>.A.A.B x;", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
 		}));
 	}
     

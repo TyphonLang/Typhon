@@ -1,7 +1,9 @@
 package info.iconmaster.typhon.types;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.Token;
@@ -263,6 +265,7 @@ public class TyphonTypeResolver {
 			return ref;
 		} else if (rule instanceof BasicTypeContext) {
 			MemberAccess base = lookup;
+			Map<TemplateType, TypeRef> map = new HashMap<>();
 			
 			while (base != null) {
 				List<MemberAccess> matches = new ArrayList<>();
@@ -280,7 +283,34 @@ public class TyphonTypeResolver {
 					List<MemberAccess> newMatches = new ArrayList<>();
 					
 					for (MemberAccess match : matches) {
-						newMatches.addAll(match.getMembers(name.tnName.getText()));
+						// replace templates with thier instantiated types if possible
+						if (match instanceof TemplateType && map.containsKey(match)) {
+							TypeRef ref = map.get(match);
+							match = ref;
+							map.putAll(TemplateUtils.matchTemplateArgs(ref, ref.getType().getMemberTemplate(), ref.getTemplateArgs()));
+						}
+						
+						// replace Types with their proper TypeRefs if there is a template
+						// since only types can have templates, elements may be removed from the list of found things
+						List<MemberAccess> found = match.getMembers(name.tnName.getText());
+						
+						if (name.tnTemplate != null) {
+							List<MemberAccess> newFound = new ArrayList<>();
+							
+							for (MemberAccess member : found) {
+								if (member instanceof Type) {
+									TypeRef ref = new TypeRef(tni);
+									ref.setType((Type) member);
+									ref.getTemplateArgs().addAll(readTemplateArgs(tni, name.tnTemplate.tnArgs, lookup));
+									
+									map.putAll(TemplateUtils.matchTemplateArgs(ref, ref.getType().getMemberTemplate(), ref.getTemplateArgs()));
+									newFound.add(TemplateUtils.replaceTemplates(ref, map));
+								}
+							}
+						}
+						
+						// finish the loop
+						newMatches.addAll(found);
 					}
 					
 					matches = newMatches;

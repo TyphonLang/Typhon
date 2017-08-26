@@ -140,6 +140,7 @@ public class TestGrammar extends TyphonTest {
 			new CaseValid("a.b<c>.d<e>", (parser)->{parser.type();}),
 			new CaseValid("@a a.@b b<@c c>.@d d<@e e>", (parser)->{parser.type();}),
 			new CaseInvalid("a.(1)", (parser)->{parser.type();}),
+			new CaseValid("a<b<c>>", (parser)->{parser.type();}),
 			//singleTypes
 			new CaseValid("var", (parser)->{parser.types();}),
 			new CaseValid("const int", (parser)->{parser.types();}),

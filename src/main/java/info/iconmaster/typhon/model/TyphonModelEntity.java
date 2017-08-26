@@ -2,6 +2,7 @@ package info.iconmaster.typhon.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.util.SourceInfo;
@@ -111,5 +112,21 @@ public class TyphonModelEntity {
 	 */
 	public void needsTypesResolved(boolean needsTypesResolved) {
 		this.needsTypesResolved = needsTypesResolved;
+	}
+	
+	/**
+	 * @param def The annotation you are searching for.
+	 * @return All the annotations with that definition.
+	 */
+	public List<Annotation> getAnnots(AnnotationDefinition def) {
+		return getAnnots().stream().filter((a)->def.equals(a.getDefinition())).collect(Collectors.toList());
+	}
+	
+	/**
+	 * @param def The annotation you are searching for.
+	 * @return Whether or not this object is annotated with that annotation.
+	 */
+	public boolean hasAnnot(AnnotationDefinition def) {
+		return getAnnots().stream().anyMatch((a)->def.equals(a.getDefinition()));
 	}
 }

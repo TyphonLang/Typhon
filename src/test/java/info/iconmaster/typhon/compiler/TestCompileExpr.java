@@ -20,6 +20,7 @@ import info.iconmaster.typhon.antlr.TyphonParser;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
 import info.iconmaster.typhon.compiler.Instruction.OpCode;
 import info.iconmaster.typhon.linker.TyphonLinker;
+import info.iconmaster.typhon.model.Function;
 import info.iconmaster.typhon.types.TypeRef;
 
 /**
@@ -51,6 +52,38 @@ public class TestCompileExpr extends TyphonTest {
 			Assert.assertEquals(1, code.ops.size());
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
 			Assert.assertEquals(1, (int) code.ops.get(0).arg(1));
+		}),new TestCase("1 + 2", 1, (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(3, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals(1, (int) code.ops.get(0).arg(1));
+			
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(1).op);
+			Assert.assertEquals(2, (int) code.ops.get(1).arg(1));
+			
+			Assert.assertEquals(OpCode.CALL, code.ops.get(2).op);
+			Assert.assertEquals(1, code.ops.get(2).<List<Variable>>arg(0).size());
+			Assert.assertEquals("add", code.ops.get(2).<Function>arg(2).getName());
+			Assert.assertEquals(1, code.ops.get(2).<List<Variable>>arg(3).size());
+		}),new TestCase("1 - 2", 1, (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(3, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals(1, (int) code.ops.get(0).arg(1));
+			
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(1).op);
+			Assert.assertEquals(2, (int) code.ops.get(1).arg(1));
+			
+			Assert.assertEquals(OpCode.CALL, code.ops.get(2).op);
+			Assert.assertEquals(1, code.ops.get(2).<List<Variable>>arg(0).size());
+			Assert.assertEquals("sub", code.ops.get(2).<Function>arg(2).getName());
+			Assert.assertEquals(1, code.ops.get(2).<List<Variable>>arg(3).size());
+		}),new TestCase("1+1.0-2*3.0/4%5.0", 1, (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
 		}));
 	}
     

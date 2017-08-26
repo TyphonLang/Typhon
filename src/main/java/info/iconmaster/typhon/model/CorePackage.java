@@ -5,6 +5,7 @@ import java.util.List;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.model.libs.CoreLibraryMath;
+import info.iconmaster.typhon.model.libs.CoreLibraryOperators;
 import info.iconmaster.typhon.types.AnyType;
 import info.iconmaster.typhon.types.SystemType;
 import info.iconmaster.typhon.types.TemplateType;
@@ -36,6 +37,16 @@ public class CorePackage extends Package {
 	 */
 	public SystemType TYPE_BYTE, TYPE_SHORT, TYPE_INT, TYPE_LONG, TYPE_UBYTE, TYPE_USHORT, TYPE_UINT, TYPE_ULONG, TYPE_CHAR, TYPE_BOOL, TYPE_STRING, TYPE_FLOAT, TYPE_DOUBLE;
 	
+	/**
+	 * Constants for annotations.
+	 */
+	public AnnotationDefinition ANNOT_MAIN;
+	
+	/**
+	 * Constants for operator annotations.
+	 */
+	public AnnotationDefinition ANNOT_OP_ADD, ANNOT_OP_SUB, ANNOT_OP_MUL, ANNOT_OP_DIV, ANNOT_OP_MOD;
+	
 	private UserType makeUserType(String name, Type parent) {
 		UserType type = new UserType(name, parent);
 		addType(type);
@@ -46,6 +57,12 @@ public class CorePackage extends Package {
 		SystemType type = new SystemType(name, parent);
 		addType(type);
 		return type;
+	}
+	
+	private AnnotationDefinition makeAnnotDef(String name, Parameter... params) {
+		AnnotationDefinition annot = new AnnotationDefinition(tni, name, params);
+		addAnnotDef(annot);
+		return annot;
 	}
 	
 	public CorePackage(TyphonInput tni) {
@@ -84,9 +101,10 @@ public class CorePackage extends Package {
 		
 		// add any core libraries
 		addSubpackage(new CoreLibraryMath(tni));
+		addSubpackage(new CoreLibraryOperators(tni));
 		
 		// add the annotations defined
-		addAnnotDef(new AnnotationDefinition(tni, "main", new Parameter[] {}));
+		ANNOT_MAIN = makeAnnotDef("main", new Parameter[] {});
 	}
 	
 	/**

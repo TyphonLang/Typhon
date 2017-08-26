@@ -8,9 +8,12 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 
 import info.iconmaster.typhon.antlr.TyphonBaseVisitor;
 import info.iconmaster.typhon.antlr.TyphonParser.AssignStatContext;
+import info.iconmaster.typhon.antlr.TyphonParser.BinOps1ExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.BinOps2ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DefStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprStatContext;
@@ -30,8 +33,10 @@ import info.iconmaster.typhon.compiler.LookupUtils.LookupElement;
 import info.iconmaster.typhon.errors.DuplicateVarNameError;
 import info.iconmaster.typhon.errors.ReadOnlyError;
 import info.iconmaster.typhon.errors.TypeError;
+import info.iconmaster.typhon.errors.UndefinedOperatorError;
 import info.iconmaster.typhon.errors.UndefinedVariableError;
 import info.iconmaster.typhon.errors.WriteOnlyError;
+import info.iconmaster.typhon.model.AnnotationDefinition;
 import info.iconmaster.typhon.model.CorePackage;
 import info.iconmaster.typhon.model.Field;
 import info.iconmaster.typhon.model.Function;
@@ -519,6 +524,16 @@ public class TyphonCompiler {
 					return Arrays.asList();
 				}
 			}
+			
+			@Override
+			public List<TypeRef> visitBinOps1Expr(BinOps1ExprContext ctx) {
+				return compileBinOp(scope, ctx.tnLhs, ctx.tnRhs, ctx.tnOp, insertInto);
+			}
+			
+			@Override
+			public List<TypeRef> visitBinOps2Expr(BinOps2ExprContext ctx) {
+				return compileBinOp(scope, ctx.tnLhs, ctx.tnRhs, ctx.tnOp, insertInto);
+			}
 		};
 		
 		List<TypeRef> a = visitor.visit(rule);
@@ -684,5 +699,49 @@ public class TyphonCompiler {
 		};
 		
 		return visitor.visit(rule);
+	}
+	
+	private static List<TypeRef> compileBinOp(Scope scope, ExprContext lhsExpr, ExprContext rhsEpr, Token opExpr, List<Variable> insertInto) {
+		CorePackage core = scope.getCodeBlock().tni.corePackage;
+		
+		Variable lhs = scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(lhsExpr));
+		Variable rhs = scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(rhsEpr));
+		
+		AnnotationDefinition operator = null;
+		
+		if (opExpr.getText().equals("+")) {
+			operator = core.ANNOT_OP_ADD;
+		} else if (opExpr.getText().equals("-")) {
+			operator = core.ANNOT_OP_SUB;
+		} else if (opExpr.getText().equals("*")) {
+			operator = core.ANNOT_OP_MUL;
+		} else if (opExpr.getText().equals("/")) {
+			operator = core.ANNOT_OP_DIV;
+		} else if (opExpr.getText().equals("%")) {
+			operator = core.ANNOT_OP_MOD;
+		}
+		
+		compileExpr(scope, lhsExpr, Arrays.asList(lhs));
+		compileExpr(scope, rhsEpr, Arrays.asList(rhs));
+		
+		List<Function> handlers = lhs.type.getType().getOperatorHandlers(operator);
+		handlers.removeIf((f)->{
+			if (f.getParams().size() != 1 || f.getRetType().isEmpty()) {
+				return true;
+			}
+			
+			return !rhs.type.canCastTo(f.getParams().get(0).getType());
+		});
+		
+		if (handlers.isEmpty()) {
+			// error; handler not found
+			core.tni.errors.add(new UndefinedOperatorError(new SourceInfo(opExpr), opExpr.getText(), lhs.type, rhs.type));
+			return Arrays.asList(TypeRef.var(core.tni));
+		}
+		
+		Function handler = handlers.get(0);
+		scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(opExpr), OpCode.CALL, new Object[] {insertInto.isEmpty() ? Arrays.asList() : Arrays.asList(insertInto.get(0)), lhs, handler, Arrays.asList(rhs)}));
+		
+		return Arrays.asList(handler.getRetType().get(0));
 	}
 }

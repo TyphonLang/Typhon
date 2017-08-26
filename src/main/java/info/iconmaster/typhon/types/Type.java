@@ -1,8 +1,11 @@
 package info.iconmaster.typhon.types;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import info.iconmaster.typhon.TyphonInput;
+import info.iconmaster.typhon.model.AnnotationDefinition;
+import info.iconmaster.typhon.model.Function;
 import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.model.Package;
 import info.iconmaster.typhon.model.TyphonModelEntity;
@@ -103,5 +106,29 @@ public abstract class Type extends TyphonModelEntity implements MemberAccess {
 			return a.equals(((TemplateType)b.getType()).getBaseType());
 		}
 		return a.equals(b);
+	}
+	
+	/**
+	 * @param op The operator to look for.
+	 * @return All the instance functions that are annotated as operator handlers for this type.
+	 */
+	public List<Function> getOperatorHandlers(AnnotationDefinition op) {
+		List<MemberAccess> members = getMembers();
+		List<Function> result = new ArrayList<>();
+		
+		while (!members.isEmpty()) {
+			MemberAccess member = members.remove(0);
+			
+			if (member instanceof Function) {
+				Function f = (Function) member;
+				if (this.canCastTo(new TypeRef(this), new TypeRef(f.getFieldOf())) && f.hasAnnot(op)) {
+					result.add(f);
+				}
+ 			} else {
+				members.addAll(member.getMembers());
+			}
+		}
+		
+		return result;
 	}
 }

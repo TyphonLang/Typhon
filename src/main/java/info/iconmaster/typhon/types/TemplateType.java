@@ -143,4 +143,34 @@ public class TemplateType extends Type {
 	public boolean canCastTo(TypeRef a, TypeRef b) {
 		return getBaseType().canCastTo(b);
 	}
+	
+	/**
+	 * Creates a library template type.
+	 * 
+	 * @param name
+	 * @param baseType
+	 * @param defualtType
+	 */
+	public TemplateType(String name, TypeRef baseType, TypeRef defualtType) {
+		this(baseType.tni, name);
+		markAsLibrary();
+		
+		this.baseType = baseType;
+		this.defaultValue = defualtType;
+	}
+	
+	/**
+	 * Creates a library template type.
+	 * 
+	 * @param name
+	 * @param baseType
+	 * @param defualtType
+	 */
+	public TemplateType(String name, Type baseType, Type defualtType) {
+		this(baseType.tni, name);
+		markAsLibrary();
+		
+		this.baseType = new TypeRef(baseType);
+		if (defualtType != null) this.defaultValue = new TypeRef(defualtType);
+	}
 }

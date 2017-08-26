@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 import info.iconmaster.typhon.antlr.TyphonBaseVisitor;
-import info.iconmaster.typhon.antlr.TyphonParser.ArgDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.AssignStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DefStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
@@ -465,7 +464,7 @@ public class TyphonCompiler {
 						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {outputVars, instanceVar, f, inputVars}));
 					}
 					
-					return outputVars.stream().map((var)->var.type).collect(Collectors.toList());
+					return f.getRetType().subList(0, outputVars.size());
 				} else {
 					// TODO: CALLFPTR
 					return Arrays.asList();

@@ -218,6 +218,17 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(1, code.ops.get(0).<List<Variable>>arg(0).size());
 			Assert.assertEquals("g", code.ops.get(0).<Function>arg(1).getName());
 			Assert.assertEquals(0, code.ops.get(0).<List<Variable>>arg(2).size());
+		}),new TestCase("int g() {} void f() {int x; x = g();}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(2, code.ops.size());
+			
+			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(0).op);
+			Assert.assertEquals(1, code.ops.get(0).<List<Variable>>arg(0).size());
+			Assert.assertEquals("g", code.ops.get(0).<Function>arg(1).getName());
+			Assert.assertEquals(0, code.ops.get(0).<List<Variable>>arg(2).size());
+			
+			Assert.assertEquals(OpCode.MOV, code.ops.get(1).op);
 		}),new TestCase("package p {int g() {}} void f() {int x = p.g();}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			

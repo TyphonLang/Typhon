@@ -145,8 +145,8 @@ public class TypeRef extends TyphonModelEntity implements MemberAccess {
 			return false;
 		TypeRef other = (TypeRef) obj;
 		
-		Map<TemplateType, TypeRef> map1 = TemplateUtils.matchTemplateArgs(this, getType().getMemberTemplate(), getTemplateArgs());
-		Map<TemplateType, TypeRef> map2 = TemplateUtils.matchTemplateArgs(this, other.getType().getMemberTemplate(), getTemplateArgs());
+		Map<TemplateType, TypeRef> map1 = TemplateUtils.matchAllTemplateArgs(this);
+		Map<TemplateType, TypeRef> map2 = TemplateUtils.matchAllTemplateArgs(other);
 		if (!map1.equals(map2)) {
 			return false;
 		}
@@ -215,5 +215,10 @@ public class TypeRef extends TyphonModelEntity implements MemberAccess {
 		t.setType(tni.corePackage.TYPE_ANY);
 		t.isVar(true);
 		return t;
+	}
+	
+	@Override
+	public List<TemplateType> getMemberTemplate() {
+		return getType().getMemberTemplate();
 	}
 }

@@ -60,8 +60,8 @@ public class TyphonTypeResolver {
 		
 		p.getFields().stream().forEach((e)->resolve(e));
 		p.getFunctions().stream().forEach((e)->resolve(e));
-		p.getTypes().stream().forEach((e)->resolve(e));
 		p.getSubpackges().stream().forEach((e)->resolve(e));
+		p.getTypes().stream().forEach((e)->resolve(e));
 		
 		p.getAnnots().stream().forEach((e)->resolve(e, p));
 	}
@@ -121,6 +121,10 @@ public class TyphonTypeResolver {
 
 			for (TypeContext rule : userType.getRawParentTypes()) {
 				userType.getParentTypes().add(readType(userType.tni, rule, t));
+			}
+			
+			if (userType.getParentTypes().isEmpty()) {
+				userType.getParentTypes().add(new TypeRef(t.tni.corePackage.TYPE_ANY));
 			}
 		} else if (t instanceof TemplateType) {
 			TemplateType tempType = (TemplateType) t;
@@ -283,17 +287,16 @@ public class TyphonTypeResolver {
 					List<MemberAccess> newMatches = new ArrayList<>();
 					
 					for (MemberAccess match : matches) {
-						// replace templates with thier instantiated types if possible
+						// handle template types correctly
 						if (match instanceof TemplateType && map.containsKey(match)) {
-							TypeRef ref = map.get(match);
-							match = ref;
-							map.putAll(TemplateUtils.matchTemplateArgs(ref, ref.getType().getMemberTemplate(), ref.getTemplateArgs()));
+							match = map.get(match);
 						}
+						
+						// find the next members with the given name
+						List<MemberAccess> found = match.getMembers(name.tnName.getText());
 						
 						// replace Types with their proper TypeRefs if there is a template
 						// since only types can have templates, elements may be removed from the list of found things
-						List<MemberAccess> found = match.getMembers(name.tnName.getText());
-						
 						if (name.tnTemplate != null) {
 							List<MemberAccess> newFound = new ArrayList<>();
 							
@@ -302,11 +305,16 @@ public class TyphonTypeResolver {
 									TypeRef ref = new TypeRef(tni);
 									ref.setType((Type) member);
 									ref.getTemplateArgs().addAll(readTemplateArgs(tni, name.tnTemplate.tnArgs, lookup));
+									ref.getTemplateArgs().stream().forEach((tt)->resolve(tt.getValue().getType()));
 									
-									map.putAll(TemplateUtils.matchTemplateArgs(ref, ref.getType().getMemberTemplate(), ref.getTemplateArgs()));
+									map.putAll(TemplateUtils.matchAllTemplateArgs(ref));
 									newFound.add(TemplateUtils.replaceTemplates(ref, map));
+									
+									TemplateUtils.checkTemplateArgs(ref);
 								}
 							}
+							
+							found = newFound;
 						}
 						
 						// finish the loop
@@ -316,21 +324,14 @@ public class TyphonTypeResolver {
 					matches = newMatches;
 				}
 				
-				List<Type> candidates = matches.stream().filter((e)->e instanceof Type).map((e)->(Type)e).collect(Collectors.toList());
+				List<TypeRef> candidates = matches.stream().filter((e)->e instanceof Type || e instanceof TypeRef).map((e)->(e instanceof Type ? new TypeRef(((Type)e).source, (Type)e) : ((TypeRef)e))).collect(Collectors.toList());
 				if (!candidates.isEmpty()) {
 					if (candidates.size() != 1) {
 						tni.errors.add(new AmbiguousTypeError(((BasicTypeContext) rule).tnLookup, candidates));
 						return new TypeRef(tni.corePackage.TYPE_ANY);
 					}
 					
-					TypeMemberItemContext lastLookup = ((BasicTypeContext) rule).tnLookup.get(((BasicTypeContext) rule).tnLookup.size()-1);
-					
-					TypeRef ref = new TypeRef(new SourceInfo(rule), candidates.get(0));
-					if (lastLookup.tnTemplate != null) {
-						ref.getTemplateArgs().addAll(readTemplateArgs(tni, lastLookup.tnTemplate.tnArgs, lookup));
-						TemplateUtils.checkTemplateArgs(ref, ref.getType().getMemberTemplate(), ref.getTemplateArgs());
-					}
-					return ref;
+					return candidates.get(0);
 				}
 				
 				base = base.getMemberParent();

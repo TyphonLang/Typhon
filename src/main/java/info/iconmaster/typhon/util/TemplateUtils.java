@@ -66,15 +66,15 @@ public class TemplateUtils {
 	 * @param template The list of template parameters.
 	 * @param args The list of template arguments.
 	 */
-	public static void checkTemplateArgs(TypeRef typeToMap, List<TemplateType> template, List<TemplateArgument> args) {
+	public static void checkTemplateArgs(TypeRef typeToMap) {
 		Map<TemplateType, TypeRef> result = new HashMap<>();
 		
 		// insert all the named arguments
-		for (TemplateArgument arg : args) {
+		for (TemplateArgument arg : typeToMap.getTemplateArgs()) {
 			if (arg.getLabel() != null) {
 				TemplateType found = null;
 				
-				for (TemplateType type : template) {
+				for (TemplateType type : typeToMap.getMemberTemplate()) {
 					if (type.getName().equals(arg.getLabel())) {
 						found = type;
 						result.put(type, arg.getValue());
@@ -90,11 +90,11 @@ public class TemplateUtils {
 		}
 		
 		// insert all the positional arguments. They should go in the first type in which they can fit.
-		for (TemplateArgument arg : args) {
+		for (TemplateArgument arg : typeToMap.getTemplateArgs()) {
 			if (arg.getLabel() == null) {
 				TemplateType found = null;
 				
-				for (TemplateType type : template) {
+				for (TemplateType type : typeToMap.getMemberTemplate()) {
 					if (!result.containsKey(type)) {
 						if (!arg.getValue().canCastTo(new TypeRef(type))) {
 							// Cannot cast to next logical template in the sequence; error
@@ -113,6 +113,11 @@ public class TemplateUtils {
 				}
 			}
 		}
+		
+		// recursively check subtemplates
+		for (TemplateArgument arg : typeToMap.getTemplateArgs()) {
+			checkTemplateArgs(arg.getValue());
+		}
 	}
 	
 	/**
@@ -122,13 +127,13 @@ public class TemplateUtils {
 	 * @param template The list of template parameters.
 	 * @param args The list of template arguments.
 	 */
-	public static Map<TemplateType, TypeRef> matchTemplateArgs(TypeRef typeToMap, List<TemplateType> template, List<TemplateArgument> args) {
+	public static Map<TemplateType, TypeRef> matchTemplateArgs(TypeRef typeToMap) {
 		Map<TemplateType, TypeRef> result = new HashMap<>();
 		
 		// insert all the named arguments
-		for (TemplateArgument arg : args) {
+		for (TemplateArgument arg : typeToMap.getTemplateArgs()) {
 			if (arg.getLabel() != null) {
-				for (TemplateType type : template) {
+				for (TemplateType type : typeToMap.getMemberTemplate()) {
 					if (type.getName().equals(arg.getLabel())) {
 						result.put(type, arg.getValue());
 						break;
@@ -138,9 +143,9 @@ public class TemplateUtils {
 		}
 		
 		// insert all the positional arguments. They should go in the first type in which they can fit.
-		for (TemplateArgument arg : args) {
+		for (TemplateArgument arg : typeToMap.getTemplateArgs()) {
 			if (arg.getLabel() == null) {
-				for (TemplateType type : template) {
+				for (TemplateType type : typeToMap.getMemberTemplate()) {
 					if (!result.containsKey(type)) {
 						result.put(type, arg.getValue());
 						break;
@@ -150,11 +155,30 @@ public class TemplateUtils {
 		}
 		
 		// finally, replace all missing arguments with their defaults.
-		for (TemplateType type : template) {
+		for (TemplateType type : typeToMap.getMemberTemplate()) {
 			if (!result.containsKey(type)) {
 				result.put(type, type.getDefaultValue() == null ? type.getBaseType() : type.getDefaultValue());
 			}
 		}
+		
+		return result;
+	}
+	
+	/**
+	 * Generates a mapping of template parameters to arguments for a type, and all template types held inside this type.
+	 * 
+	 * @param typeToMap The type you're working on. Used for error output.
+	 * @param template The list of template parameters.
+	 * @param args The list of template arguments.
+	 */
+	public static Map<TemplateType, TypeRef> matchAllTemplateArgs(TypeRef typeToMap) {
+		Map<TemplateType, TypeRef> result = new HashMap<>();
+		
+		for (TemplateArgument arg : typeToMap.getTemplateArgs()) {
+			result.putAll(matchAllTemplateArgs(arg.getValue()));
+		}
+		
+		result.putAll(matchTemplateArgs(typeToMap));
 		
 		return result;
 	}

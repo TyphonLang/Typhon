@@ -3,7 +3,7 @@ package info.iconmaster.typhon.errors;
 import java.util.List;
 
 import info.iconmaster.typhon.antlr.TyphonParser.TypeMemberItemContext;
-import info.iconmaster.typhon.types.Type;
+import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.types.TyphonTypeResolver;
 import info.iconmaster.typhon.util.SourceInfo;
 
@@ -15,9 +15,9 @@ import info.iconmaster.typhon.util.SourceInfo;
  */
 public class AmbiguousTypeError extends TyphonError {
 	public List<TypeMemberItemContext> failedLookup;
-	public List<Type> types;
+	public List<TypeRef> types;
 	
-	public AmbiguousTypeError(List<TypeMemberItemContext> failedLookup, List<Type> types) {
+	public AmbiguousTypeError(List<TypeMemberItemContext> failedLookup, List<TypeRef> types) {
 		super(new SourceInfo(failedLookup));
 		this.failedLookup = failedLookup;
 		this.types = types;

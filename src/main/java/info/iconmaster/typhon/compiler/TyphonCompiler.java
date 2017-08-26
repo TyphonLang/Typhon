@@ -231,8 +231,57 @@ public class TyphonCompiler {
 			public List<TypeRef> visitNumConstExpr(NumConstExprContext ctx) {
 				if (insertInto.size() == 0) return Arrays.asList();
 				
-				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.MOVINT, new Object[] {insertInto.get(0), ctx.tnValue.getText()}));
-				return Arrays.asList(new TypeRef(core.TYPE_INT));
+				// try to determine what type this constant should be
+				Variable var = insertInto.get(0);
+				OpCode op;
+				Object arg;
+				Type type;
+				
+				String text = ctx.tnValue.getText();
+				if (text.contains(".") || text.contains("e")) {
+					 if (var.type.getType() == core.TYPE_FLOAT) {
+						op = OpCode.MOVFLOAT;
+						arg = Float.parseFloat(text);
+						type = var.type.getType();
+					} else {
+						op = OpCode.MOVDOUBLE;
+						arg = Double.parseDouble(text);
+						type = core.TYPE_DOUBLE;
+					}
+				} else {
+					if (var.type.getType() == core.TYPE_BYTE || var.type.getType() == core.TYPE_UBYTE) {
+						op = OpCode.MOVBYTE;
+						arg = Byte.parseByte(text);
+						type = var.type.getType();
+					} else if (var.type.getType() == core.TYPE_DOUBLE || var.type.getType() == core.TYPE_REAL) {
+						op = OpCode.MOVDOUBLE;
+						arg = Double.parseDouble(text);
+						type = core.TYPE_DOUBLE;
+					} else if (var.type.getType() == core.TYPE_FLOAT) {
+						op = OpCode.MOVFLOAT;
+						arg = Float.parseFloat(text);
+						type = var.type.getType();
+					} else if (var.type.getType() == core.TYPE_LONG || var.type.getType() == core.TYPE_ULONG) {
+						op = OpCode.MOVLONG;
+						arg = Long.parseUnsignedLong(text);
+						type = var.type.getType();
+					} else if (var.type.getType() == core.TYPE_SHORT || var.type.getType() == core.TYPE_USHORT) {
+						op = OpCode.MOVSHORT;
+						arg = Short.parseShort(text);
+						type = var.type.getType();
+					} else if (var.type.getType() == core.TYPE_UINT) {
+						op = OpCode.MOVINT;
+						arg = Integer.parseUnsignedInt(text);
+						type = var.type.getType();
+					} else {
+						op = OpCode.MOVINT;
+						arg = Integer.parseUnsignedInt(text);
+						type = core.TYPE_INT;
+					}
+				}
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), op, new Object[] {var, arg}));
+				return Arrays.asList(new TypeRef(type));
 			}
 			
 			@Override

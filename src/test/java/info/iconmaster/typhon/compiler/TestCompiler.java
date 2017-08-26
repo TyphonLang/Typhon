@@ -33,21 +33,21 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(1, code.ops.size());
 			
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
-			Assert.assertEquals("1", code.ops.get(0).arg(1));
+			Assert.assertEquals(1, (int) code.ops.get(0).arg(1));
 		}),new TestCase("int f() => 1", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
 			Assert.assertEquals(1, code.ops.size());
 			
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
-			Assert.assertEquals("1", code.ops.get(0).arg(1));
+			Assert.assertEquals(1, (int) code.ops.get(0).arg(1));
 		}),new TestCase("void f() {var x = 1; var y = x;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
 			Assert.assertEquals(2, code.ops.size());
 			
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
-			Assert.assertEquals("1", code.ops.get(0).arg(1));
+			Assert.assertEquals(1, (int) code.ops.get(0).arg(1));
 			
 			Assert.assertEquals(OpCode.MOV, code.ops.get(1).op);
 		}),new TestCase("var a; void f() {var x = a;}", (code)->{
@@ -121,7 +121,7 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(2, code.ops.size());
 			
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
-			Assert.assertEquals("1", code.ops.get(0).arg(1));
+			Assert.assertEquals(1, (int) code.ops.get(0).arg(1));
 			
 			Assert.assertEquals(OpCode.MOV, code.ops.get(1).op);
 		}),new TestCase("void f() {[int] x; x = 1;}", (code)->{
@@ -132,10 +132,10 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(4, code.ops.size());
 			
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
-			Assert.assertEquals("1", code.ops.get(0).arg(1));
+			Assert.assertEquals(1, (int) code.ops.get(0).arg(1));
 			
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(1).op);
-			Assert.assertEquals("2", code.ops.get(1).arg(1));
+			Assert.assertEquals(2, (int) code.ops.get(1).arg(1));
 			
 			Assert.assertEquals(OpCode.MOV, code.ops.get(2).op);
 			Assert.assertEquals(OpCode.MOV, code.ops.get(3).op);
@@ -149,7 +149,7 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(3, code.ops.size());
 			
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
-			Assert.assertEquals("1", code.ops.get(0).arg(1));
+			Assert.assertEquals(1, (int) code.ops.get(0).arg(1));
 			
 			Assert.assertEquals(OpCode.MOV, code.ops.get(1).op);
 			
@@ -163,7 +163,7 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(3, code.ops.size());
 			
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
-			Assert.assertEquals("1", code.ops.get(0).arg(1));
+			Assert.assertEquals(1, (int) code.ops.get(0).arg(1));
 			
 			Assert.assertEquals(OpCode.MOV, code.ops.get(1).op);
 			
@@ -186,7 +186,7 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(2, code.ops.size());
 			
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
-			Assert.assertEquals("1", code.ops.get(0).arg(1));
+			Assert.assertEquals(1, (int) code.ops.get(0).arg(1));
 			
 			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(1).op);
 			Assert.assertEquals(0, code.ops.get(1).<List<Variable>>arg(0).size());
@@ -198,7 +198,7 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(3, code.ops.size());
 			
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
-			Assert.assertEquals("1", code.ops.get(0).arg(1));
+			Assert.assertEquals(1, (int) code.ops.get(0).arg(1));
 			
 			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(1).op);
 			Assert.assertEquals(0, code.ops.get(1).<List<Variable>>arg(0).size());
@@ -244,7 +244,7 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(2, code.ops.size());
 			
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
-			Assert.assertEquals("1", code.ops.get(0).arg(1));
+			Assert.assertEquals(1, (int) code.ops.get(0).arg(1));
 			
 			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(1).op);
 			Assert.assertEquals(1, code.ops.get(1).<List<Variable>>arg(0).size());

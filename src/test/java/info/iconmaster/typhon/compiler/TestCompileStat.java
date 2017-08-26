@@ -36,12 +36,6 @@ public class TestCompileStat extends TyphonTest {
 			Assert.assertEquals(0, code.tni.errors.size());
 			
 			Assert.assertEquals(0, code.ops.size());
-		}),new TestCase("var x = 1;", (code)->{
-			Assert.assertEquals(0, code.tni.errors.size());
-			
-			Assert.assertEquals(1, code.ops.size());
-			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
-			Assert.assertEquals("1", code.ops.get(0).arg(1));
 		}),new TestCase("var x, y = 1;", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
@@ -58,6 +52,90 @@ public class TestCompileStat extends TyphonTest {
 			Assert.assertEquals(0, code.tni.errors.size());
 			
 			Assert.assertEquals(0, code.ops.size());
+		}),new TestCase("var x = 1;", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals((Integer) 1, (Integer) code.ops.get(0).arg(1));
+		}),new TestCase("byte x = 1;", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			Assert.assertEquals(OpCode.MOVBYTE, code.ops.get(0).op);
+			Assert.assertEquals((Byte) (byte) 1, (Byte) code.ops.get(0).arg(1));
+		}),new TestCase("ubyte x = 1;", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			Assert.assertEquals(OpCode.MOVBYTE, code.ops.get(0).op);
+			Assert.assertEquals((Byte) (byte) 1, (Byte) code.ops.get(0).arg(1));
+		}),new TestCase("short x = 1;", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			Assert.assertEquals(OpCode.MOVSHORT, code.ops.get(0).op);
+			Assert.assertEquals((Short) (short) 1, (Short) code.ops.get(0).arg(1));
+		}),new TestCase("ushort x = 1;", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			Assert.assertEquals(OpCode.MOVSHORT, code.ops.get(0).op);
+			Assert.assertEquals((Short) (short) 1, (Short) code.ops.get(0).arg(1));
+		}),new TestCase("int x = 1;", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals((Integer) 1, (Integer) code.ops.get(0).arg(1));
+		}),new TestCase("uint x = 1;", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals((Integer) 1, (Integer) code.ops.get(0).arg(1));
+		}),new TestCase("long x = 1;", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			Assert.assertEquals(OpCode.MOVLONG, code.ops.get(0).op);
+			Assert.assertEquals((Long) 1l, (Long) code.ops.get(0).arg(1));
+		}),new TestCase("ulong x = 1;", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			Assert.assertEquals(OpCode.MOVLONG, code.ops.get(0).op);
+			Assert.assertEquals((Long) 1l, (Long) code.ops.get(0).arg(1));
+		}),new TestCase("double x = 1;", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			Assert.assertEquals(OpCode.MOVDOUBLE, code.ops.get(0).op);
+			Assert.assertEquals((Double) 1.0, (Double) code.ops.get(0).arg(1));
+		}),new TestCase("float x = 1;", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			Assert.assertEquals(OpCode.MOVFLOAT, code.ops.get(0).op);
+			Assert.assertEquals((Float) 1.0f, (Float) code.ops.get(0).arg(1));
+		}),new TestCase("var x = 1.0;", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			Assert.assertEquals(OpCode.MOVDOUBLE, code.ops.get(0).op);
+			Assert.assertEquals((Double) 1.0, (Double) code.ops.get(0).arg(1));
+		}),new TestCase("double x = 1.0;", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			Assert.assertEquals(OpCode.MOVDOUBLE, code.ops.get(0).op);
+			Assert.assertEquals((Double) 1.0, (Double) code.ops.get(0).arg(1));
+		}),new TestCase("float x = 1.0;", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			Assert.assertEquals(OpCode.MOVFLOAT, code.ops.get(0).op);
+			Assert.assertEquals((Float) 1.0f, (Float) code.ops.get(0).arg(1));
 		}));
 	}
     

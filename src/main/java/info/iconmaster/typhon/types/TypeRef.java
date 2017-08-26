@@ -10,6 +10,7 @@ import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.model.TemplateArgument;
 import info.iconmaster.typhon.model.TyphonModelEntity;
 import info.iconmaster.typhon.util.SourceInfo;
+import info.iconmaster.typhon.util.TemplateUtils;
 
 /**
  * This represents a reference to a type, possibly with templates instantiated.

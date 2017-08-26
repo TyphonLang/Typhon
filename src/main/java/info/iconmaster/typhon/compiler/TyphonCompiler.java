@@ -28,8 +28,6 @@ import info.iconmaster.typhon.antlr.TyphonParser.StatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.VarExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.VarLvalueContext;
 import info.iconmaster.typhon.compiler.Instruction.OpCode;
-import info.iconmaster.typhon.compiler.LookupUtils.LookupArgument;
-import info.iconmaster.typhon.compiler.LookupUtils.LookupElement;
 import info.iconmaster.typhon.errors.DuplicateVarNameError;
 import info.iconmaster.typhon.errors.ReadOnlyError;
 import info.iconmaster.typhon.errors.TypeError;
@@ -48,7 +46,10 @@ import info.iconmaster.typhon.model.TyphonModelReader;
 import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.types.TyphonTypeResolver;
+import info.iconmaster.typhon.util.LookupUtils;
 import info.iconmaster.typhon.util.SourceInfo;
+import info.iconmaster.typhon.util.LookupUtils.LookupArgument;
+import info.iconmaster.typhon.util.LookupUtils.LookupElement;
 
 /**
  * The Typhon compiler.

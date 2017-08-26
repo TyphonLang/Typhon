@@ -31,6 +31,7 @@ import info.iconmaster.typhon.model.Parameter;
 import info.iconmaster.typhon.model.TemplateArgument;
 import info.iconmaster.typhon.model.TyphonModelReader;
 import info.iconmaster.typhon.util.SourceInfo;
+import info.iconmaster.typhon.util.TemplateUtils;
 
 /**
  * This class turns rules for ANTLR types into Typhon types by scanning through packages and translating raw data

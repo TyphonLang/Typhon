@@ -9,6 +9,7 @@ import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.model.Package;
 import info.iconmaster.typhon.util.SourceInfo;
+import info.iconmaster.typhon.util.TemplateUtils;
 
 public class FunctionType extends Type {
 	private List<TypeRef> argTypes = new ArrayList<>();

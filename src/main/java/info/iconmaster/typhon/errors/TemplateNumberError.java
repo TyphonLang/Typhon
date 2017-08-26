@@ -1,7 +1,7 @@
 package info.iconmaster.typhon.errors;
 
-import info.iconmaster.typhon.types.TemplateUtils;
 import info.iconmaster.typhon.types.TypeRef;
+import info.iconmaster.typhon.util.TemplateUtils;
 
 /**
  * This is an error for when {@link TemplateUtils} finds that there are more template arguments than parameters.

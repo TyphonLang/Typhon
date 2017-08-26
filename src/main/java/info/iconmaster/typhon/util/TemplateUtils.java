@@ -1,4 +1,4 @@
-package info.iconmaster.typhon.types;
+package info.iconmaster.typhon.util;
 
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +8,10 @@ import info.iconmaster.typhon.errors.TemplateLabelNotFoundError;
 import info.iconmaster.typhon.errors.TemplateNumberError;
 import info.iconmaster.typhon.errors.TemplateTypeError;
 import info.iconmaster.typhon.model.TemplateArgument;
+import info.iconmaster.typhon.types.FunctionType;
+import info.iconmaster.typhon.types.TemplateType;
+import info.iconmaster.typhon.types.TypeRef;
+import info.iconmaster.typhon.types.UserType;
 
 /**
  * This class contains utilities related to Typhon's templating system.

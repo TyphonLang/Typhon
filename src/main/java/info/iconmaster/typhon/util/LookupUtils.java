@@ -1,4 +1,4 @@
-package info.iconmaster.typhon.compiler;
+package info.iconmaster.typhon.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import info.iconmaster.typhon.compiler.Instruction;
+import info.iconmaster.typhon.compiler.Scope;
+import info.iconmaster.typhon.compiler.Variable;
 import info.iconmaster.typhon.compiler.Instruction.OpCode;
 import info.iconmaster.typhon.errors.WriteOnlyError;
 import info.iconmaster.typhon.model.Field;
@@ -15,7 +18,6 @@ import info.iconmaster.typhon.model.Parameter;
 import info.iconmaster.typhon.model.TemplateArgument;
 import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
-import info.iconmaster.typhon.util.SourceInfo;
 
 public class LookupUtils {
 	private LookupUtils() {}

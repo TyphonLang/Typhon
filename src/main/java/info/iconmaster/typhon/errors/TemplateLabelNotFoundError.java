@@ -1,8 +1,8 @@
 package info.iconmaster.typhon.errors;
 
 import info.iconmaster.typhon.model.TemplateArgument;
-import info.iconmaster.typhon.types.TemplateUtils;
 import info.iconmaster.typhon.types.TypeRef;
+import info.iconmaster.typhon.util.TemplateUtils;
 
 /**
  * This is an error for when {@link TemplateUtils} finds an argument with a label that does not refernece any parameter.

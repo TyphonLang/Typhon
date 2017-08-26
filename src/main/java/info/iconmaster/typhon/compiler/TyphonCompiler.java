@@ -159,7 +159,7 @@ public class TyphonCompiler {
 				
 				if (ctx.tnValues != null) {
 					for (ExprContext expr : ctx.tnValues) {
-						vars = vars.subList(compileExpr(scope, expr, vars), vars.size());
+						vars = vars.subList(Math.min(compileExpr(scope, expr, vars), vars.size()), vars.size());
 					}
 				}
 				
@@ -178,7 +178,7 @@ public class TyphonCompiler {
 				
 				List<Variable> tempRhs = rhs;
 				for (ExprContext expr : ctx.tnValues) {
-					tempRhs = tempRhs.subList(compileExpr(scope, expr, tempRhs), tempRhs.size());
+					tempRhs = tempRhs.subList(Math.min(compileExpr(scope, expr, tempRhs), tempRhs.size()), tempRhs.size());
 				}
 				
 				// assign to the lvalues

@@ -290,6 +290,7 @@ public class TyphonTypeResolver {
 						// handle template types correctly
 						if (match instanceof TemplateType && map.containsKey(match)) {
 							match = map.get(match);
+							map = TemplateUtils.matchAllTemplateArgs((TypeRef) match);
 						}
 						
 						// find the next members with the given name
@@ -307,7 +308,7 @@ public class TyphonTypeResolver {
 									ref.getTemplateArgs().addAll(readTemplateArgs(tni, name.tnTemplate.tnArgs, lookup));
 									ref.getTemplateArgs().stream().forEach((tt)->resolve(tt.getValue().getType()));
 									
-									map.putAll(TemplateUtils.matchAllTemplateArgs(ref));
+									map = TemplateUtils.matchAllTemplateArgs(ref);
 									newFound.add(TemplateUtils.replaceTemplates(ref, map));
 									
 									TemplateUtils.checkTemplateArgs(ref);

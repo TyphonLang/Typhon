@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import info.iconmaster.typhon.model.MemberAccess;
+import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.util.SourceInfo;
 
@@ -148,7 +149,7 @@ public class Scope implements MemberAccess {
 	}
 	
 	@Override
-	public List<MemberAccess> getMembers() {
+	public List<MemberAccess> getMembers(Map<TemplateType, TypeRef> templateMap) {
 		return (List) getVars();
 	}
 }

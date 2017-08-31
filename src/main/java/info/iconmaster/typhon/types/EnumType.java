@@ -2,6 +2,7 @@ package info.iconmaster.typhon.types;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.model.Argument;
@@ -74,8 +75,8 @@ public class EnumType extends UserType {
 		}
 		
 		@Override
-		public List<MemberAccess> getMembers() {
-			return parent.getMembers();
+		public List<MemberAccess> getMembers(Map<TemplateType, TypeRef> templateMap) {
+			return parent.getMembers(templateMap);
 		}
 
 		@Override
@@ -113,8 +114,8 @@ public class EnumType extends UserType {
 	}
 	
 	@Override
-	public List<MemberAccess> getMembers() {
-		List<MemberAccess> a = super.getMembers();
+	public List<MemberAccess> getMembers(Map<TemplateType, TypeRef> templateMap) {
+		List<MemberAccess> a = super.getMembers(templateMap);
 		
 		a.addAll(getChoices());
 		

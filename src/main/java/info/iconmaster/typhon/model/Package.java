@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import info.iconmaster.typhon.TyphonInput;
+import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.types.Type;
+import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.util.SourceInfo;
 
 /**
@@ -496,7 +498,7 @@ public class Package extends TyphonModelEntity implements MemberAccess {
 	}
 	
 	@Override
-	public List<MemberAccess> getMembers() {
+	public List<MemberAccess> getMembers(Map<TemplateType, TypeRef> templateMap) {
 		ArrayList<MemberAccess> a = new ArrayList<>();
 		
 		a.addAll(getSubpackges());
@@ -507,7 +509,7 @@ public class Package extends TyphonModelEntity implements MemberAccess {
 		
 		for (Import i : getImports()) {
 			for (Package p : i.getResolvedTo()) {
-				a.addAll(p.getMembers());
+				a.addAll(p.getMembers(templateMap));
 			}
 		}
 		

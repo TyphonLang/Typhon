@@ -66,7 +66,7 @@ public class LookupUtils {
 				
 				for (List<MemberAccess> members : options) {
 					MemberAccess lastMember = members.get(members.size()-1);
-					List<MemberAccess> matches = lastMember.getMembers(name.name);
+					List<MemberAccess> matches = lastMember.getMembers(name.name, new HashMap<>());
 					
 					for (MemberAccess match : matches) {
 						List<MemberAccess> newMembers = new ArrayList<>(members);

@@ -1,6 +1,7 @@
 package info.iconmaster.typhon.types;
 
 import java.util.List;
+import java.util.Map;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
@@ -8,6 +9,7 @@ import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.model.Package;
 import info.iconmaster.typhon.model.TemplateArgument;
 import info.iconmaster.typhon.util.SourceInfo;
+import info.iconmaster.typhon.util.TemplateUtils;
 
 /**
  * These types are template parameters.
@@ -123,8 +125,11 @@ public class TemplateType extends Type {
 	}
 	
 	@Override
-	public List<MemberAccess> getMembers() {
-		return baseType.getMembers();
+	public List<MemberAccess> getMembers(Map<TemplateType, TypeRef> templateMap) {
+		if (templateMap.containsKey(this)) {
+			return templateMap.get(this).getMembers(templateMap);
+		}
+		return TemplateUtils.replaceTemplates(baseType, templateMap).getMembers(templateMap);
 	}
 	
 	@Override

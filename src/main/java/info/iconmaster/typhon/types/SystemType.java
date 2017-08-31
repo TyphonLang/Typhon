@@ -3,6 +3,7 @@ package info.iconmaster.typhon.types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import info.iconmaster.typhon.TyphonInput;
@@ -67,11 +68,11 @@ public class SystemType extends Type {
 	}
 	
 	@Override
-	public List<MemberAccess> getMembers() {
-		List<MemberAccess> a = super.getMembers();
+	public List<MemberAccess> getMembers(Map<TemplateType, TypeRef> templateMap) {
+		List<MemberAccess> a = super.getMembers(templateMap);
 		
 		for (TypeRef t : getParentTypes()) {
-			a.addAll(t.getMembers());
+			a.addAll(t.getMembers(templateMap));
 		}
 		
 		return a;

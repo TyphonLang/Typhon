@@ -81,12 +81,12 @@ public class TypeRef extends TyphonModelEntity implements MemberAccess {
 	}
 	
 	@Override
-	public List<MemberAccess> getMembers() {
+	public List<MemberAccess> getMembers(Map<TemplateType, TypeRef> templateMap) {
 		if (type == null) {
 			return Arrays.asList();
 		}
 		
-		return type.getMembers();
+		return TemplateUtils.replaceTemplates(this, templateMap).getType().getMembers(templateMap);
 	}
 	
 	@Override

@@ -2,6 +2,7 @@ package info.iconmaster.typhon.model;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
@@ -11,6 +12,7 @@ import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.util.SourceInfo;
+import info.iconmaster.typhon.util.TemplateUtils;
 
 /**
  * This represents a Typhon field- Either a global variable, or a member of a class.
@@ -141,12 +143,12 @@ public class Field extends TyphonModelEntity implements MemberAccess {
 	}
 	
 	@Override
-	public List<MemberAccess> getMembers() {
+	public List<MemberAccess> getMembers(Map<TemplateType, TypeRef> templateMap) {
 		if (type == null) {
 			return Arrays.asList();
 		}
 		
-		return type.getMembers();
+		return TemplateUtils.replaceTemplates(getType(), templateMap).getMembers(templateMap);
 	}
 
 	@Override

@@ -1,10 +1,13 @@
 package info.iconmaster.typhon.compiler;
 
 import java.util.List;
+import java.util.Map;
 
 import info.iconmaster.typhon.model.MemberAccess;
+import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.util.SourceInfo;
+import info.iconmaster.typhon.util.TemplateUtils;
 
 /**
  * A local variable.
@@ -60,7 +63,7 @@ public class Variable implements MemberAccess {
 	}
 	
 	@Override
-	public List<MemberAccess> getMembers() {
-		return type.getMembers();
+	public List<MemberAccess> getMembers(Map<TemplateType, TypeRef> templateMap) {
+		return TemplateUtils.replaceTemplates(type, templateMap).getMembers(templateMap);
 	}
 }

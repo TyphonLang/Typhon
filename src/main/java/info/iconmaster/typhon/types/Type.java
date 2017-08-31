@@ -1,7 +1,9 @@
 package info.iconmaster.typhon.types;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.model.AnnotationDefinition;
@@ -88,8 +90,8 @@ public abstract class Type extends TyphonModelEntity implements MemberAccess {
 	}
 	
 	@Override
-	public List<MemberAccess> getMembers() {
-		return getTypePackage().getMembers();
+	public List<MemberAccess> getMembers(Map<TemplateType, TypeRef> templateMap) {
+		return getTypePackage().getMembers(templateMap);
 	}
 	
 	/**
@@ -113,7 +115,7 @@ public abstract class Type extends TyphonModelEntity implements MemberAccess {
 	 * @return All the instance functions that are annotated as operator handlers for this type.
 	 */
 	public List<Function> getOperatorHandlers(AnnotationDefinition op) {
-		List<MemberAccess> members = getMembers();
+		List<MemberAccess> members = getMembers(new HashMap<>());
 		List<Function> result = new ArrayList<>();
 		
 		while (!members.isEmpty()) {
@@ -125,7 +127,7 @@ public abstract class Type extends TyphonModelEntity implements MemberAccess {
 					result.add(f);
 				}
  			} else {
-				members.addAll(member.getMembers());
+				members.addAll(member.getMembers(new HashMap<>()));
 			}
 		}
 		

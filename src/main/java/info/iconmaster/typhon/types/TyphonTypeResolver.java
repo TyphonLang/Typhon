@@ -199,7 +199,7 @@ public class TyphonTypeResolver {
 				List<MemberAccess> newMatches = new ArrayList<>();
 				
 				for (MemberAccess match : matches) {
-					newMatches.addAll(match.getMembers(name.getText()));
+					newMatches.addAll(match.getMembers(name.getText(), new HashMap<>()));
 				}
 				
 				matches = newMatches;
@@ -294,7 +294,7 @@ public class TyphonTypeResolver {
 						}
 						
 						// find the next members with the given name
-						List<MemberAccess> found = match.getMembers(name.tnName.getText());
+						List<MemberAccess> found = match.getMembers(name.tnName.getText(), map);
 						
 						// replace Types with their proper TypeRefs if there is a template
 						// since only types can have templates, elements may be removed from the list of found things

@@ -2,9 +2,11 @@ package info.iconmaster.typhon.model;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import info.iconmaster.typhon.types.TemplateType;
+import info.iconmaster.typhon.types.TypeRef;
 
 /**
  * This represents an entity that can be obtained somehow through member lookup,
@@ -35,7 +37,7 @@ public interface MemberAccess {
 	 * @return A list of all members that can be looked up from this entity.
 	 * Behavior may change based on if linking, type resolution, or compiling has been done.
 	 */
-	public default List<MemberAccess> getMembers() {
+	public default List<MemberAccess> getMembers(Map<TemplateType, TypeRef> templateMap) {
 		return Arrays.asList();
 	}
 	
@@ -44,7 +46,7 @@ public interface MemberAccess {
 	 * @return A list of all members that can be looked up from this entity with the given name.
 	 * Behavior may change based on if linking, type resolution, or compiling has been done.
 	 */
-	public default List<MemberAccess> getMembers(String name) {
-		return getMembers().stream().filter((e)->name.equals(e.getName())).collect(Collectors.toList());
+	public default List<MemberAccess> getMembers(String name, Map<TemplateType, TypeRef> templateMap) {
+		return getMembers(templateMap).stream().filter((e)->name.equals(e.getName())).collect(Collectors.toList());
 	}
 }

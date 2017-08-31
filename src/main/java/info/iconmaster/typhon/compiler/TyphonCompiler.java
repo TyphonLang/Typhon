@@ -2,6 +2,7 @@ package info.iconmaster.typhon.compiler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -48,6 +49,7 @@ import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.types.TyphonTypeResolver;
 import info.iconmaster.typhon.util.LookupUtils;
 import info.iconmaster.typhon.util.SourceInfo;
+import info.iconmaster.typhon.util.TemplateUtils;
 import info.iconmaster.typhon.util.LookupUtils.LookupArgument;
 import info.iconmaster.typhon.util.LookupUtils.LookupElement;
 
@@ -296,7 +298,7 @@ public class TyphonCompiler {
 				
 				MemberAccess access = scope;
 				while (access != null) {
-					List<MemberAccess> members = access.getMembers(ctx.tnValue.getText());
+					List<MemberAccess> members = access.getMembers(ctx.tnValue.getText(), scope.getCodeBlock().instance == null ? new HashMap<>() : TemplateUtils.matchAllTemplateArgs(scope.getCodeBlock().instance.type));
 					
 					for (MemberAccess member : members) {
 						if (member instanceof Field) {
@@ -572,7 +574,7 @@ public class TyphonCompiler {
 			public Variable visitVarLvalue(VarLvalueContext ctx) {
 				MemberAccess access = scope;
 				while (access != null) {
-					List<MemberAccess> members = access.getMembers(ctx.tnName.getText());
+					List<MemberAccess> members = access.getMembers(ctx.tnName.getText(), scope.getCodeBlock().instance == null ? new HashMap<>() : TemplateUtils.matchAllTemplateArgs(scope.getCodeBlock().instance.type));
 					
 					for (MemberAccess member : members) {
 						if (member instanceof Field) {

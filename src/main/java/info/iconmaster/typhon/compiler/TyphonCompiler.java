@@ -352,7 +352,7 @@ public class TyphonCompiler {
 						names.add(0, new LookupElement(((MemberExprContext) expr).tnValue.getText(), new SourceInfo(expr)));
 						
 						names.addAll(0, ((MemberExprContext) expr).tnLookup.stream().map((e)->{
-							List<TemplateArgument> template = TyphonTypeResolver.readTemplateArgs(core.tni, e.tnTemplate.tnArgs, scope);
+							List<TemplateArgument> template = TyphonTypeResolver.readTemplateArgs(core.tni, e.tnTemplate == null ? Arrays.asList() : e.tnTemplate.tnArgs, scope);
 							return new LookupElement(e.tnName.getText(), new SourceInfo(e), template);
 						}).collect(Collectors.toList()));
 						
@@ -585,7 +585,7 @@ public class TyphonCompiler {
 								if (f.getSetter() == null) {
 									// error; field is write-only
 									core.tni.errors.add(new ReadOnlyError(new SourceInfo(ctx), f));
-									return null;
+									return var;
 								}
 								
 								postfix.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALLSTATIC, new Object[] {Arrays.asList(), f.getSetter(), Arrays.asList(var)}));
@@ -671,7 +671,7 @@ public class TyphonCompiler {
 				if (paths.isEmpty()) {
 					// error, no path found
 					core.tni.errors.add(new UndefinedVariableError(new SourceInfo(ctx), ctx.tnRhs.getText()));
-					return null;
+					return scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(ctx));
 				}
 				List<MemberAccess> path = paths.get(0);
 				
@@ -679,14 +679,13 @@ public class TyphonCompiler {
 				
 				Field f = (Field) path.remove(path.size()-1);
 				Type fieldOf = f.getFieldOf();
+				Variable var = scope.addTempVar(f.type, new SourceInfo(ctx));
 				
 				if (f.getSetter() == null) {
 					// error; field is read-only
 					core.tni.errors.add(new ReadOnlyError(new SourceInfo(ctx), f));
-					return null;
+					return var;
 				}
-				
-				Variable var = scope.addTempVar(f.type, new SourceInfo(ctx));
 				
 				if (fieldOf == null) {
 					postfix.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALLSTATIC, new Object[] {Arrays.asList(), f.getSetter(), Arrays.asList(var)}));

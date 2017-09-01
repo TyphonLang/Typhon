@@ -50,6 +50,7 @@ public class TestCastingRules extends TyphonTest {
 				new InvalidCase(p.TYPE_NUMBER, p.TYPE_INT),
 				new InvalidCase(p.TYPE_INT, p.TYPE_FLOAT),
 				new InvalidCase(p.TYPE_ANY, p.TYPE_NUMBER),
+				new InvalidCase(p.TYPE_INT, p.TYPE_BYTE),
 				new InvalidCase(new FunctionType(tni, new Type[] {}, new Type[] {}), p.TYPE_INT),
 				new InvalidCase(new FunctionType(tni, new Type[] {p.TYPE_INT}, new Type[] {}), new FunctionType(tni, new Type[] {}, new Type[] {})),
 				new InvalidCase(new FunctionType(tni, new Type[] {}, new Type[] {}), new FunctionType(tni, new Type[] {}, new Type[] {p.TYPE_INT})),

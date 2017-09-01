@@ -560,6 +560,132 @@ public class TyphonCompiler {
 		return a.size();
 	}
 	
+	public static List<TypeRef> getExprType(Scope scope, ExprContext rule, List<TypeRef> expectedTypes) {
+		CorePackage core = scope.getCodeBlock().tni.corePackage;
+		
+		TyphonBaseVisitor<List<TypeRef>> visitor = new TyphonBaseVisitor<List<TypeRef>>() {
+			@Override
+			public List<TypeRef> visitNumConstExpr(NumConstExprContext ctx) {
+				// try to determine what type this constant should be
+				TypeRef var = expectedTypes.isEmpty() ? null : expectedTypes.get(0);
+				
+				String text = ctx.tnValue.getText();
+				if (var == null) {
+					if (text.contains(".") || text.contains("e")) {
+						return Arrays.asList(new TypeRef(core.TYPE_DOUBLE));
+					} else {
+						return Arrays.asList(new TypeRef(core.TYPE_INT));
+					}
+				} else {
+					if (var.getType() == core.TYPE_BYTE || var.getType() == core.TYPE_UBYTE) {
+						return Arrays.asList(var);
+					} else if (var.getType() == core.TYPE_DOUBLE || var.getType() == core.TYPE_REAL) {
+						return Arrays.asList(var);
+					} else if (var.getType() == core.TYPE_FLOAT) {
+						return Arrays.asList(var);
+					} else if (var.getType() == core.TYPE_LONG || var.getType() == core.TYPE_ULONG) {
+						return Arrays.asList(var);
+					} else if (var.getType() == core.TYPE_SHORT || var.getType() == core.TYPE_USHORT) {
+						return Arrays.asList(var);
+					} else if (var.getType() == core.TYPE_UINT) {
+						return Arrays.asList(var);
+					} else {
+						if (text.contains(".") || text.contains("e")) {
+							return Arrays.asList(new TypeRef(core.TYPE_DOUBLE));
+						} else {
+							return Arrays.asList(new TypeRef(core.TYPE_INT));
+						}
+					}
+				}
+			}
+			
+			@Override
+			public List<TypeRef> visitVarExpr(VarExprContext ctx) {
+				MemberAccess access = scope;
+				while (access != null) {
+					List<MemberAccess> members = access.getMembers(ctx.tnValue.getText(), scope.getCodeBlock().instance == null ? new HashMap<>() : TemplateUtils.matchAllTemplateArgs(scope.getCodeBlock().instance.type));
+					
+					for (MemberAccess member : members) {
+						if (member instanceof Field) {
+							Field f = (Field) member;
+							return Arrays.asList(f.type);
+						} else if (member instanceof Variable) {
+							Variable var = (Variable) member;
+							return Arrays.asList(var.type);
+						}
+					}
+					
+					access = access.getMemberParent();
+				}
+				
+				// error, not found
+				return Arrays.asList(TypeRef.var(core.tni));
+			}
+			
+			@Override
+			public List<TypeRef> visitMemberExpr(MemberExprContext ctx) {
+				// TODO: we assume all are .'s and no .?'s
+				
+				// turn the rule into a list of member accesses
+				List<LookupElement> names = new ArrayList<>();
+				ExprContext expr = ctx;
+				
+				while (true) {
+					if (expr instanceof MemberExprContext) {
+						names.add(0, new LookupElement(((MemberExprContext) expr).tnValue.getText(), new SourceInfo(expr)));
+						
+						names.addAll(0, ((MemberExprContext) expr).tnLookup.stream().map((e)->{
+							List<TemplateArgument> template = TyphonTypeResolver.readTemplateArgs(core.tni, e.tnTemplate == null ? Arrays.asList() : e.tnTemplate.tnArgs, scope);
+							return new LookupElement(e.tnName.getText(), new SourceInfo(e), template);
+						}).collect(Collectors.toList()));
+						
+						expr = ((MemberExprContext) expr).tnLhs;
+					} else if (expr instanceof VarExprContext) {
+						names.add(0, new LookupElement(((VarExprContext) expr).tnValue.getText(), new SourceInfo(expr)));
+						
+						expr = null;
+						break;
+					} else {
+						break;
+					}
+				}
+				
+				// create a list of possible member access routes
+				MemberAccess base = scope;
+				if (expr != null) {
+					base = getExprType(scope, expr, Arrays.asList()).get(0);
+				}
+				
+				List<List<MemberAccess>> paths = LookupUtils.findPaths(scope, base, names);
+				if (paths.isEmpty()) {
+					// error, no path found
+					return Arrays.asList(TypeRef.var(core.tni));
+				}
+				
+				// process the chosen path
+				List<MemberAccess> path = paths.get(0);
+				return Arrays.asList(LookupUtils.getTypeOfPath(scope, path));
+			}
+			
+			@Override
+			public List<TypeRef> visitBinOps1Expr(BinOps1ExprContext ctx) {
+				return getTypesBinOp(scope, ctx.tnLhs, ctx.tnRhs, ctx.tnOp);
+			}
+			
+			@Override
+			public List<TypeRef> visitBinOps2Expr(BinOps2ExprContext ctx) {
+				return getTypesBinOp(scope, ctx.tnLhs, ctx.tnRhs, ctx.tnOp);
+			}
+			
+			@Override
+			public List<TypeRef> visitParensExpr(ParensExprContext ctx) {
+				return getExprType(scope, ctx.tnExpr, expectedTypes);
+			}
+		};
+		
+		return visitor.visit(rule);
+	}
+	
 	/**
 	 * Produces the instructions and variable necessary to assign to the lvalue provided.
 	 * 
@@ -706,25 +832,58 @@ public class TyphonCompiler {
 		return visitor.visit(rule);
 	}
 	
+	private static AnnotationDefinition getBinOp(CorePackage core, String s) {
+		if (s.equals("+")) {
+			return core.ANNOT_OP_ADD;
+		} else if (s.equals("-")) {
+			return core.ANNOT_OP_SUB;
+		} else if (s.equals("*")) {
+			return core.ANNOT_OP_MUL;
+		} else if (s.equals("/")) {
+			return core.ANNOT_OP_DIV;
+		} else if (s.equals("%")) {
+			return core.ANNOT_OP_MOD;
+		} else {
+			return null;
+		}
+	}
+	
+	private static List<TypeRef> getTypesBinOp(Scope scope, ExprContext lhsExpr, ExprContext rhsEpr, Token opExpr) {
+		CorePackage core = scope.getCodeBlock().tni.corePackage;
+		
+		Variable lhs = scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(lhsExpr));
+		Variable rhs = scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(rhsEpr));
+		
+		AnnotationDefinition operator = getBinOp(core, opExpr.getText());
+		
+		compileExpr(scope, lhsExpr, Arrays.asList(lhs));
+		compileExpr(scope, rhsEpr, Arrays.asList(rhs));
+		
+		List<Function> handlers = lhs.type.getType().getOperatorHandlers(operator);
+		handlers.removeIf((f)->{
+			if (f.getParams().size() != 1 || f.getRetType().isEmpty()) {
+				return true;
+			}
+			
+			return !rhs.type.canCastTo(f.getParams().get(0).getType());
+		});
+		
+		if (handlers.isEmpty()) {
+			// error; handler not found
+			return Arrays.asList(TypeRef.var(core.tni));
+		}
+		
+		Function handler = handlers.get(0);
+		return Arrays.asList(handler.getRetType().get(0));
+	}
+	
 	private static List<TypeRef> compileBinOp(Scope scope, ExprContext lhsExpr, ExprContext rhsEpr, Token opExpr, List<Variable> insertInto) {
 		CorePackage core = scope.getCodeBlock().tni.corePackage;
 		
 		Variable lhs = scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(lhsExpr));
 		Variable rhs = scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(rhsEpr));
 		
-		AnnotationDefinition operator = null;
-		
-		if (opExpr.getText().equals("+")) {
-			operator = core.ANNOT_OP_ADD;
-		} else if (opExpr.getText().equals("-")) {
-			operator = core.ANNOT_OP_SUB;
-		} else if (opExpr.getText().equals("*")) {
-			operator = core.ANNOT_OP_MUL;
-		} else if (opExpr.getText().equals("/")) {
-			operator = core.ANNOT_OP_DIV;
-		} else if (opExpr.getText().equals("%")) {
-			operator = core.ANNOT_OP_MOD;
-		}
+		AnnotationDefinition operator = getBinOp(core, opExpr.getText());
 		
 		compileExpr(scope, lhsExpr, Arrays.asList(lhs));
 		compileExpr(scope, rhsEpr, Arrays.asList(rhs));

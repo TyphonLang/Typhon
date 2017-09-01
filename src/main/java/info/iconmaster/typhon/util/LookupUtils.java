@@ -176,6 +176,24 @@ public class LookupUtils {
 		return var;
 	}
 	
+	public static TypeRef getTypeOfPath(Scope scope, List<MemberAccess> path) {
+		TypeRef var = scope.getCodeBlock().instance == null ? null : scope.getCodeBlock().instance.type;
+		
+		for (MemberAccess access : path) {
+			if (access instanceof Variable) {
+				var = ((Variable) access).type;
+			}
+			
+			if (access instanceof Field) {
+				Field f = (Field) access;
+				
+				var = f.getType();
+			}
+		}
+		
+		return var;
+	}
+	
 	public static class LookupArgument {
 		public Variable var;
 		public String label;

@@ -178,4 +178,9 @@ public class TemplateType extends Type {
 		this.baseType = new TypeRef(baseType);
 		if (defualtType != null) this.defaultValue = new TypeRef(defualtType);
 	}
+	
+	@Override
+	public Map<TemplateType, TypeRef> getTemplateMap(Map<TemplateType, TypeRef> templateMap) {
+		return baseType.getTemplateMap(templateMap);
+	}
 }

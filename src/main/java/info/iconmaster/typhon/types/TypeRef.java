@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.model.MemberAccess;
@@ -220,5 +221,10 @@ public class TypeRef extends TyphonModelEntity implements MemberAccess {
 	@Override
 	public List<TemplateType> getMemberTemplate() {
 		return getType().getMemberTemplate();
+	}
+	
+	@Override
+	public Map<TemplateType, TypeRef> getTemplateMap(Map<TemplateType, TypeRef> templateMap) {
+		return TemplateUtils.matchAllTemplateArgs(TemplateUtils.replaceTemplates(this, templateMap));
 	}
 }

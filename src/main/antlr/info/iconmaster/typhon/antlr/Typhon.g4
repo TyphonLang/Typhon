@@ -73,7 +73,7 @@ memberItem: (tnOp='.'|tnOp='?.') tnAnnots+=annotation* tnName=WORD tnTemplate=te
 stat:
 	tnAnnots+=annotation* 'return' (tnValues+=expr (',' tnValues+=expr)*)? ';'																							#retStat
 |	tnDoc=DOC_COMMENT? tnType=type tnNames+=paramName (',' tnNames+=paramName)* ('=' tnValues+=expr (',' tnValues+=expr)*)? ';'											#defStat
-|	tnLvals+=lvalue (',' tnLvals+=lvalue)* ('=' tnValues+=expr (',' tnValues+=expr)*)? ';'																				#assignStat
+|	tnLvals+=lvalue (',' tnLvals+=lvalue)* '=' tnValues+=expr (',' tnValues+=expr)* ';'																					#assignStat
 |	tnLvals+=lvalue (',' tnLvals+=lvalue)* (tnOp='+='|tnOp='-='|tnOp='*='|tnOp='/='|tnOp='%=') tnRval=expr ';'															#comboAssignStat
 |	tnAnnots+=annotation* 'if' tnIfExpr=expr tnIfBlock=block	('elseif' tnElseifExprs+=expr tnElseifBlocks+=block)* ('else' tnElseBlock=block)?						#ifStat
 |	tnAnnots+=annotation* 'for' tnLvals+=forLvalue (',' tnLvals+=forLvalue)* ':' tnExpr=expr tnBlock=block																#forStat

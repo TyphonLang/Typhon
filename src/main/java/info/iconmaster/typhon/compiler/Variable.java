@@ -66,4 +66,9 @@ public class Variable implements MemberAccess {
 	public List<MemberAccess> getMembers(Map<TemplateType, TypeRef> templateMap) {
 		return TemplateUtils.replaceTemplates(type, templateMap).getMembers(templateMap);
 	}
+	
+	@Override
+	public Map<TemplateType, TypeRef> getTemplateMap(Map<TemplateType, TypeRef> templateMap) {
+		return type.getTemplateMap(templateMap);
+	}
 }

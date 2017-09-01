@@ -7,15 +7,16 @@ import java.util.List;
 import java.util.Map;
 
 import info.iconmaster.typhon.compiler.Instruction;
+import info.iconmaster.typhon.compiler.Instruction.OpCode;
 import info.iconmaster.typhon.compiler.Scope;
 import info.iconmaster.typhon.compiler.Variable;
-import info.iconmaster.typhon.compiler.Instruction.OpCode;
 import info.iconmaster.typhon.errors.WriteOnlyError;
 import info.iconmaster.typhon.model.Field;
 import info.iconmaster.typhon.model.Function;
 import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.model.Parameter;
 import info.iconmaster.typhon.model.TemplateArgument;
+import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
 
@@ -65,11 +66,30 @@ public class LookupUtils {
 				List<List<MemberAccess>> newOptions = new ArrayList<>();
 				
 				for (List<MemberAccess> members : options) {
+					Map<TemplateType, TypeRef> map = new HashMap<>();
+					
+					int i = 0;
+					for (MemberAccess member : members) {
+						if (i == members.size()-1) break;
+						Map<TemplateType, TypeRef> newMap = member.getTemplateMap(map);
+						if (newMap != null) {
+							map = newMap;
+						}
+						i++;
+					}
+					
 					MemberAccess lastMember = members.get(members.size()-1);
-					List<MemberAccess> matches = lastMember.getMembers(name.name, new HashMap<>());
+					List<MemberAccess> matches = lastMember.getMembers(name.name, map);
 					
 					for (MemberAccess match : matches) {
 						List<MemberAccess> newMembers = new ArrayList<>(members);
+						
+						if (match instanceof Type) {
+							TypeRef ref = new TypeRef(name.source, (Type) match);
+							ref.getTemplateArgs().addAll(name.template);
+							match = ref;
+						}
+						
 						newMembers.add(match);
 						newOptions.add(newMembers);
 					}
@@ -85,21 +105,27 @@ public class LookupUtils {
 		// remove incorrect accesses to instance fields
 		result.removeIf((path)->{
 			TypeRef type = scope.getCodeBlock().instance != null ? scope.getCodeBlock().instance.type : null;
+			Map<TemplateType, TypeRef> map = new HashMap<>();
 			
 			for (MemberAccess access : path) {
 				if (access instanceof Variable) {
-					type = ((Variable) access).type;
+					type = TemplateUtils.replaceTemplates(((Variable) access).type, map);
 				}
 				
 				if (access instanceof Field) {
 					Field f = (Field) access;
 					Type fieldOf = f.getFieldOf();
 					
-					if (fieldOf != null && (type == null || !fieldOf.equals(type.getType()))) {
+					if (fieldOf != null && (type == null || !type.canCastTo(TemplateUtils.replaceTemplates(new TypeRef(null, fieldOf), map)))) {
 						return true;
 					}
 					
-					type = f.type;
+					type = TemplateUtils.replaceTemplates(f.getType(), map);
+				}
+				
+				Map<TemplateType, TypeRef> newMap = access.getTemplateMap(map);
+				if (newMap != null) {
+					map = newMap;
 				}
 			}
 			

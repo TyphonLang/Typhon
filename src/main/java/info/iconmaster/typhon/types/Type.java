@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.model.AnnotationDefinition;
@@ -12,6 +13,7 @@ import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.model.Package;
 import info.iconmaster.typhon.model.TyphonModelEntity;
 import info.iconmaster.typhon.util.SourceInfo;
+import info.iconmaster.typhon.util.TemplateUtils;
 
 /**
  * This is a type in Typhon's type system.
@@ -49,7 +51,12 @@ public abstract class Type extends TyphonModelEntity implements MemberAccess {
 	 */
 	public Package getTypePackage() {
 		if (typePackage == null) {
-			typePackage = new Package(source, null, parent == null ? tni.corePackage : parent);
+			typePackage = new Package(source, null, parent == null ? tni.corePackage : parent) {
+				@Override
+				public MemberAccess getMemberParent() {
+					return Type.this;
+				}
+			};
 		}
 		
 		return typePackage;
@@ -105,9 +112,32 @@ public abstract class Type extends TyphonModelEntity implements MemberAccess {
 	 */
 	public boolean canCastTo(TypeRef a, TypeRef b) {
 		if (b.getType() instanceof TemplateType) {
-			return a.equals(((TemplateType)b.getType()).getBaseType());
+			return a.canCastTo(((TemplateType)b.getType()).getBaseType());
 		}
-		return a.equals(b);
+		
+		// compare templates
+		Map<TemplateType, TypeRef> map1 = TemplateUtils.matchTemplateArgs(a);
+		Map<TemplateType, TypeRef> map2 = TemplateUtils.matchTemplateArgs(b);
+		
+		for (Entry<TemplateType, TypeRef> entry : map1.entrySet()) {
+			if (!map2.containsKey(entry.getKey())) return false;
+		}
+		
+		for (Entry<TemplateType, TypeRef> entry : map2.entrySet()) {
+			if (!map1.containsKey(entry.getKey())) return false;
+		}
+		
+		for (Entry<TemplateType, TypeRef> entry : map1.entrySet()) {
+			TypeRef value1 = entry.getValue();
+			TypeRef value2 = map2.get(entry.getKey());
+			
+			if (!value1.canCastTo(value2)) {
+				return false;
+			}
+		}
+		
+		// compare types
+		return a.getType().equals(b.getType());
 	}
 	
 	/**

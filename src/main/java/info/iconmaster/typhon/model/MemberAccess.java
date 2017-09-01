@@ -49,4 +49,8 @@ public interface MemberAccess {
 	public default List<MemberAccess> getMembers(String name, Map<TemplateType, TypeRef> templateMap) {
 		return getMembers(templateMap).stream().filter((e)->name.equals(e.getName())).collect(Collectors.toList());
 	}
+	
+	public default Map<TemplateType, TypeRef> getTemplateMap(Map<TemplateType, TypeRef> templateMap) {
+		return null;
+	}
 }

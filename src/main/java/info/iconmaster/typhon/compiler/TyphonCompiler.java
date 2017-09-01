@@ -388,7 +388,10 @@ public class TyphonCompiler {
 				// process the chosen path
 				List<MemberAccess> path = paths.get(0);
 				Variable var = LookupUtils.getSubjectOfPath(scope, path, names);
-				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.MOV, new Object[] {insertInto.get(0), var}));
+				
+				if (!insertInto.isEmpty()) {
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.MOV, new Object[] {insertInto.get(0), var}));
+				}
 				
 				return Arrays.asList(var.type);
 			}

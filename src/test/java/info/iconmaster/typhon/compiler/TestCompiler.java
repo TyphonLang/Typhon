@@ -283,6 +283,8 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(0, code.tni.errors.size());
 		}),new TestCase("void g(byte b) {} void f() {g(1);}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("void g(byte b) {} void f() {int x = 1; g(x);}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
 		}));
 	}
     

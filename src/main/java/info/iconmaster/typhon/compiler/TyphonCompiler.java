@@ -567,6 +567,14 @@ public class TyphonCompiler {
 		return a.size();
 	}
 	
+	/**
+	 * Returns the type of an expression rule.
+	 * 
+	 * @param scope The current scope.
+	 * @param rule The rule representing the expression.
+	 * @param expectedTypes What the compiler expects the type to be. May be empty.
+	 * @return A list of at least one type.
+	 */
 	public static List<TypeRef> getExprType(Scope scope, ExprContext rule, List<TypeRef> expectedTypes) {
 		CorePackage core = scope.getCodeBlock().tni.corePackage;
 		

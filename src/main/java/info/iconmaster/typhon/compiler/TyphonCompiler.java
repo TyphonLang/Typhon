@@ -36,6 +36,7 @@ import info.iconmaster.typhon.errors.UndefinedOperatorError;
 import info.iconmaster.typhon.errors.UndefinedVariableError;
 import info.iconmaster.typhon.errors.WriteOnlyError;
 import info.iconmaster.typhon.model.AnnotationDefinition;
+import info.iconmaster.typhon.model.Argument;
 import info.iconmaster.typhon.model.CorePackage;
 import info.iconmaster.typhon.model.Field;
 import info.iconmaster.typhon.model.Function;
@@ -48,10 +49,10 @@ import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.types.TyphonTypeResolver;
 import info.iconmaster.typhon.util.LookupUtils;
-import info.iconmaster.typhon.util.SourceInfo;
-import info.iconmaster.typhon.util.TemplateUtils;
 import info.iconmaster.typhon.util.LookupUtils.LookupArgument;
 import info.iconmaster.typhon.util.LookupUtils.LookupElement;
+import info.iconmaster.typhon.util.SourceInfo;
+import info.iconmaster.typhon.util.TemplateUtils;
 
 /**
  * The Typhon compiler.
@@ -453,12 +454,14 @@ public class TyphonCompiler {
 				List<LookupArgument> args = new ArrayList<>();
 				List<Variable> vars = new ArrayList<>();
 				
+				Map<Variable, ExprContext> argmap = new HashMap<>();
 				TyphonModelReader.readArgs(core.tni, ctx.tnArgs.tnArgs).stream().forEach((arg)->{
 					Variable var = scope.addTempVar(TypeRef.var(core.tni), arg.source);
-					compileExpr(scope, arg.getRawValue(), Arrays.asList(var));
 					vars.add(var);
 					
 					args.add(new LookupArgument(var, arg.getLabel()));
+					
+					argmap.put(var, arg.getRawValue());
 				});
 				
 				paths.removeIf((path)->{
@@ -475,7 +478,7 @@ public class TyphonCompiler {
 						
 						// check if the types match up to the signature
 						for (Entry<Parameter, Variable> entry : map.entrySet()) {
-							if (!entry.getValue().type.canCastTo(entry.getKey().getType())) {
+							if (!getExprType(scope, argmap.get(entry.getValue()), Arrays.asList(entry.getKey().getType())).get(0).canCastTo(entry.getKey().getType())) {
 								return true;
 							}
 						}
@@ -505,9 +508,13 @@ public class TyphonCompiler {
 					List<Variable> inputVars = new ArrayList<>();
 					
 					Map<Parameter, Variable> map = LookupUtils.getFuncArgMap(f, args);
+					
 					for (Parameter param : f.getParams()) {
 						if (map.containsKey(param)) {
 							inputVars.add(map.get(param));
+							map.get(param).type = getExprType(scope, argmap.get(map.get(param)), Arrays.asList(param.getType())).get(0);
+							
+							compileExpr(scope, argmap.get(map.get(param)), Arrays.asList(map.get(param)));
 						} else {
 							Variable var = scope.addTempVar(param.getType(), new SourceInfo(ctx));
 							// TODO: assign default value to variable

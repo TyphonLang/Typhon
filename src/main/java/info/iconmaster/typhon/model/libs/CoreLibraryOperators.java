@@ -143,6 +143,19 @@ public class CoreLibraryOperators extends Package {
 		}));
 	}
 	
+	private void addRelOpFunc(AnnotationDefinition op) {
+		CorePackage c = tni.corePackage;
+		
+		// add the general version
+		addOpFunc(c.TYPE_NUMBER.getTypePackage(), op, new Function(tni, op.getName(), new TemplateType[] {
+				
+		}, new Parameter[] {
+				new Parameter(tni, "other", c.TYPE_NUMBER, false),
+		}, new Type[] {
+				c.TYPE_BOOL,
+		}));
+	}
+	
 	public CoreLibraryOperators(TyphonInput tni) {
 		super(tni, "operator");
 		
@@ -160,6 +173,11 @@ public class CoreLibraryOperators extends Package {
 		tni.corePackage.ANNOT_OP_SHL = makeAnnotDef("shl");
 		tni.corePackage.ANNOT_OP_SHR = makeAnnotDef("shr");
 		
+		tni.corePackage.ANNOT_OP_LT = makeAnnotDef("lt");
+		tni.corePackage.ANNOT_OP_LE = makeAnnotDef("le");
+		tni.corePackage.ANNOT_OP_GT = makeAnnotDef("gt");
+		tni.corePackage.ANNOT_OP_GE = makeAnnotDef("ge");
+		
 		// add the operator functions
 		addBinOpFunc(tni.corePackage.ANNOT_OP_ADD);
 		addBinOpFunc(tni.corePackage.ANNOT_OP_SUB);
@@ -173,5 +191,10 @@ public class CoreLibraryOperators extends Package {
 		
 		addBitShiftOpFunc(tni.corePackage.ANNOT_OP_SHL);
 		addBitShiftOpFunc(tni.corePackage.ANNOT_OP_SHR);
+		
+		addRelOpFunc(tni.corePackage.ANNOT_OP_LT);
+		addRelOpFunc(tni.corePackage.ANNOT_OP_LE);
+		addRelOpFunc(tni.corePackage.ANNOT_OP_GT);
+		addRelOpFunc(tni.corePackage.ANNOT_OP_GE);
 	}
 }

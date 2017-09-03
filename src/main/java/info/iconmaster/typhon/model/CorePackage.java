@@ -35,7 +35,8 @@ public class CorePackage extends Package {
 	/**
 	 * Constants for built-in types.
 	 */
-	public SystemType TYPE_BYTE, TYPE_SHORT, TYPE_INT, TYPE_LONG, TYPE_UBYTE, TYPE_USHORT, TYPE_UINT, TYPE_ULONG, TYPE_CHAR, TYPE_BOOL, TYPE_STRING, TYPE_FLOAT, TYPE_DOUBLE;
+	public SystemType TYPE_BYTE, TYPE_SHORT, TYPE_INT, TYPE_LONG, TYPE_UBYTE, TYPE_USHORT, TYPE_UINT, TYPE_ULONG, TYPE_FLOAT, TYPE_DOUBLE,
+	TYPE_BOOL, TYPE_CHAR, TYPE_STRING;
 	
 	/**
 	 * Constants for annotations.
@@ -45,7 +46,9 @@ public class CorePackage extends Package {
 	/**
 	 * Constants for operator annotations.
 	 */
-	public AnnotationDefinition ANNOT_OP_ADD, ANNOT_OP_SUB, ANNOT_OP_MUL, ANNOT_OP_DIV, ANNOT_OP_MOD, ANNOT_OP_BAND, ANNOT_OP_BOR, ANNOT_OP_XOR, ANNOT_OP_SHL, ANNOT_OP_SHR;
+	public AnnotationDefinition ANNOT_OP_ADD, ANNOT_OP_SUB, ANNOT_OP_MUL, ANNOT_OP_DIV, ANNOT_OP_MOD,
+	ANNOT_OP_BAND, ANNOT_OP_BOR, ANNOT_OP_XOR, ANNOT_OP_SHL, ANNOT_OP_SHR,
+	ANNOT_OP_LT, ANNOT_OP_LE, ANNOT_OP_GT, ANNOT_OP_GE;
 	
 	private UserType makeUserType(String name, Type parent) {
 		UserType type = new UserType(name, parent);

@@ -25,6 +25,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.MemberLvalueContext;
 import info.iconmaster.typhon.antlr.TyphonParser.NumConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ParamNameContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ParensExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.RelOpsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.StatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.VarExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.VarLvalueContext;
@@ -554,6 +555,11 @@ public class TyphonCompiler {
 				
 				return compileBinOp(scope, ctx.tnLhs, ctx.tnRhs, op, insertInto);
 			}
+			
+			@Override
+			public List<TypeRef> visitRelOpsExpr(RelOpsExprContext ctx) {
+				return compileBinOp(scope, ctx.tnLhs, ctx.tnRhs, ctx.tnOp.getText(), insertInto);
+			}
 		};
 		
 		List<TypeRef> a = visitor.visit(rule);
@@ -705,6 +711,11 @@ public class TyphonCompiler {
 				if (ctx.tnOp2 != null) op += ctx.tnOp2.getText();
 				
 				return getTypesBinOp(scope, ctx.tnLhs, ctx.tnRhs, op);
+			}
+			
+			@Override
+			public List<TypeRef> visitRelOpsExpr(RelOpsExprContext ctx) {
+				return getTypesBinOp(scope, ctx.tnLhs, ctx.tnRhs, ctx.tnOp.getText());
 			}
 			
 			@Override
@@ -884,6 +895,14 @@ public class TyphonCompiler {
 			return core.ANNOT_OP_SHL;
 		case ">>":
 			return core.ANNOT_OP_SHR;
+		case "<":
+			return core.ANNOT_OP_LT;
+		case "<=":
+			return core.ANNOT_OP_LE;
+		case ">":
+			return core.ANNOT_OP_GT;
+		case ">=":
+			return core.ANNOT_OP_GE;
 		default:
 			throw new IllegalArgumentException("unknown operator in getBinOp: "+s+"");
 		}

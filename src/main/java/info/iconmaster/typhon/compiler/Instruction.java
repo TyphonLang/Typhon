@@ -45,10 +45,13 @@ public class Instruction extends TyphonModelEntity {
 		CALLFPTR,
 		LABEL,
 		JUMP,
-		JUMPTRUE,
-		JUMPFALSE,
+		JUMPIF,
 		RET,
 		ALLOC,
+		RAWEQ,
+		NOT,
+		INSTANCEOF,
+		ISNULL,
 	}
 	
 	/**

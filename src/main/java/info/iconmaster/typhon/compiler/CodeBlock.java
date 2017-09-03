@@ -47,6 +47,11 @@ public class CodeBlock extends TyphonModelEntity {
 	public Variable instance;
 	
 	/**
+	 * The labels present.
+	 */
+	public List<Label> labels = new ArrayList<>();
+	
+	/**
 	 * Create a new code block.
 	 * 
 	 * @param input

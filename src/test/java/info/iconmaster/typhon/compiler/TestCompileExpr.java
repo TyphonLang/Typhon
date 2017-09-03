@@ -105,7 +105,13 @@ public class TestCompileExpr extends TyphonTest {
 		}),new TestCase("1 as Any", 1, (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 		}),new TestCase("1 as List<int>", 1, (code)->{
-			Assert.assertEquals(1, code.tni.errors.size());
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("1 as? int", 1, (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("1 as? Any", 1, (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("1 as? List<int>", 1, (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
 		}));
 	}
     

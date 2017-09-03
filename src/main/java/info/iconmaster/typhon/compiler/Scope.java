@@ -40,6 +40,11 @@ public class Scope implements MemberAccess {
 	private CodeBlock codeBlock;
 	
 	/**
+	 * The labels in this scope.
+	 */
+	private List<Label> labels = new ArrayList<>();
+	
+	/**
 	 * Construct a root scope.
 	 * 
 	 * @param codeBlock
@@ -151,5 +156,34 @@ public class Scope implements MemberAccess {
 	@Override
 	public List<MemberAccess> getMembers(Map<TemplateType, TypeRef> templateMap) {
 		return (List) getVars();
+	}
+	
+	public List<Label> getLabels() {
+		return labels;
+	}
+	
+	public Label getLabel(String name) {
+		for (Label label : labels) {
+			if (name.equals(label.name)) {
+				return label;
+			}
+		}
+		
+		if (parent == null) {
+			return null;
+		}
+		
+		return parent.getLabel(name);
+	}
+	
+	public Label addLabel(String name) {
+		Label label = new Label(this, name);
+		labels.add(label);
+		getCodeBlock().labels.add(label);
+		return label;
+	}
+	
+	public Label addTempLabel() {
+		return addLabel(null);
 	}
 }

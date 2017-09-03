@@ -564,15 +564,31 @@ public class TyphonCompiler {
 			
 			@Override
 			public List<TypeRef> visitCastExpr(CastExprContext ctx) {
-				// TODO: the 'as?' operator
-				
 				TypeRef newType = TyphonTypeResolver.readType(core.tni, ctx.tnRhs, scope);
 				TypeRef oldType = getExprType(scope, ctx.tnLhs, Arrays.asList(newType)).get(0);
 				
+				TypeRef oldInsertIntoType = null;
+				if (!insertInto.isEmpty()) {
+					// we temporarily alter the type of the var to the old one, so the expression compiles correctly
+					oldInsertIntoType = insertInto.get(0).type;
+					insertInto.get(0).type = oldType;
+				}
+				
 				compileExpr(scope, ctx.tnLhs, insertInto.isEmpty() ? Arrays.asList() : Arrays.asList(insertInto.get(0)));
 				
-				if (!oldType.canCastTo(newType)) {
-					core.tni.errors.add(new TypeError(new SourceInfo(ctx), oldType, newType));
+				if (!insertInto.isEmpty()) {
+					// restore the changes to the type
+					insertInto.get(0).type = oldInsertIntoType;
+				}
+				
+				if (!insertInto.isEmpty() && ctx.tnOp.getText().equals("as?")) {
+					Label label = scope.addTempLabel();
+					Variable var1 = scope.addTempVar(new TypeRef(core.TYPE_BOOL), new SourceInfo(ctx));
+					
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.INSTANCEOF, new Object[] {var1, insertInto.get(0), newType}));
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPIF, new Object[] {label, var1}));
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.MOVNULL, new Object[] {insertInto.get(0)}));
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {label}));
 				}
 				
 				return Arrays.asList(newType);

@@ -15,6 +15,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.AssignStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BinOps1ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BinOps2ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BitOpsExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.CastExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DefStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprStatContext;
@@ -560,6 +561,22 @@ public class TyphonCompiler {
 			public List<TypeRef> visitRelOpsExpr(RelOpsExprContext ctx) {
 				return compileBinOp(scope, ctx.tnLhs, ctx.tnRhs, ctx.tnOp.getText(), insertInto);
 			}
+			
+			@Override
+			public List<TypeRef> visitCastExpr(CastExprContext ctx) {
+				// TODO: the 'as?' operator
+				
+				TypeRef newType = TyphonTypeResolver.readType(core.tni, ctx.tnRhs, scope);
+				TypeRef oldType = getExprType(scope, ctx.tnLhs, Arrays.asList(newType)).get(0);
+				
+				compileExpr(scope, ctx.tnLhs, insertInto.isEmpty() ? Arrays.asList() : Arrays.asList(insertInto.get(0)));
+				
+				if (!oldType.canCastTo(newType)) {
+					core.tni.errors.add(new TypeError(new SourceInfo(ctx), oldType, newType));
+				}
+				
+				return Arrays.asList(newType);
+			}
 		};
 		
 		List<TypeRef> a = visitor.visit(rule);
@@ -716,6 +733,11 @@ public class TyphonCompiler {
 			@Override
 			public List<TypeRef> visitRelOpsExpr(RelOpsExprContext ctx) {
 				return getTypesBinOp(scope, ctx.tnLhs, ctx.tnRhs, ctx.tnOp.getText());
+			}
+			
+			@Override
+			public List<TypeRef> visitCastExpr(CastExprContext ctx) {
+				return Arrays.asList(TyphonTypeResolver.readType(core.tni, ctx.tnRhs, scope));
 			}
 			
 			@Override

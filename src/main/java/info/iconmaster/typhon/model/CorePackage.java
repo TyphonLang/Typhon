@@ -45,7 +45,7 @@ public class CorePackage extends Package {
 	/**
 	 * Constants for operator annotations.
 	 */
-	public AnnotationDefinition ANNOT_OP_ADD, ANNOT_OP_SUB, ANNOT_OP_MUL, ANNOT_OP_DIV, ANNOT_OP_MOD;
+	public AnnotationDefinition ANNOT_OP_ADD, ANNOT_OP_SUB, ANNOT_OP_MUL, ANNOT_OP_DIV, ANNOT_OP_MOD, ANNOT_OP_BAND, ANNOT_OP_BOR, ANNOT_OP_XOR, ANNOT_OP_SHL, ANNOT_OP_SHR;
 	
 	private UserType makeUserType(String name, Type parent) {
 		UserType type = new UserType(name, parent);

@@ -45,7 +45,7 @@ expr:
 |	tnAnnots+=annotation* (tnOp='-'|tnOp='+'|tnOp='!'|tnOp='~') tnArg=expr																	#unOpsExpr
 |	tnLhs=expr (tnOp='*'|tnOp='/'|tnOp='%') tnRhs=expr																						#binOps1Expr
 |	tnLhs=expr (tnOp='+'|tnOp='-') tnRhs=expr																								#binOps2Expr
-|	tnLhs=expr (tnOp='&'|tnOp='|'|tnOp='^'|tnOp='<' '<'|tnOp='>' '>') tnRhs=expr															#bitOpsExpr
+|	tnLhs=expr (tnOp='&'|tnOp='|'|tnOp='^'|tnOp='<' tnOp2='<'|tnOp='>' tnOp2='>') tnRhs=expr												#bitOpsExpr
 |	tnLhs=expr '??' tnRhs=expr																												#nullCoalesceExpr
 |	tnLhs=expr (tnOp='<'|tnOp='>'|tnOp='<='|tnOp='>=') tnRhs=expr																			#relOpsExpr
 |	tnLhs=expr 'is' tnRhs=type																												#isExpr

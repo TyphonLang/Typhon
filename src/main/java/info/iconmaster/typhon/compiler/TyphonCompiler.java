@@ -9,12 +9,12 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
 
 import info.iconmaster.typhon.antlr.TyphonBaseVisitor;
 import info.iconmaster.typhon.antlr.TyphonParser.AssignStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BinOps1ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BinOps2ExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.BitOpsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DefStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprStatContext;
@@ -36,7 +36,6 @@ import info.iconmaster.typhon.errors.UndefinedOperatorError;
 import info.iconmaster.typhon.errors.UndefinedVariableError;
 import info.iconmaster.typhon.errors.WriteOnlyError;
 import info.iconmaster.typhon.model.AnnotationDefinition;
-import info.iconmaster.typhon.model.Argument;
 import info.iconmaster.typhon.model.CorePackage;
 import info.iconmaster.typhon.model.Field;
 import info.iconmaster.typhon.model.Function;
@@ -540,12 +539,20 @@ public class TyphonCompiler {
 			
 			@Override
 			public List<TypeRef> visitBinOps1Expr(BinOps1ExprContext ctx) {
-				return compileBinOp(scope, ctx.tnLhs, ctx.tnRhs, ctx.tnOp, insertInto);
+				return compileBinOp(scope, ctx.tnLhs, ctx.tnRhs, ctx.tnOp.getText(), insertInto);
 			}
 			
 			@Override
 			public List<TypeRef> visitBinOps2Expr(BinOps2ExprContext ctx) {
-				return compileBinOp(scope, ctx.tnLhs, ctx.tnRhs, ctx.tnOp, insertInto);
+				return compileBinOp(scope, ctx.tnLhs, ctx.tnRhs, ctx.tnOp.getText(), insertInto);
+			}
+			
+			@Override
+			public List<TypeRef> visitBitOpsExpr(BitOpsExprContext ctx) {
+				String op = ctx.tnOp.getText();
+				if (ctx.tnOp2 != null) op += ctx.tnOp2.getText();
+				
+				return compileBinOp(scope, ctx.tnLhs, ctx.tnRhs, op, insertInto);
 			}
 		};
 		
@@ -684,12 +691,20 @@ public class TyphonCompiler {
 			
 			@Override
 			public List<TypeRef> visitBinOps1Expr(BinOps1ExprContext ctx) {
-				return getTypesBinOp(scope, ctx.tnLhs, ctx.tnRhs, ctx.tnOp);
+				return getTypesBinOp(scope, ctx.tnLhs, ctx.tnRhs, ctx.tnOp.getText());
 			}
 			
 			@Override
 			public List<TypeRef> visitBinOps2Expr(BinOps2ExprContext ctx) {
-				return getTypesBinOp(scope, ctx.tnLhs, ctx.tnRhs, ctx.tnOp);
+				return getTypesBinOp(scope, ctx.tnLhs, ctx.tnRhs, ctx.tnOp.getText());
+			}
+			
+			@Override
+			public List<TypeRef> visitBitOpsExpr(BitOpsExprContext ctx) {
+				String op = ctx.tnOp.getText();
+				if (ctx.tnOp2 != null) op += ctx.tnOp2.getText();
+				
+				return getTypesBinOp(scope, ctx.tnLhs, ctx.tnRhs, op);
 			}
 			
 			@Override
@@ -848,28 +863,39 @@ public class TyphonCompiler {
 	}
 	
 	private static AnnotationDefinition getBinOp(CorePackage core, String s) {
-		if (s.equals("+")) {
+		switch (s) {
+		case "+":
 			return core.ANNOT_OP_ADD;
-		} else if (s.equals("-")) {
+		case "-":
 			return core.ANNOT_OP_SUB;
-		} else if (s.equals("*")) {
+		case "*":
 			return core.ANNOT_OP_MUL;
-		} else if (s.equals("/")) {
+		case "/":
 			return core.ANNOT_OP_DIV;
-		} else if (s.equals("%")) {
+		case "%":
 			return core.ANNOT_OP_MOD;
-		} else {
-			return null;
+		case "&":
+			return core.ANNOT_OP_BAND;
+		case "|":
+			return core.ANNOT_OP_BOR;
+		case "^":
+			return core.ANNOT_OP_XOR;
+		case "<<":
+			return core.ANNOT_OP_SHL;
+		case ">>":
+			return core.ANNOT_OP_SHR;
+		default:
+			throw new IllegalArgumentException("unknown operator in getBinOp: "+s+"");
 		}
 	}
 	
-	private static List<TypeRef> getTypesBinOp(Scope scope, ExprContext lhsExpr, ExprContext rhsEpr, Token opExpr) {
+	private static List<TypeRef> getTypesBinOp(Scope scope, ExprContext lhsExpr, ExprContext rhsEpr, String opStr) {
 		CorePackage core = scope.getCodeBlock().tni.corePackage;
 		
 		Variable lhs = scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(lhsExpr));
 		Variable rhs = scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(rhsEpr));
 		
-		AnnotationDefinition operator = getBinOp(core, opExpr.getText());
+		AnnotationDefinition operator = getBinOp(core, opStr);
 		
 		compileExpr(scope, lhsExpr, Arrays.asList(lhs));
 		compileExpr(scope, rhsEpr, Arrays.asList(rhs));
@@ -892,16 +918,16 @@ public class TyphonCompiler {
 		return Arrays.asList(handler.getRetType().get(0));
 	}
 	
-	private static List<TypeRef> compileBinOp(Scope scope, ExprContext lhsExpr, ExprContext rhsEpr, Token opExpr, List<Variable> insertInto) {
+	private static List<TypeRef> compileBinOp(Scope scope, ExprContext lhsExpr, ExprContext rhsExpr, String opStr, List<Variable> insertInto) {
 		CorePackage core = scope.getCodeBlock().tni.corePackage;
 		
 		Variable lhs = scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(lhsExpr));
-		Variable rhs = scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(rhsEpr));
+		Variable rhs = scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(rhsExpr));
 		
-		AnnotationDefinition operator = getBinOp(core, opExpr.getText());
+		AnnotationDefinition operator = getBinOp(core, opStr);
 		
 		compileExpr(scope, lhsExpr, Arrays.asList(lhs));
-		compileExpr(scope, rhsEpr, Arrays.asList(rhs));
+		compileExpr(scope, rhsExpr, Arrays.asList(rhs));
 		
 		List<Function> handlers = lhs.type.getType().getOperatorHandlers(operator);
 		handlers.removeIf((f)->{
@@ -914,12 +940,12 @@ public class TyphonCompiler {
 		
 		if (handlers.isEmpty()) {
 			// error; handler not found
-			core.tni.errors.add(new UndefinedOperatorError(new SourceInfo(opExpr), opExpr.getText(), lhs.type, rhs.type));
+			core.tni.errors.add(new UndefinedOperatorError(new SourceInfo(lhsExpr, rhsExpr), opStr, lhs.type, rhs.type));
 			return Arrays.asList(TypeRef.var(core.tni));
 		}
 		
 		Function handler = handlers.get(0);
-		scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(opExpr), OpCode.CALL, new Object[] {insertInto.isEmpty() ? Arrays.asList() : Arrays.asList(insertInto.get(0)), lhs, handler, Arrays.asList(rhs)}));
+		scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(lhsExpr, rhsExpr), OpCode.CALL, new Object[] {insertInto.isEmpty() ? Arrays.asList() : Arrays.asList(insertInto.get(0)), lhs, handler, Arrays.asList(rhs)}));
 		
 		return Arrays.asList(handler.getRetType().get(0));
 	}

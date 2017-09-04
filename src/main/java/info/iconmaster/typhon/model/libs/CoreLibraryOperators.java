@@ -156,6 +156,10 @@ public class CoreLibraryOperators extends Package {
 		}));
 	}
 	
+	private void addUnOpFunc(AnnotationDefinition op) {
+
+	}
+	
 	public CoreLibraryOperators(TyphonInput tni) {
 		super(tni, "operator");
 		
@@ -178,6 +182,11 @@ public class CoreLibraryOperators extends Package {
 		tni.corePackage.ANNOT_OP_GT = makeAnnotDef("gt");
 		tni.corePackage.ANNOT_OP_GE = makeAnnotDef("ge");
 		
+		tni.corePackage.ANNOT_OP_NEG = makeAnnotDef("neg");
+		tni.corePackage.ANNOT_OP_POS = makeAnnotDef("pos");
+		tni.corePackage.ANNOT_OP_NOT = makeAnnotDef("not");
+		tni.corePackage.ANNOT_OP_BNOT = makeAnnotDef("bnot");
+		
 		// add the operator functions
 		addBinOpFunc(tni.corePackage.ANNOT_OP_ADD);
 		addBinOpFunc(tni.corePackage.ANNOT_OP_SUB);
@@ -196,5 +205,103 @@ public class CoreLibraryOperators extends Package {
 		addRelOpFunc(tni.corePackage.ANNOT_OP_LE);
 		addRelOpFunc(tni.corePackage.ANNOT_OP_GT);
 		addRelOpFunc(tni.corePackage.ANNOT_OP_GE);
+		
+		{
+			// add unary -
+			
+			CorePackage c = tni.corePackage;
+			Type[] types = new Type[] {c.TYPE_UBYTE, c.TYPE_BYTE, c.TYPE_USHORT, c.TYPE_SHORT, c.TYPE_UINT, c.TYPE_INT, c.TYPE_ULONG, c.TYPE_LONG, c.TYPE_DOUBLE, c.TYPE_FLOAT};
+			Type[] rtypes = new Type[] {c.TYPE_BYTE, c.TYPE_BYTE, c.TYPE_SHORT, c.TYPE_SHORT, c.TYPE_INT, c.TYPE_INT, c.TYPE_LONG, c.TYPE_LONG, c.TYPE_DOUBLE, c.TYPE_FLOAT};
+			
+			// add the specific versions
+			int i = 0;
+			for (Type t : types) {
+				addOpFunc(t.getTypePackage(), c.ANNOT_OP_NEG, new Function(tni, c.ANNOT_OP_NEG.getName(), new TemplateType[] {
+						
+				}, new Parameter[] {
+						
+				}, new Type[] {
+						rtypes[i],
+				}));
+				i++;
+			}
+			
+			// add the general version
+			addOpFunc(c.TYPE_NUMBER.getTypePackage(), c.ANNOT_OP_NEG, new Function(tni, c.ANNOT_OP_NEG.getName(), new TemplateType[] {
+					
+			}, new Parameter[] {
+					
+			}, new Type[] {
+					c.TYPE_NUMBER,
+			}));
+		}
+		
+		{
+			// add unary +
+			
+			CorePackage c = tni.corePackage;
+			Type[] types = new Type[] {c.TYPE_UBYTE, c.TYPE_BYTE, c.TYPE_USHORT, c.TYPE_SHORT, c.TYPE_UINT, c.TYPE_INT, c.TYPE_ULONG, c.TYPE_LONG, c.TYPE_DOUBLE, c.TYPE_FLOAT};
+			
+			// add the specific versions
+			for (Type t : types) {
+				addOpFunc(t.getTypePackage(), c.ANNOT_OP_POS, new Function(tni, c.ANNOT_OP_POS.getName(), new TemplateType[] {
+						
+				}, new Parameter[] {
+						
+				}, new Type[] {
+						t,
+				}));
+			}
+			
+			// add the general version
+			addOpFunc(c.TYPE_NUMBER.getTypePackage(), c.ANNOT_OP_POS, new Function(tni, c.ANNOT_OP_POS.getName(), new TemplateType[] {
+					
+			}, new Parameter[] {
+					
+			}, new Type[] {
+					c.TYPE_NUMBER,
+			}));
+		}
+		
+		{
+			// add logical not
+			
+			CorePackage c = tni.corePackage;
+			
+			addOpFunc(c.TYPE_BOOL.getTypePackage(), c.ANNOT_OP_NOT, new Function(tni, c.ANNOT_OP_NOT.getName(), new TemplateType[] {
+					
+			}, new Parameter[] {
+					
+			}, new Type[] {
+					c.TYPE_BOOL,
+			}));
+		}
+		
+		{
+			// add binary not
+			
+			CorePackage c = tni.corePackage;
+			Type[] types = new Type[] {c.TYPE_UBYTE, c.TYPE_BYTE, c.TYPE_USHORT, c.TYPE_SHORT, c.TYPE_UINT, c.TYPE_INT, c.TYPE_ULONG, c.TYPE_LONG};
+			
+			// add the specific versions
+			for (Type t : types) {
+				addOpFunc(t.getTypePackage(), c.ANNOT_OP_BNOT, new Function(tni, c.ANNOT_OP_BNOT.getName(), new TemplateType[] {
+						
+				}, new Parameter[] {
+						
+				}, new Type[] {
+						t,
+				}));
+			}
+			
+			// add the general version
+			addOpFunc(c.TYPE_INTEGER.getTypePackage(), c.ANNOT_OP_BNOT, new Function(tni, c.ANNOT_OP_BNOT.getName(), new TemplateType[] {
+					
+			}, new Parameter[] {
+					
+			}, new Type[] {
+					c.TYPE_INTEGER,
+			}));
+		}
 	}
 }

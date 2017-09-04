@@ -28,6 +28,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.ParamNameContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ParensExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.RelOpsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.StatContext;
+import info.iconmaster.typhon.antlr.TyphonParser.UnOpsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.VarExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.VarLvalueContext;
 import info.iconmaster.typhon.compiler.Instruction.OpCode;
@@ -593,6 +594,54 @@ public class TyphonCompiler {
 				
 				return Arrays.asList(newType);
 			}
+			
+			@Override
+			public List<TypeRef> visitUnOpsExpr(UnOpsExprContext ctx) {
+				CorePackage core = scope.getCodeBlock().tni.corePackage;
+				
+				Variable lhs = scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(ctx.tnArg));
+				
+				AnnotationDefinition operator;
+				
+				switch (ctx.tnOp.getText()) {
+				case "-":
+					operator = core.ANNOT_OP_NEG;
+					break;
+				case "+":
+					operator = core.ANNOT_OP_POS;
+					break;
+				case "!":
+					operator = core.ANNOT_OP_NOT;
+					break;
+				case "~":
+					operator = core.ANNOT_OP_BNOT;
+					break;
+				default:
+					throw new IllegalArgumentException("unknown operator in getUnOp: "+ctx.tnOp.getText());
+				}
+				
+				compileExpr(scope, ctx.tnArg, Arrays.asList(lhs));
+				
+				List<Function> handlers = lhs.type.getType().getOperatorHandlers(operator);
+				handlers.removeIf((f)->{
+					if (f.getParams().size() != 0) {
+						return true;
+					}
+					
+					return false;
+				});
+				
+				if (handlers.isEmpty()) {
+					// error; handler not found
+					core.tni.errors.add(new UndefinedOperatorError(new SourceInfo(ctx.tnArg), ctx.tnOp.getText(), lhs.type, null));
+					return Arrays.asList(TypeRef.var(core.tni));
+				}
+				
+				Function handler = handlers.get(0);
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnArg), OpCode.CALL, new Object[] {insertInto.isEmpty() ? Arrays.asList() : Arrays.asList(insertInto.get(0)), lhs, handler, Arrays.asList()}));
+				
+				return handler.getRetType();
+			}
 		};
 		
 		List<TypeRef> a = visitor.visit(rule);
@@ -759,6 +808,48 @@ public class TyphonCompiler {
 			@Override
 			public List<TypeRef> visitParensExpr(ParensExprContext ctx) {
 				return getExprType(scope, ctx.tnExpr, expectedTypes);
+			}
+			
+			@Override
+			public List<TypeRef> visitUnOpsExpr(UnOpsExprContext ctx) {
+				CorePackage core = scope.getCodeBlock().tni.corePackage;
+				
+				AnnotationDefinition operator;
+				
+				switch (ctx.tnOp.getText()) {
+				case "-":
+					operator = core.ANNOT_OP_NEG;
+					break;
+				case "+":
+					operator = core.ANNOT_OP_POS;
+					break;
+				case "!":
+					operator = core.ANNOT_OP_NOT;
+					break;
+				case "~":
+					operator = core.ANNOT_OP_BNOT;
+					break;
+				default:
+					throw new IllegalArgumentException("unknown operator in getUnOp: "+ctx.tnOp.getText());
+				}
+				
+				
+				List<Function> handlers = getExprType(scope, ctx.tnArg, Arrays.asList()).get(0).getType().getOperatorHandlers(operator);
+				handlers.removeIf((f)->{
+					if (f.getParams().size() != 0) {
+						return true;
+					}
+					
+					return false;
+				});
+				
+				if (handlers.isEmpty()) {
+					// error; handler not found
+					return Arrays.asList(TypeRef.var(core.tni));
+				}
+				
+				Function handler = handlers.get(0);
+				return handler.getRetType();
 			}
 		};
 		
@@ -959,7 +1050,7 @@ public class TyphonCompiler {
 		
 		List<Function> handlers = lhs.type.getType().getOperatorHandlers(operator);
 		handlers.removeIf((f)->{
-			if (f.getParams().size() != 1 || f.getRetType().isEmpty()) {
+			if (f.getParams().size() != 1) {
 				return true;
 			}
 			
@@ -972,7 +1063,7 @@ public class TyphonCompiler {
 		}
 		
 		Function handler = handlers.get(0);
-		return Arrays.asList(handler.getRetType().get(0));
+		return handler.getRetType();
 	}
 	
 	private static List<TypeRef> compileBinOp(Scope scope, ExprContext lhsExpr, ExprContext rhsExpr, String opStr, List<Variable> insertInto) {
@@ -988,7 +1079,7 @@ public class TyphonCompiler {
 		
 		List<Function> handlers = lhs.type.getType().getOperatorHandlers(operator);
 		handlers.removeIf((f)->{
-			if (f.getParams().size() != 1 || f.getRetType().isEmpty()) {
+			if (f.getParams().size() != 1) {
 				return true;
 			}
 			
@@ -1004,6 +1095,6 @@ public class TyphonCompiler {
 		Function handler = handlers.get(0);
 		scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(lhsExpr, rhsExpr), OpCode.CALL, new Object[] {insertInto.isEmpty() ? Arrays.asList() : Arrays.asList(insertInto.get(0)), lhs, handler, Arrays.asList(rhs)}));
 		
-		return Arrays.asList(handler.getRetType().get(0));
+		return handler.getRetType();
 	}
 }

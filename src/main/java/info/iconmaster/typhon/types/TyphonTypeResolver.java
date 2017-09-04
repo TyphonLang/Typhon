@@ -188,13 +188,6 @@ public class TyphonTypeResolver {
 			matches.add(base);
 			
 			for (Token name : a.getRawDefinition().tnName) {
-				// ensure all lookup members are resolved already
-				for (MemberAccess match : matches) {
-					if (match instanceof Type) {
-						resolve((Type)match);
-					}
-				}
-				
 				// do the lookup of a single member
 				List<MemberAccess> newMatches = new ArrayList<>();
 				

@@ -22,6 +22,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.ExprStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.FuncCallExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.LvalueContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MemberExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.MemberItemContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MemberLvalueContext;
 import info.iconmaster.typhon.antlr.TyphonParser.NumConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ParamNameContext;
@@ -53,6 +54,7 @@ import info.iconmaster.typhon.types.TyphonTypeResolver;
 import info.iconmaster.typhon.util.LookupUtils;
 import info.iconmaster.typhon.util.LookupUtils.LookupArgument;
 import info.iconmaster.typhon.util.LookupUtils.LookupElement;
+import info.iconmaster.typhon.util.LookupUtils.LookupElement.AccessType;
 import info.iconmaster.typhon.util.SourceInfo;
 import info.iconmaster.typhon.util.TemplateUtils;
 
@@ -354,16 +356,16 @@ public class TyphonCompiler {
 				
 				while (true) {
 					if (expr instanceof MemberExprContext) {
-						names.add(0, new LookupElement(((MemberExprContext) expr).tnValue.getText(), new SourceInfo(expr)));
+						names.add(0, new LookupElement(((MemberExprContext) expr).tnValue.getText(), new SourceInfo(expr), AccessType.get(((MemberExprContext) expr).tnOp.getText())));
 						
 						names.addAll(0, ((MemberExprContext) expr).tnLookup.stream().map((e)->{
 							List<TemplateArgument> template = TyphonTypeResolver.readTemplateArgs(core.tni, e.tnTemplate == null ? Arrays.asList() : e.tnTemplate.tnArgs, scope);
-							return new LookupElement(e.tnName.getText(), new SourceInfo(e), template);
+							return new LookupElement(e.tnName.getText(), new SourceInfo(e), AccessType.get(e.tnOp.getText()), template);
 						}).collect(Collectors.toList()));
 						
 						expr = ((MemberExprContext) expr).tnLhs;
 					} else if (expr instanceof VarExprContext) {
-						names.add(0, new LookupElement(((VarExprContext) expr).tnValue.getText(), new SourceInfo(expr)));
+						names.add(0, new LookupElement(((VarExprContext) expr).tnValue.getText(), new SourceInfo(expr), null));
 						
 						expr = null;
 						break;
@@ -409,16 +411,16 @@ public class TyphonCompiler {
 				
 				while (true) {
 					if (expr instanceof MemberExprContext) {
-						names.add(0, new LookupElement(((MemberExprContext) expr).tnValue.getText(), new SourceInfo(expr)));
+						names.add(0, new LookupElement(((MemberExprContext) expr).tnValue.getText(), new SourceInfo(expr), AccessType.get(((MemberExprContext) expr).tnOp.getText())));
 						
 						names.addAll(0, ((MemberExprContext) expr).tnLookup.stream().map((e)->{
 							List<TemplateArgument> template = TyphonTypeResolver.readTemplateArgs(core.tni, e.tnTemplate.tnArgs, scope);
-							return new LookupElement(e.tnName.getText(), new SourceInfo(e), template);
+							return new LookupElement(e.tnName.getText(), new SourceInfo(e), AccessType.get(e.tnOp.getText()), template);
 						}).collect(Collectors.toList()));
 						
 						expr = ((MemberExprContext) expr).tnLhs;
 					} else if (expr instanceof VarExprContext) {
-						names.add(0, new LookupElement(((VarExprContext) expr).tnValue.getText(), new SourceInfo(expr)));
+						names.add(0, new LookupElement(((VarExprContext) expr).tnValue.getText(), new SourceInfo(expr), null));
 						
 						expr = null;
 						break;
@@ -742,16 +744,16 @@ public class TyphonCompiler {
 				
 				while (true) {
 					if (expr instanceof MemberExprContext) {
-						names.add(0, new LookupElement(((MemberExprContext) expr).tnValue.getText(), new SourceInfo(expr)));
+						names.add(0, new LookupElement(((MemberExprContext) expr).tnValue.getText(), new SourceInfo(expr), AccessType.get(((MemberExprContext) expr).tnOp.getText())));
 						
 						names.addAll(0, ((MemberExprContext) expr).tnLookup.stream().map((e)->{
 							List<TemplateArgument> template = TyphonTypeResolver.readTemplateArgs(core.tni, e.tnTemplate == null ? Arrays.asList() : e.tnTemplate.tnArgs, scope);
-							return new LookupElement(e.tnName.getText(), new SourceInfo(e), template);
+							return new LookupElement(e.tnName.getText(), new SourceInfo(e), AccessType.get(e.tnOp.getText()), template);
 						}).collect(Collectors.toList()));
 						
 						expr = ((MemberExprContext) expr).tnLhs;
 					} else if (expr instanceof VarExprContext) {
-						names.add(0, new LookupElement(((VarExprContext) expr).tnValue.getText(), new SourceInfo(expr)));
+						names.add(0, new LookupElement(((VarExprContext) expr).tnValue.getText(), new SourceInfo(expr), null));
 						
 						expr = null;
 						break;
@@ -927,28 +929,28 @@ public class TyphonCompiler {
 				while (true) {
 					if (lval instanceof MemberLvalueContext) {
 						if (((MemberLvalueContext) lval).tnRhs instanceof VarLvalueContext) {
-							names.add(0, new LookupElement(((MemberLvalueContext) lval).tnRhs.getText(), new SourceInfo(lval)));
+							names.add(0, new LookupElement(((MemberLvalueContext) lval).tnRhs.getText(), new SourceInfo(lval), AccessType.get(((MemberLvalueContext) lval).tnOp.getText())));
 						} else {
 							// TODO
 						}
 						
 						names.addAll(0, ((MemberLvalueContext) lval).tnLookup.stream().map((e)->{
 							List<TemplateArgument> template = TyphonTypeResolver.readTemplateArgs(core.tni, e.tnTemplate.tnArgs, scope);
-							return new LookupElement(e.tnName.getText(), new SourceInfo(e), template);
+							return new LookupElement(e.tnName.getText(), new SourceInfo(e), AccessType.get(e.tnOp.getText()), template);
 						}).collect(Collectors.toList()));
 						
 						lval = ((MemberLvalueContext) lval).tnLhs;
 					} else if (lval instanceof MemberExprContext) {
-						names.add(0, new LookupElement(((MemberExprContext) lval).tnValue.getText(), new SourceInfo(lval)));
+						names.add(0, new LookupElement(((MemberExprContext) lval).tnValue.getText(), new SourceInfo(lval), AccessType.get(((MemberExprContext) lval).tnOp.getText())));
 						
 						names.addAll(0, ((MemberExprContext) lval).tnLookup.stream().map((e)->{
 							List<TemplateArgument> template = TyphonTypeResolver.readTemplateArgs(core.tni, e.tnTemplate.tnArgs, scope);
-							return new LookupElement(e.tnName.getText(), new SourceInfo(e), template);
+							return new LookupElement(e.tnName.getText(), new SourceInfo(e), AccessType.get(e.tnOp.getText()), template);
 						}).collect(Collectors.toList()));
 						
 						lval = ((MemberExprContext) lval).tnLhs;
 					} else if (lval instanceof VarExprContext) {
-						names.add(0, new LookupElement(((VarExprContext) lval).tnValue.getText(), new SourceInfo(lval)));
+						names.add(0, new LookupElement(((VarExprContext) lval).tnValue.getText(), new SourceInfo(lval), null));
 						
 						lval = null;
 						break;

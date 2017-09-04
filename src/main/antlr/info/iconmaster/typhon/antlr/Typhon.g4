@@ -36,7 +36,7 @@ types:
 typeMemberItem: tnAnnots+=annotation* tnName=WORD tnTemplate=templateArgs?;
 
 expr:
-	tnLhs=expr tnLookup+=memberItem* (tnOp='.'|tnOp='?.') tnAnnots+=annotation* tnValue=WORD												#memberExpr
+	tnLhs=expr tnLookup+=memberItem* (tnOp='.'|tnOp='?.'|tnOp='..') tnAnnots+=annotation* tnValue=WORD										#memberExpr
 |	tnLhs=expr '::' tnValue=WORD tnTemplate=templateArgs? '(' (tnFuncPtrArg+=templateArg (',' tnFuncPtrArg+=templateArg)*)? ')'				#funcPtrExpr
 |	tnCallee=expr tnAnnots+=annotation* tnTemplate=templateArgs? '(' tnArgs=argsDecl ')'													#funcCallExpr
 |	tnCallee=expr tnAnnots+=annotation* tnTemplate=templateArgs? '[' tnArgs=argsDecl ']'													#indexCallExpr
@@ -68,7 +68,7 @@ expr:
 |	tnAnnots+=annotation* '(' tnExpr=expr ')'																								#parensExpr
 ;
 exprs: tnExprs+=expr | '(' (tnExprs+=expr (',' tnExprs+=expr)*)? ')';
-memberItem: (tnOp='.'|tnOp='?.') tnAnnots+=annotation* tnName=WORD tnTemplate=templateArgs?;
+memberItem: (tnOp='.'|tnOp='?.'|tnOp='..') tnAnnots+=annotation* tnName=WORD tnTemplate=templateArgs?;
 
 stat:
 	tnAnnots+=annotation* 'return' (tnValues+=expr (',' tnValues+=expr)*)? ';'																							#retStat
@@ -93,9 +93,9 @@ catchBlock: tnAnnots+=annotation* 'catch' tnType=type tnName=WORD tnBlock=block;
 caseBlock: tnAnnots+=annotation* 'case' tnExprs+=expr (',' tnExprs+=expr)* tnBlock=block;
 
 lvalue:
-	tnLhs=expr tnLookup+=memberItem* (tnOp='.'|tnOp='?.') tnRhs=lvalue	#memberLvalue
-|	tnCallee=expr '[' tnArgs=argsDecl ']'								#indexLvalue
-|	tnName=WORD															#varLvalue
+	tnLhs=expr tnLookup+=memberItem* (tnOp='.'|tnOp='?.'|tnOp='..') tnRhs=lvalue	#memberLvalue
+|	tnCallee=expr '[' tnArgs=argsDecl ']'											#indexLvalue
+|	tnName=WORD																		#varLvalue
 ;
 
 packageName: tnName+=WORD ('.' tnName+=WORD)*;

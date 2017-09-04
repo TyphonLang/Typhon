@@ -27,22 +27,45 @@ public class LookupUtils {
 		String name;
 		List<TemplateArgument> template = new ArrayList<>();
 		SourceInfo source;
+		AccessType prefix;
 		
-		public LookupElement(String name, SourceInfo source) {
-			this.name = name;
-			this.source = source;
+		public static enum AccessType {
+			DOT,
+			NULLABLE_DOT,
+			DOUBLE_DOT;
+			
+			public static AccessType get(String s) {
+				switch (s) {
+				case ".":
+					return DOT;
+				case "?.":
+					return NULLABLE_DOT;
+				case "..":
+					return DOUBLE_DOT;
+				default:
+					throw new IllegalArgumentException("Unknown access type: "+s);
+				}
+			}
 		}
 		
-		public LookupElement(String name, SourceInfo source, List<TemplateArgument> template) {
+		public LookupElement(String name, SourceInfo source, AccessType prefix) {
+			this.name = name;
+			this.source = source;
+			this.prefix = prefix;
+		}
+		
+		public LookupElement(String name, SourceInfo source, AccessType prefix, List<TemplateArgument> template) {
 			this.name = name;
 			this.template.addAll(template);
 			this.source = source;
+			this.prefix = prefix;
 		}
 		
-		public LookupElement(String name, SourceInfo source, TemplateArgument... template) {
+		public LookupElement(String name, SourceInfo source, AccessType prefix, TemplateArgument... template) {
 			this.name = name;
 			this.template.addAll(Arrays.asList(template));
 			this.source = source;
+			this.prefix = prefix;
 		}
 	}
 

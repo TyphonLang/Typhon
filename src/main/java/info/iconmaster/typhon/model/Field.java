@@ -262,4 +262,9 @@ public class Field extends TyphonModelEntity implements MemberAccess {
 	public Map<TemplateType, TypeRef> getTemplateMap(Map<TemplateType, TypeRef> templateMap) {
 		return type.getTemplateMap(templateMap);
 	}
+	
+	@Override
+	public String toString() {
+		return "Field("+type+" "+name+")";
+	}
 }

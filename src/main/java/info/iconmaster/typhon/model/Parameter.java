@@ -157,4 +157,9 @@ public class Parameter extends TyphonModelEntity {
 	public boolean isOptional() {
 		return rawDefaultValue != null || defaultValue != null || (isLibrary() && optionalOverride);
 	}
+	
+	@Override
+	public String toString() {
+		return type+" "+name;
+	}
 }

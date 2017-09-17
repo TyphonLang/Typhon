@@ -520,4 +520,9 @@ public class Package extends TyphonModelEntity implements MemberAccess {
 	public MemberAccess getMemberParent() {
 		return getParent();
 	}
+	
+	@Override
+	public String toString() {
+		return "Package("+name+")";
+	}
 }

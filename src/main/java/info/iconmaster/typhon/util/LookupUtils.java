@@ -2,12 +2,15 @@ package info.iconmaster.typhon.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import info.iconmaster.typhon.compiler.Instruction;
 import info.iconmaster.typhon.compiler.Instruction.OpCode;
+import info.iconmaster.typhon.compiler.Label;
 import info.iconmaster.typhon.compiler.Scope;
 import info.iconmaster.typhon.compiler.Variable;
 import info.iconmaster.typhon.errors.WriteOnlyError;
@@ -19,6 +22,8 @@ import info.iconmaster.typhon.model.TemplateArgument;
 import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
+import info.iconmaster.typhon.util.LookupUtils.LookupElement.AccessType;
+import info.iconmaster.typhon.util.LookupUtils.LookupPath.Subject;
 
 public class LookupUtils {
 	private LookupUtils() {}
@@ -67,8 +72,218 @@ public class LookupUtils {
 			this.source = source;
 			this.prefix = prefix;
 		}
+		
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder("LookupElement(");
+			sb.append(name);
+			if (!template.isEmpty()) {
+				sb.append('<');
+				for (TemplateArgument arg : template) {
+					sb.append(arg);
+					sb.append(',');
+				}
+				sb.deleteCharAt(sb.length()-1);
+				sb.append('>');
+			}
+			sb.append(':');
+			sb.append(prefix);
+			sb.append(')');
+			return sb.toString();
+		}
 	}
-
+	
+	public static class LookupPath {
+		public static class Subject {
+			public int loc;
+			public Subject previous;
+			public MemberAccess member;
+			public AccessType infix;
+			public SourceInfo source;
+			
+			public TypeRef type;
+			public Map<TemplateType, TypeRef> typeMap = new HashMap<>();
+			
+			public Subject(int loc, MemberAccess member) {
+				this.loc = loc;
+				this.member = member;
+			}
+			
+			@Override
+			public String toString() {
+				return "Subject("+member+")";
+			}
+		}
+		
+		public List<LookupElement> names;
+		public List<MemberAccess> members = new ArrayList<>();
+		public List<Subject> subjects = new ArrayList<>();
+		
+		public List<Map<TemplateType, TypeRef>> typeMaps = new ArrayList<>();
+		
+		public LookupPath(List<LookupElement> names) {
+			this.names = new ArrayList<>();
+			this.names.add(null);
+			this.names.addAll(names);
+		}
+		
+		public LookupPath(LookupPath other) {
+			this.names = other.names;
+			this.members = new ArrayList<>(other.members);
+			this.subjects = new ArrayList<>(other.subjects);
+			this.typeMaps = new ArrayList<>(other.typeMaps);
+		}
+		
+		public LookupPath add(MemberAccess member) {
+			Map<TemplateType, TypeRef> typeMap = lastTypeMap();
+			LookupElement name = names.get(members.size());
+			
+			if (member instanceof Type) {
+				TypeRef ref = new TypeRef(name == null ? null : name.source, (Type)member);
+				if (name != null) ref.getTemplateArgs().addAll(name.template);
+				member = TemplateUtils.replaceTemplates(ref, typeMap);
+			}
+			
+			Map<TemplateType, TypeRef> newMap = member.getTemplateMap(typeMap);
+			this.members.add(member);
+			
+			if (member instanceof Field || member instanceof Variable || member instanceof Function) {
+				Subject sub = new Subject(members.size()-1, member);
+				if (name != null) sub.source = name.source;
+				
+				if (!subjects.isEmpty()) {
+					sub.previous = lastSubject();
+					sub.infix = names.get(subjects.get(subjects.size()-1).loc+1).prefix;
+				}
+				
+				TypeRef type = null;
+				
+				if (member instanceof Variable) {
+					type = TemplateUtils.replaceTemplates(((Variable) member).type, typeMap);
+				}
+				
+				if (member instanceof Field) {
+					Field f = (Field) member;
+					type = TemplateUtils.replaceTemplates(f.getType(), typeMap);
+				}
+				
+				sub.type = type;
+				if (type != null) {
+					Map<TemplateType, TypeRef> subTypeMap = type.getTemplateMap(typeMap);
+					sub.typeMap = newMap = subTypeMap == null ? (newMap == null ? typeMap : newMap) : subTypeMap;
+				} else {
+					sub.typeMap = newMap == null ? typeMap : newMap;
+				}
+				
+				subjects.add(sub);
+			}
+			
+			if (newMap != null) {
+				typeMap = newMap;
+			}
+			typeMaps.add(typeMap);
+			
+			return this;
+		}
+		
+		public LookupPath addAll(Collection<MemberAccess> members) {
+			for (MemberAccess member : members) {
+				add(member);
+			}
+			
+			return this;
+		}
+		
+		public boolean isValidPath() {
+			if (subjects.isEmpty() || subjects.get(subjects.size()-1).loc != names.size()-1) return false;
+			
+			for (Subject sub : subjects) {
+				if (sub.member instanceof Field) {
+					Field f = (Field) sub.member;
+					Type fieldOf = f.getFieldOf();
+					
+					TypeRef type = sub.previous == null ? null : sub.previous.type;
+					Map<TemplateType, TypeRef> typeMap = sub.previous == null ? new HashMap<>() : sub.previous.typeMap;
+					
+					if (fieldOf != null && (type == null || !type.canCastTo(TemplateUtils.replaceTemplates(new TypeRef(null, fieldOf), typeMap)))) {
+						return false;
+					}
+				}
+			}
+			
+			return true;
+		}
+		
+		public List<LookupPath> branch(List<MemberAccess> newMembers) {
+			return newMembers.stream().map((member)->new LookupPath(this).add(member)).collect(Collectors.toList());
+		}
+		
+		public MemberAccess lastMember() {
+			if (members.isEmpty()) return null;
+			
+			int i = members.size()-1;
+			MemberAccess e = members.get(i);
+			Subject sub = subjects.isEmpty() ? null : subjects.get(subjects.size()-1);
+			
+			while (sub != null && sub.loc == i && sub.infix == AccessType.DOUBLE_DOT) {
+				sub = sub.previous;
+				i = sub.loc;
+				e = members.get(i);
+			}
+			
+			return e;
+		}
+		
+		public Subject lastSubject() {
+			if (subjects.isEmpty()) return null;
+			
+			Subject e = subjects.get(subjects.size()-1);
+			
+			while (e.infix == AccessType.DOUBLE_DOT) {
+				e = e.previous;
+			}
+			
+			return e;
+		}
+		
+		public Map<TemplateType, TypeRef> lastTypeMap() {
+			if (typeMaps.isEmpty()) return new HashMap<>();
+			
+			int i = typeMaps.size()-1;
+			Map<TemplateType, TypeRef> e = typeMaps.get(i);
+			Subject sub = subjects.isEmpty() ? null : subjects.get(subjects.size()-1);
+			
+			while (sub != null && sub.loc == i && sub.infix == AccessType.DOUBLE_DOT) {
+				sub = sub.previous;
+				i = sub.loc;
+				e = typeMaps.get(i);
+			}
+			
+			return e;
+		}
+		
+		public Subject popSubject() {
+			Subject sub = subjects.remove(subjects.size()-1);
+			// TODO: remove non-subject members
+			return sub;
+		}
+		
+		@Override
+		public String toString() {
+			return "path"+members;
+		}
+		
+		public MemberAccess getLookup() {
+			Subject sub = lastSubject();
+			MemberAccess member = lastMember();
+			if (sub == null || sub.type == null || sub.member != member) {
+				return member;
+			} else {
+				return sub.type;
+			}
+		}
+	}
+	
 	/**
 	 * Look up all possible paths of a list of names.
 	 * 
@@ -76,49 +291,20 @@ public class LookupUtils {
 	 * @param names The list of successive names.
 	 * @return All the possible paths of members.
 	 */
-	public static List<List<MemberAccess>> findPaths(Scope scope, MemberAccess base, List<LookupElement> names) {
-		List<List<MemberAccess>> result = new ArrayList<>();
+	public static List<LookupPath> findPaths(Scope scope, MemberAccess base, List<LookupElement> names) {
+		List<LookupPath> result = new ArrayList<>();
 		
 		// populate the list of possible paths (based on name alone)
 		while (base != null) {
-			List<List<MemberAccess>> options = new ArrayList<>();
-			final MemberAccess finalBase = base;
-			options.add(new ArrayList<MemberAccess>() {{add(finalBase);}});
+			List<LookupPath> options = new ArrayList<>();
+			options.add(new LookupPath(names).add(base));
 			
 			for (LookupElement name : names) {
-				List<List<MemberAccess>> newOptions = new ArrayList<>();
+				if (options.isEmpty()) break;
 				
-				for (List<MemberAccess> members : options) {
-					Map<TemplateType, TypeRef> map = new HashMap<>();
-					
-					int i = 0;
-					for (MemberAccess member : members) {
-						if (i == members.size()-1) break;
-						Map<TemplateType, TypeRef> newMap = member.getTemplateMap(map);
-						if (newMap != null) {
-							map = newMap;
-						}
-						i++;
-					}
-					
-					MemberAccess lastMember = members.get(members.size()-1);
-					List<MemberAccess> matches = lastMember.getMembers(name.name, map);
-					
-					for (MemberAccess match : matches) {
-						List<MemberAccess> newMembers = new ArrayList<>(members);
-						
-						if (match instanceof Type) {
-							TypeRef ref = new TypeRef(name.source, (Type) match);
-							ref.getTemplateArgs().addAll(name.template);
-							match = ref;
-						}
-						
-						newMembers.add(match);
-						newOptions.add(newMembers);
-					}
-				}
-				
-				options = newOptions;
+				options = options.stream()
+						.map((path)->path.branch(path.getLookup().getMembers(name.name, path.lastTypeMap())))
+						.reduce(new ArrayList<>(), (a,b)->{a.addAll(b); return a;});
 			}
 			
 			result.addAll(options);
@@ -126,51 +312,42 @@ public class LookupUtils {
 		}
 		
 		// remove incorrect accesses to instance fields
-		result.removeIf((path)->{
-			TypeRef type = scope.getCodeBlock().instance != null ? scope.getCodeBlock().instance.type : null;
-			Map<TemplateType, TypeRef> map = new HashMap<>();
-			
-			for (MemberAccess access : path) {
-				if (access instanceof Variable) {
-					type = TemplateUtils.replaceTemplates(((Variable) access).type, map);
-				}
-				
-				if (access instanceof Field) {
-					Field f = (Field) access;
-					Type fieldOf = f.getFieldOf();
-					
-					if (fieldOf != null && (type == null || !type.canCastTo(TemplateUtils.replaceTemplates(new TypeRef(null, fieldOf), map)))) {
-						return true;
-					}
-					
-					type = TemplateUtils.replaceTemplates(f.getType(), map);
-				}
-				
-				Map<TemplateType, TypeRef> newMap = access.getTemplateMap(map);
-				if (newMap != null) {
-					map = newMap;
-				}
-			}
-			
-			return false;
-		});
+		result.removeIf((path)->!path.isValidPath());
 		
+		// return the result
 		return result;
 	}
 	
-	public static Variable getSubjectOfPath(Scope scope, List<MemberAccess> path, List<LookupElement> names) {
+	public static Variable getSubjectOfPath(Scope scope, LookupPath path) {
 		Variable var = scope.getCodeBlock().instance;
+		Label label = null;
 		
-		int i = -1;
-		for (MemberAccess access : path) {
-			SourceInfo source = i < 0 ? null : names.get(i).source;
+		for (Subject sub : path.subjects) {
+			LookupElement name = path.names.get(sub.loc);
+			SourceInfo source = name == null ? null : name.source;
+			Variable lastVar = var;
 			
-			if (access instanceof Variable) {
-				var = (Variable) access;
+			if (sub.infix == AccessType.NULLABLE_DOT) {
+				if (var == null) {
+					// TODO: error?
+					return null;
+				}
+				
+				if (label == null) {
+					label = scope.addTempLabel();
+				}
+				
+				Variable tempVar = scope.addTempVar(new TypeRef(scope.getCodeBlock().tni.corePackage.TYPE_BOOL), name.source);
+				scope.getCodeBlock().ops.add(new Instruction(scope.getCodeBlock().tni, source, OpCode.ISNULL, new Object[] {tempVar, var}));
+				scope.getCodeBlock().ops.add(new Instruction(scope.getCodeBlock().tni, source, OpCode.JUMPIF, new Object[] {tempVar, label}));
 			}
 			
-			if (access instanceof Field) {
-				Field f = (Field) access;
+			if (sub.member instanceof Variable) {
+				var = (Variable) sub.member;
+			}
+			
+			if (sub.member instanceof Field) {
+				Field f = (Field) sub.member;
 				Type fieldOf = f.getFieldOf();
 				Variable newVar = scope.addTempVar(f.type, source);
 				
@@ -193,25 +370,18 @@ public class LookupUtils {
 				var = newVar;
 			}
 			
-			i++;
+			if (sub.infix == AccessType.DOUBLE_DOT) {
+				if (var == null) {
+					// TODO: error?
+					return null;
+				}
+				
+				var = lastVar;
+			}
 		}
 		
-		return var;
-	}
-	
-	public static TypeRef getTypeOfPath(Scope scope, List<MemberAccess> path) {
-		TypeRef var = scope.getCodeBlock().instance == null ? null : scope.getCodeBlock().instance.type;
-		
-		for (MemberAccess access : path) {
-			if (access instanceof Variable) {
-				var = ((Variable) access).type;
-			}
-			
-			if (access instanceof Field) {
-				Field f = (Field) access;
-				
-				var = f.getType();
-			}
+		if (label != null) {
+			scope.getCodeBlock().ops.add(new Instruction(scope.getCodeBlock().tni, null, OpCode.LABEL, new Object[] {label}));
 		}
 		
 		return var;

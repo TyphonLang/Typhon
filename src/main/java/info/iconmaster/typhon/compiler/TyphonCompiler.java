@@ -22,7 +22,6 @@ import info.iconmaster.typhon.antlr.TyphonParser.ExprStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.FuncCallExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.LvalueContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MemberExprContext;
-import info.iconmaster.typhon.antlr.TyphonParser.MemberItemContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MemberLvalueContext;
 import info.iconmaster.typhon.antlr.TyphonParser.NumConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ParamNameContext;
@@ -55,6 +54,8 @@ import info.iconmaster.typhon.util.LookupUtils;
 import info.iconmaster.typhon.util.LookupUtils.LookupArgument;
 import info.iconmaster.typhon.util.LookupUtils.LookupElement;
 import info.iconmaster.typhon.util.LookupUtils.LookupElement.AccessType;
+import info.iconmaster.typhon.util.LookupUtils.LookupPath;
+import info.iconmaster.typhon.util.LookupUtils.LookupPath.Subject;
 import info.iconmaster.typhon.util.SourceInfo;
 import info.iconmaster.typhon.util.TemplateUtils;
 
@@ -348,8 +349,6 @@ public class TyphonCompiler {
 			
 			@Override
 			public List<TypeRef> visitMemberExpr(MemberExprContext ctx) {
-				// TODO: we assume all are .'s and no .?'s
-				
 				// turn the rule into a list of member accesses
 				List<LookupElement> names = new ArrayList<>();
 				ExprContext expr = ctx;
@@ -383,7 +382,7 @@ public class TyphonCompiler {
 					compileExpr(scope, expr, Arrays.asList(exprVar));
 				}
 				
-				List<List<MemberAccess>> paths = LookupUtils.findPaths(scope, base, names);
+				List<LookupPath> paths = LookupUtils.findPaths(scope, base, names);
 				if (paths.isEmpty()) {
 					// error, no path found
 					core.tni.errors.add(new UndefinedVariableError(new SourceInfo(ctx), ctx.tnValue.getText()));
@@ -391,8 +390,8 @@ public class TyphonCompiler {
 				}
 				
 				// process the chosen path
-				List<MemberAccess> path = paths.get(0);
-				Variable var = LookupUtils.getSubjectOfPath(scope, path, names);
+				LookupPath path = paths.get(0);
+				Variable var = LookupUtils.getSubjectOfPath(scope, path);
 				
 				if (!insertInto.isEmpty()) {
 					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.MOV, new Object[] {insertInto.get(0), var}));
@@ -438,22 +437,7 @@ public class TyphonCompiler {
 					compileExpr(scope, expr, Arrays.asList(exprVar));
 				}
 				
-				List<List<MemberAccess>> paths = LookupUtils.findPaths(scope, base, names);
-				paths.removeIf((path)->{
-					MemberAccess member = path.get(path.size()-1);
-					
-					if (member instanceof Field || member instanceof Function || member instanceof Variable) {
-						return false;
-					}
-					
-					return true;
-				});
-				
-				if (paths.isEmpty()) {
-					// error, no path found
-					core.tni.errors.add(new UndefinedVariableError(new SourceInfo(ctx), ctx.tnCallee.getText()));
-					return Arrays.asList(TypeRef.var(core.tni));
-				}
+				List<LookupPath> paths = LookupUtils.findPaths(scope, base, names);
 				
 				List<LookupArgument> args = new ArrayList<>();
 				List<Variable> vars = new ArrayList<>();
@@ -469,7 +453,7 @@ public class TyphonCompiler {
 				});
 				
 				paths.removeIf((path)->{
-					MemberAccess member = path.get(path.size()-1);
+					MemberAccess member = path.members.get(path.members.size()-1);
 					
 					if (member instanceof Function) {
 						Function f = (Function) member;
@@ -501,11 +485,11 @@ public class TyphonCompiler {
 				}
 				
 				// process the chosen path
-				List<MemberAccess> path = paths.get(0);
-				MemberAccess member = path.get(path.size()-1);
+				LookupPath path = paths.get(0);
+				Subject sub = path.popSubject();
 				
-				if (member instanceof Function) {
-					Function f = (Function) member;
+				if (sub.member instanceof Function) {
+					Function f = (Function) sub.member;
 					Type fieldOf = f.getFieldOf();
 					
 					List<Variable> outputVars = new ArrayList<>(insertInto.subList(0, Math.min(f.getRetType().size(), insertInto.size())));
@@ -531,7 +515,7 @@ public class TyphonCompiler {
 						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALLSTATIC, new Object[] {outputVars, f, inputVars}));
 					} else {
 						// CALL
-						Variable instanceVar = LookupUtils.getSubjectOfPath(scope, path, names);
+						Variable instanceVar = LookupUtils.getSubjectOfPath(scope, path);
 						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {outputVars, instanceVar, f, inputVars}));
 					}
 					
@@ -736,8 +720,6 @@ public class TyphonCompiler {
 			
 			@Override
 			public List<TypeRef> visitMemberExpr(MemberExprContext ctx) {
-				// TODO: we assume all are .'s and no .?'s
-				
 				// turn the rule into a list of member accesses
 				List<LookupElement> names = new ArrayList<>();
 				ExprContext expr = ctx;
@@ -768,15 +750,15 @@ public class TyphonCompiler {
 					base = getExprType(scope, expr, Arrays.asList()).get(0);
 				}
 				
-				List<List<MemberAccess>> paths = LookupUtils.findPaths(scope, base, names);
+				List<LookupPath> paths = LookupUtils.findPaths(scope, base, names);
 				if (paths.isEmpty()) {
 					// error, no path found
 					return Arrays.asList(TypeRef.var(core.tni));
 				}
 				
 				// process the chosen path
-				List<MemberAccess> path = paths.get(0);
-				return Arrays.asList(LookupUtils.getTypeOfPath(scope, path));
+				LookupPath path = paths.get(0);
+				return Arrays.asList(path.lastSubject().type);
 			}
 			
 			@Override
@@ -968,19 +950,19 @@ public class TyphonCompiler {
 					compileExpr(scope, (ExprContext) lval, Arrays.asList(exprVar));
 				}
 				
-				List<List<MemberAccess>> paths = LookupUtils.findPaths(scope, base, names);
-				paths.removeIf((path)->!(path.get(path.size()-1) instanceof Field));
+				List<LookupPath> paths = LookupUtils.findPaths(scope, base, names);
+				paths.removeIf((path)->!(path.lastSubject().member instanceof Field));
 				
 				if (paths.isEmpty()) {
 					// error, no path found
 					core.tni.errors.add(new UndefinedVariableError(new SourceInfo(ctx), ctx.tnRhs.getText()));
 					return scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(ctx));
 				}
-				List<MemberAccess> path = paths.get(0);
+				LookupPath path = paths.get(0);
 				
 				// process the chosen path
 				
-				Field f = (Field) path.remove(path.size()-1);
+				Field f = (Field) path.popSubject().member;
 				Type fieldOf = f.getFieldOf();
 				Variable var = scope.addTempVar(f.type, new SourceInfo(ctx));
 				
@@ -993,7 +975,7 @@ public class TyphonCompiler {
 				if (fieldOf == null) {
 					postfix.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALLSTATIC, new Object[] {Arrays.asList(), f.getSetter(), Arrays.asList(var)}));
 				} else {
-					Variable fieldsInstance = LookupUtils.getSubjectOfPath(scope, path, names);
+					Variable fieldsInstance = LookupUtils.getSubjectOfPath(scope, path);
 					postfix.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {Arrays.asList(), fieldsInstance, f.getSetter(), Arrays.asList(var)}));
 				}
 				

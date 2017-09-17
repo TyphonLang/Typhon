@@ -71,4 +71,9 @@ public class Variable implements MemberAccess {
 	public Map<TemplateType, TypeRef> getTemplateMap(Map<TemplateType, TypeRef> templateMap) {
 		return type.getTemplateMap(templateMap);
 	}
+	
+	@Override
+	public String toString() {
+		return "var("+type+" "+name+")";
+	}
 }

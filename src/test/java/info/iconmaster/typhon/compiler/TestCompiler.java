@@ -295,6 +295,36 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(0, code.tni.errors.size());
 		}),new TestCase("import operator; class a {@add int g(a other) {}} void f() {a b, c; int x = b + c;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("class a {int b;} void f() {a a; int x = a.?b;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(4, code.ops.size());
+			
+			Assert.assertEquals(OpCode.ISNULL, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.JUMPIF, code.ops.get(1).op);
+			
+			Assert.assertEquals(OpCode.CALL, code.ops.get(2).op);
+			Assert.assertEquals(1, code.ops.get(2).<List<Variable>>arg(0).size());
+			Assert.assertEquals("b", code.ops.get(2).<Function>arg(2).getName());
+			Assert.assertEquals(0, code.ops.get(2).<List<Variable>>arg(3).size());
+			
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(3).op);
+		}),new TestCase("class a {float b; int c;} void f() {a a; int x = a..b.c;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(3, code.ops.size());
+			
+			Assert.assertEquals(OpCode.CALL, code.ops.get(0).op);
+			Assert.assertEquals(1, code.ops.get(0).<List<Variable>>arg(0).size());
+			Assert.assertEquals("b", code.ops.get(0).<Function>arg(2).getName());
+			Assert.assertEquals(0, code.ops.get(0).<List<Variable>>arg(3).size());
+			
+			Assert.assertEquals(OpCode.CALL, code.ops.get(1).op);
+			Assert.assertEquals(1, code.ops.get(1).<List<Variable>>arg(0).size());
+			Assert.assertEquals("c", code.ops.get(1).<Function>arg(2).getName());
+			Assert.assertEquals(0, code.ops.get(1).<List<Variable>>arg(3).size());
+			
+			Assert.assertEquals(OpCode.MOV, code.ops.get(2).op);
 		}));
 	}
     

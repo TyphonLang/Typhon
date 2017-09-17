@@ -186,4 +186,9 @@ public class Scope implements MemberAccess {
 	public Label addTempLabel() {
 		return addLabel(null);
 	}
+	
+	@Override
+	public String toString() {
+		return "Scope("+getVars()+")";
+	}
 }

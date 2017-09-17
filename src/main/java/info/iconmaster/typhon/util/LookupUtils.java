@@ -427,6 +427,27 @@ public class LookupUtils {
 				return sub.type;
 			}
 		}
+		
+		/**
+		 * @return the last member (but not necessarily the one that this lookup returns).
+		 */
+		public MemberAccess lastMember() {
+			return members.isEmpty() ? null : members.get(members.size()-1);
+		}
+		
+		/**
+		 * @return the last subject (but not necessarily the one that this lookup returns).
+		 */
+		public Subject lastSubject() {
+			return subjects.isEmpty() ? null : subjects.get(subjects.size()-1);
+		}
+		
+		/**
+		 * @return the last type map (but not necessarily the one that this lookup returns).
+		 */
+		public Map<TemplateType, TypeRef> lastTypeMap() {
+			return typeMaps.isEmpty() ? null : typeMaps.get(typeMaps.size()-1);
+		}
 	}
 	
 	/**

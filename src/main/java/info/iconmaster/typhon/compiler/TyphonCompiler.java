@@ -508,6 +508,8 @@ public class TyphonCompiler {
 						}
 					}
 					
+					Variable instanceVar = LookupUtils.getSubjectOfPath(scope, path);
+					
 					if (fieldOf == null) {
 						// CALLSTATIC
 						if (sub.infix == AccessType.NULLABLE_DOT || sub.infix == AccessType.DOUBLE_DOT) {
@@ -517,8 +519,6 @@ public class TyphonCompiler {
 						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALLSTATIC, new Object[] {outputVars, f, inputVars}));
 					} else {
 						// CALL
-						Variable instanceVar = LookupUtils.getSubjectOfPath(scope, path);
-						
 						Label label = null;
 						if (sub.infix == AccessType.NULLABLE_DOT) {
 							label = scope.addTempLabel();
@@ -930,8 +930,6 @@ public class TyphonCompiler {
 			
 			@Override
 			public Variable visitMemberLvalue(MemberLvalueContext ctx) {
-				// TODO: we assume all are .'s and no .?'s
-				
 				// turn the rule into a list of member accesses
 				List<LookupElement> names = new ArrayList<>();
 				ParserRuleContext lval = ctx;
@@ -979,7 +977,7 @@ public class TyphonCompiler {
 				}
 				
 				List<LookupPath> paths = LookupUtils.findPaths(scope, base, names);
-				paths.removeIf((path)->!(path.returnedSubject().member instanceof Field));
+				paths.removeIf((path)->!(path.returnedSubject().member instanceof Field || path.returnedSubject().member instanceof Variable));
 				
 				if (paths.isEmpty()) {
 					// error, no path found
@@ -990,24 +988,53 @@ public class TyphonCompiler {
 				
 				// process the chosen path
 				
-				Field f = (Field) path.popSubject().member;
-				Type fieldOf = f.getFieldOf();
-				Variable var = scope.addTempVar(f.type, new SourceInfo(ctx));
+				Subject sub;
+				if (path.lastSubject().infix == AccessType.DOUBLE_DOT) {
+					sub = path.lastSubject().previous;
+				} else {
+					sub = path.popSubject();
+				}
 				
-				if (f.getSetter() == null) {
-					// error; field is read-only
-					core.tni.errors.add(new ReadOnlyError(new SourceInfo(ctx), f));
+				Variable instanceVar = LookupUtils.getSubjectOfPath(scope, path);
+				
+				if (sub.member instanceof Field) {
+					Field f = (Field) sub.member;
+					Type fieldOf = f.getFieldOf();
+					Variable var = scope.addTempVar(f.type, new SourceInfo(ctx));
+					
+					Label label = null;
+					if (sub.infix == AccessType.NULLABLE_DOT) {
+						label = scope.addTempLabel();
+							
+						Variable tempVar = scope.addTempVar(new TypeRef(core.TYPE_BOOL), sub.source);
+						scope.getCodeBlock().ops.add(new Instruction(core.tni, sub.source, OpCode.ISNULL, new Object[] {tempVar, instanceVar}));
+						scope.getCodeBlock().ops.add(new Instruction(core.tni, sub.source, OpCode.JUMPIF, new Object[] {tempVar, label}));
+					}
+					
+					if (f.getSetter() == null) {
+						// error; field is read-only
+						core.tni.errors.add(new ReadOnlyError(new SourceInfo(ctx), f));
+						return var;
+					}
+					
+					if (fieldOf == null) {
+						postfix.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALLSTATIC, new Object[] {Arrays.asList(), f.getSetter(), Arrays.asList(var)}));
+					} else {
+						postfix.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {Arrays.asList(), instanceVar, f.getSetter(), Arrays.asList(var)}));
+					}
+					
+					if (label != null) {
+						scope.getCodeBlock().ops.add(new Instruction(core.tni, sub.source, OpCode.LABEL, new Object[] {label}));
+					}
+					
 					return var;
 				}
 				
-				if (fieldOf == null) {
-					postfix.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALLSTATIC, new Object[] {Arrays.asList(), f.getSetter(), Arrays.asList(var)}));
-				} else {
-					Variable fieldsInstance = LookupUtils.getSubjectOfPath(scope, path);
-					postfix.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {Arrays.asList(), fieldsInstance, f.getSetter(), Arrays.asList(var)}));
+				if (sub.member instanceof Variable) {
+					return (Variable) sub.member;
 				}
 				
-				return var;
+				throw new IllegalArgumentException("Unknown instance type in member lvalue");
 			}
 		};
 		

@@ -25,20 +25,68 @@ import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.util.LookupUtils.LookupElement.AccessType;
 import info.iconmaster.typhon.util.LookupUtils.LookupPath.Subject;
 
+/**
+ * This class contains functions suitable for doing lookup for expressions in dot-linked form.
+ * @author iconmaster
+ *
+ */
 public class LookupUtils {
 	private LookupUtils() {}
 	
+	/**
+	 * A single element in a chain of names to look up.
+	 * Contains data such as the source and raw template.
+	 * 
+	 * @author iconmaster
+	 *
+	 */
 	public static class LookupElement {
+		/**
+		 * The name that will be looked up.
+		 */
 		String name;
+		
+		/**
+		 * The template arguments that was supplied with this name, if any.
+		 */
 		List<TemplateArgument> template = new ArrayList<>();
+		
+		/**
+		 * The source this portion of lookup came from.
+		 */
 		SourceInfo source;
+		
+		/**
+		 * What connector joins this element to the last one. May be null.
+		 */
 		AccessType prefix;
 		
+		/**
+		 * The type of connector that was placed between two elements.
+		 * 
+		 * @author iconmaster
+		 *
+		 */
 		public static enum AccessType {
+			/**
+			 * Normal access notation, '.'. Standard access of a field, subpackage, etc.
+			 */
 			DOT,
+			/**
+			 * Call-chaining notation, '..'. Like '.', but will return the value it accessed instead of what it returns itself.
+			 */
 			NULLABLE_DOT,
+			/**
+			 * Nullable notation, '.?'. Like '.', but returns null instead if what it is accessing is null.
+			 */
 			DOUBLE_DOT;
 			
+			/**
+			 * Creates an AccessType from a String that represents it.
+			 * 
+			 * @param s
+			 * @return
+			 */
 			public static AccessType get(String s) {
 				switch (s) {
 				case ".":
@@ -93,15 +141,55 @@ public class LookupUtils {
 		}
 	}
 	
+	/**
+	 * This represents a possible path returned by findPaths().
+	 * It consists of a list of members that were found based on the names provided.
+	 * 
+	 * @author iconmaster
+	 *
+	 */
 	public static class LookupPath {
+		
+		/**
+		 * A Subject of a path is a MemberAccess that requires special action when it is encountered. This includes variables, fields, etc.
+		 * 
+		 * @author iconmaster
+		 *
+		 */
 		public static class Subject {
+			/**
+			 * Where it is in the path's member list.
+			 */
 			public int loc;
+			
+			/**
+			 * What the previous subject was. If this is a field, this is the callee, for example.
+			 */
 			public Subject previous;
+			
+			/**
+			 * The member this subject represents.
+			 */
 			public MemberAccess member;
+			
+			/**
+			 * What access operation binds together <tt>previous</tt> and <tt>this</tt>.
+			 */
 			public AccessType infix;
+			
+			/**
+			 * Where this member originated.
+			 */
 			public SourceInfo source;
 			
+			/**
+			 * The type this subject returns upon execution.
+			 */
 			public TypeRef type;
+			
+			/**
+			 * The type map this subject returns, suitable for the methods in {@link MemberAccess} or {@link TemplateUtils}.
+			 */
 			public Map<TemplateType, TypeRef> typeMap = new HashMap<>();
 			
 			public Subject(int loc, MemberAccess member) {
@@ -115,10 +203,24 @@ public class LookupUtils {
 			}
 		}
 		
+		/**
+		 * The raw input given to this path.
+		 */
 		public List<LookupElement> names;
+		
+		/**
+		 * The list of consecutive accesses that the names given represent.
+		 */
 		public List<MemberAccess> members = new ArrayList<>();
+		
+		/**
+		 * The list of subjects that were accessed in this path.
+		 */
 		public List<Subject> subjects = new ArrayList<>();
 		
+		/**
+		 * The type map at each step of this access path.
+		 */
 		public List<Map<TemplateType, TypeRef>> typeMaps = new ArrayList<>();
 		
 		public LookupPath(List<LookupElement> names) {
@@ -127,6 +229,11 @@ public class LookupUtils {
 			this.names.addAll(names);
 		}
 		
+		/**
+		 * Copies another LookupPath.
+		 * 
+		 * @param other
+		 */
 		public LookupPath(LookupPath other) {
 			this.names = other.names;
 			this.members = new ArrayList<>(other.members);
@@ -134,8 +241,14 @@ public class LookupUtils {
 			this.typeMaps = new ArrayList<>(other.typeMaps);
 		}
 		
+		/**
+		 * Adds a new member to this list. Automatically updates the subject and type map lists.
+		 * 
+		 * @param member
+		 * @return <tt>this</tt>.
+		 */
 		public LookupPath add(MemberAccess member) {
-			Map<TemplateType, TypeRef> typeMap = lastTypeMap();
+			Map<TemplateType, TypeRef> typeMap = returnedTypeMap();
 			LookupElement name = names.get(members.size());
 			
 			if (member instanceof Type) {
@@ -152,7 +265,7 @@ public class LookupUtils {
 				if (name != null) sub.source = name.source;
 				
 				if (!subjects.isEmpty()) {
-					sub.previous = lastSubject();
+					sub.previous = returnedSubject();
 					sub.infix = names.get(subjects.get(subjects.size()-1).loc+1).prefix;
 				}
 				
@@ -186,6 +299,12 @@ public class LookupUtils {
 			return this;
 		}
 		
+		/**
+		 * Adds new members to this list. Automatically updates the subject and type map lists.
+		 * 
+		 * @param members
+		 * @return <tt>this</tt>.
+		 */
 		public LookupPath addAll(Collection<MemberAccess> members) {
 			for (MemberAccess member : members) {
 				add(member);
@@ -194,6 +313,9 @@ public class LookupUtils {
 			return this;
 		}
 		
+		/**
+		 * @return true if this path does not violate any access rules.
+		 */
 		public boolean isValidPath() {
 			if (subjects.isEmpty() || subjects.get(subjects.size()-1).loc != names.size()-1) return false;
 			
@@ -214,11 +336,20 @@ public class LookupUtils {
 			return true;
 		}
 		
+		/**
+		 * Given a list of members, returns the list of paths that are created by appending each member to the end of the existing path.
+		 * 
+		 * @param newMembers
+		 * @return
+		 */
 		public List<LookupPath> branch(List<MemberAccess> newMembers) {
 			return newMembers.stream().map((member)->new LookupPath(this).add(member)).collect(Collectors.toList());
 		}
 		
-		public MemberAccess lastMember() {
+		/**
+		 * @return the member that this entire lookup will return (but not necessarily the last one in the list).
+		 */
+		public MemberAccess returnedMember() {
 			if (members.isEmpty()) return null;
 			
 			int i = members.size()-1;
@@ -234,7 +365,10 @@ public class LookupUtils {
 			return e;
 		}
 		
-		public Subject lastSubject() {
+		/**
+		 * @return the subject that this entire lookup will return (but not necessarily the last one in the list).
+		 */
+		public Subject returnedSubject() {
 			if (subjects.isEmpty()) return null;
 			
 			Subject e = subjects.get(subjects.size()-1);
@@ -246,7 +380,10 @@ public class LookupUtils {
 			return e;
 		}
 		
-		public Map<TemplateType, TypeRef> lastTypeMap() {
+		/**
+		 * @return the type map that this entire lookup will return (but not necessarily the last one in the list).
+		 */
+		public Map<TemplateType, TypeRef> returnedTypeMap() {
 			if (typeMaps.isEmpty()) return new HashMap<>();
 			
 			int i = typeMaps.size()-1;
@@ -262,6 +399,10 @@ public class LookupUtils {
 			return e;
 		}
 		
+		/**
+		 * Takes the final subject off the list and gives it to you.
+		 * @return
+		 */
 		public Subject popSubject() {
 			Subject sub = subjects.remove(subjects.size()-1);
 			// TODO: remove non-subject members
@@ -273,9 +414,13 @@ public class LookupUtils {
 			return "path"+members;
 		}
 		
+		/**
+		 * Returns the member you should do lookup based on.
+		 * @return
+		 */
 		public MemberAccess getLookup() {
-			Subject sub = lastSubject();
-			MemberAccess member = lastMember();
+			Subject sub = returnedSubject();
+			MemberAccess member = returnedMember();
 			if (sub == null || sub.type == null || sub.member != member) {
 				return member;
 			} else {
@@ -303,7 +448,7 @@ public class LookupUtils {
 				if (options.isEmpty()) break;
 				
 				options = options.stream()
-						.map((path)->path.branch(path.getLookup().getMembers(name.name, path.lastTypeMap())))
+						.map((path)->path.branch(path.getLookup().getMembers(name.name, path.returnedTypeMap())))
 						.reduce(new ArrayList<>(), (a,b)->{a.addAll(b); return a;});
 			}
 			
@@ -318,6 +463,13 @@ public class LookupUtils {
 		return result;
 	}
 	
+	/**
+	 * Given a path, this function will add the code needed to return the contents of this path to the code block provided.
+	 * 
+	 * @param scope The current scope.
+	 * @param path The access path.
+	 * @return The variable that contains the results of the lookup.
+	 */
 	public static Variable getSubjectOfPath(Scope scope, LookupPath path) {
 		Variable var = scope.getCodeBlock().instance;
 		Label label = null;
@@ -387,8 +539,21 @@ public class LookupUtils {
 		return var;
 	}
 	
+	/**
+	 * An argument passed into a function. Used for function lookup.
+	 * 
+	 * @author iconmaster
+	 *
+	 */
 	public static class LookupArgument {
+		/**
+		 * The variable containing the argument's value.
+		 */
 		public Variable var;
+		
+		/**
+		 * The label of the argumnet. May be null.
+		 */
 		public String label;
 		
 		public LookupArgument(Variable var) {
@@ -403,6 +568,13 @@ public class LookupUtils {
 		}
 	}
 	
+	/**
+	 * Creates a map of parameters to arguments for a function.
+	 * 
+	 * @param f
+	 * @param args The arguments supplied, in the order they were supplied.
+	 * @return
+	 */
 	public static Map<Parameter, Variable> getFuncArgMap(Function f, List<LookupArgument> args) {
 		Map<Parameter, Variable> result = new HashMap<>();
 		

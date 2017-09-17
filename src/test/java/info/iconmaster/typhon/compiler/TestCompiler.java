@@ -325,6 +325,26 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(0, code.ops.get(1).<List<Variable>>arg(3).size());
 			
 			Assert.assertEquals(OpCode.MOV, code.ops.get(2).op);
+		}),new TestCase("class a {package p {float b;} package q {int c;}} void f() {a a; int x = a..p.b.q.c;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(3, code.ops.size());
+			
+			Assert.assertEquals(OpCode.CALL, code.ops.get(0).op);
+			Assert.assertEquals(1, code.ops.get(0).<List<Variable>>arg(0).size());
+			Assert.assertEquals("b", code.ops.get(0).<Function>arg(2).getName());
+			Assert.assertEquals(0, code.ops.get(0).<List<Variable>>arg(3).size());
+			
+			Assert.assertEquals(OpCode.CALL, code.ops.get(1).op);
+			Assert.assertEquals(1, code.ops.get(1).<List<Variable>>arg(0).size());
+			Assert.assertEquals("c", code.ops.get(1).<Function>arg(2).getName());
+			Assert.assertEquals(0, code.ops.get(1).<List<Variable>>arg(3).size());
+			
+			Assert.assertEquals(OpCode.MOV, code.ops.get(2).op);
+		}),new TestCase("class a {float b; int c;} void f() {a a; a x = a..b..c..b;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("class y {int c;} class a {y b;} void f() {a a; int x = a.?b.?c;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
 		}));
 	}
     

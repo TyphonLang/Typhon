@@ -758,7 +758,7 @@ public class TyphonCompiler {
 				
 				// process the chosen path
 				LookupPath path = paths.get(0);
-				return Arrays.asList(path.lastSubject().type);
+				return Arrays.asList(path.returnedSubject().type);
 			}
 			
 			@Override
@@ -951,7 +951,7 @@ public class TyphonCompiler {
 				}
 				
 				List<LookupPath> paths = LookupUtils.findPaths(scope, base, names);
-				paths.removeIf((path)->!(path.lastSubject().member instanceof Field));
+				paths.removeIf((path)->!(path.returnedSubject().member instanceof Field));
 				
 				if (paths.isEmpty()) {
 					// error, no path found

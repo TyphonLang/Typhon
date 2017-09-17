@@ -3,6 +3,7 @@ package info.iconmaster.typhon.util;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import info.iconmaster.typhon.errors.TemplateLabelNotFoundError;
 import info.iconmaster.typhon.errors.TemplateNumberError;
@@ -10,6 +11,7 @@ import info.iconmaster.typhon.errors.TemplateTypeError;
 import info.iconmaster.typhon.model.TemplateArgument;
 import info.iconmaster.typhon.types.FunctionType;
 import info.iconmaster.typhon.types.TemplateType;
+import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.types.UserType;
 
@@ -181,5 +183,53 @@ public class TemplateUtils {
 		result.putAll(matchTemplateArgs(typeToMap));
 		
 		return result;
+	}
+	
+	public static Map<TemplateType, TypeRef> inferMapFromArguments(List<TypeRef> params, List<TypeRef> args, Map<TemplateType, TypeRef> defaults) {
+		Map<TemplateType, TypeRef> result = new HashMap<>();
+		
+		inferMapFromArguments(params, args, defaults, result);
+		
+		return new HashMap<TemplateType, TypeRef>(defaults){{
+			putAll(result);
+		}};
+	}
+	
+	private static void inferMapFromArguments(List<TypeRef> params, List<TypeRef> args, Map<TemplateType, TypeRef> defaults, Map<TemplateType, TypeRef> result) {
+		int i = 0;
+		for (TypeRef param : params) {
+			TypeRef arg = args.get(i);
+			
+			if (param.getType() instanceof TemplateType) {
+				// we have a match
+				TemplateType t = (TemplateType) param.getType();
+				if (!defaults.containsKey(t) || arg.canCastTo(defaults.get(t))) {
+					if (result.containsKey(t)) {
+						TypeRef inMap = result.get(t);
+						
+						if (!arg.canCastTo(inMap) && inMap.canCastTo(arg)) {
+							// widening of current value.
+							result.put(t, arg);
+						} else if (defaults.containsKey(t)) {
+							// they both cast to the default, so do that at the very least.
+							// TODO: find most narrow common parentage instead
+							result.put(t, defaults.get(t));
+						}
+					} else if (arg.canCastTo(param)) {
+						// narrowing of default
+						result.put(t, arg);
+					}
+				}
+			} else if (param.getType() instanceof UserType) {
+				// recurse on template arguments
+				int minLen = Math.min(param.getTemplateArgs().size(), arg.getTemplateArgs().size());
+				List<TypeRef> paramList = param.getTemplateArgs().subList(0, minLen).stream().map((a)->a.getValue()).collect(Collectors.toList());
+				List<TypeRef> argList = arg.getTemplateArgs().subList(0, minLen).stream().map((a)->a.getValue()).collect(Collectors.toList());
+				
+				inferMapFromArguments(paramList, argList, defaults, result);
+			}
+			
+			i++;
+		}
 	}
 }

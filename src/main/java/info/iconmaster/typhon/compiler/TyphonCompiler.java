@@ -402,8 +402,6 @@ public class TyphonCompiler {
 			
 			@Override
 			public List<TypeRef> visitFuncCallExpr(FuncCallExprContext ctx) {
-				// TODO: we assume all are .'s and no .?'s
-				
 				// turn the rule into a list of member accesses
 				List<LookupElement> names = new ArrayList<>();
 				ExprContext expr = ctx.tnCallee;
@@ -512,11 +510,41 @@ public class TyphonCompiler {
 					
 					if (fieldOf == null) {
 						// CALLSTATIC
+						if (sub.infix == AccessType.NULLABLE_DOT || sub.infix == AccessType.DOUBLE_DOT) {
+							// TODO: error
+						}
+						
 						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALLSTATIC, new Object[] {outputVars, f, inputVars}));
 					} else {
 						// CALL
 						Variable instanceVar = LookupUtils.getSubjectOfPath(scope, path);
+						
+						Label label = null;
+						if (sub.infix == AccessType.NULLABLE_DOT) {
+							label = scope.addTempLabel();
+							
+							Variable tempVar = scope.addTempVar(new TypeRef(core.TYPE_BOOL), sub.source);
+							scope.getCodeBlock().ops.add(new Instruction(core.tni, sub.source, OpCode.ISNULL, new Object[] {tempVar, instanceVar}));
+							scope.getCodeBlock().ops.add(new Instruction(core.tni, sub.source, OpCode.JUMPIF, new Object[] {tempVar, label}));
+						}
+						
+						if (sub.infix == AccessType.DOUBLE_DOT) {
+							outputVars = Arrays.asList();
+						}
+						
 						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {outputVars, instanceVar, f, inputVars}));
+						
+						if (sub.infix == AccessType.DOUBLE_DOT && !insertInto.isEmpty()) {
+							scope.getCodeBlock().ops.add(new Instruction(core.tni, sub.source, OpCode.MOV, new Object[] {instanceVar, insertInto.get(0)}));
+						}
+						
+						if (label != null) {
+							scope.getCodeBlock().ops.add(new Instruction(scope.getCodeBlock().tni, sub.source, OpCode.LABEL, new Object[] {label}));
+						}
+						
+						if (sub.infix == AccessType.DOUBLE_DOT) {
+							return Arrays.asList(instanceVar.type);
+						}
 					}
 					
 					return f.getRetType().subList(0, outputVars.size());

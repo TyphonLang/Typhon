@@ -8,6 +8,8 @@ import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
 import info.iconmaster.typhon.compiler.CodeBlock;
+import info.iconmaster.typhon.plugins.PluginLoader;
+import info.iconmaster.typhon.plugins.TyphonPlugin;
 import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
@@ -195,6 +197,7 @@ public class Field extends TyphonModelEntity implements MemberAccess {
 		if (defaultGetter == null) {
 			// make the default getter function
 			defaultGetter = new Function(tni, getName(), new TemplateType[0], new Parameter[0], new TypeRef[] {type});
+			PluginLoader.runHook(TyphonPlugin.OnInitGetter.class, this);
 		}
 		
 		return defaultGetter;
@@ -239,6 +242,7 @@ public class Field extends TyphonModelEntity implements MemberAccess {
 		if (defaultSetter == null) {
 			// make the default setter function
 			defaultSetter = new Function(tni, getName(), new TemplateType[0], new Parameter[] {new Parameter(tni, name, type, false)}, new TypeRef[0]);
+			PluginLoader.runHook(TyphonPlugin.OnInitSetter.class, this);
 		}
 		
 		return defaultSetter;

@@ -34,6 +34,14 @@ public @interface TyphonPlugin {
 	@Target(ElementType.METHOD)
 	public static @interface OnCompilationComplete {}
 	
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	public static @interface OnInitGetter {}
+	
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	public static @interface OnInitSetter {}
+	
 	// define methods
 	
 	@Retention(RetentionPolicy.RUNTIME)

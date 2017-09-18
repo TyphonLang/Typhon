@@ -4,13 +4,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Scanner;
 
-import info.iconmaster.typhon.antlr.TyphonLexer;
 import info.iconmaster.typhon.compiler.TyphonCompiler;
 import info.iconmaster.typhon.errors.TyphonError;
 import info.iconmaster.typhon.linker.TyphonLinker;
 import info.iconmaster.typhon.model.Package;
 import info.iconmaster.typhon.model.TyphonModelReader;
+import info.iconmaster.typhon.plugins.PluginLoader;
+import info.iconmaster.typhon.plugins.TyphonPlugin;
 import info.iconmaster.typhon.types.TyphonTypeResolver;
+import info.iconmaster.typhon.util.CommandLineHelper;
 import info.iconmaster.typhon.util.CommandLineHelper.Result;
 import info.iconmaster.typhon.util.CommandLineHelper.UnknownOptionException;
 import info.iconmaster.typhon.util.FileUtils;
@@ -34,11 +36,14 @@ public class Typhon {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		PluginLoader.loadPlugins();
+		CommandLineHelper claHelper = TyphonCommandLine.getCommandLineHelper();
+		
 		try {
-			Result options = TyphonCommandLine.CMD_PARSER.parseCommandLine(args);
+			Result options = TyphonCommandLine.getCommandLineHelper().parseCommandLine(args);
 			
 			if (options.optionalArguments.containsKey(TyphonCommandLine.OPTION_HELP)) {
-				TyphonCommandLine.CMD_PARSER.printUsage(System.out);
+				claHelper.printUsage(System.out);
 				return;
 			}
 			
@@ -47,10 +52,12 @@ public class Typhon {
 				return;
 			}
 			
+			PluginLoader.runHook(TyphonPlugin.OnCompilationBegun.class, claHelper, options);
+			
 			if (options.positionalArguments.size() == 0) {
 				System.err.println("error: no input files specified");
 				System.err.println();
-				TyphonCommandLine.CMD_PARSER.printUsage(System.err);
+				claHelper.printUsage(System.err);
 				return;
 			}
 			
@@ -175,10 +182,11 @@ public class Typhon {
 				return;
 			}
 			
+			PluginLoader.runHook(TyphonPlugin.OnCompilationComplete.class, claHelper, options, tni);
 		} catch (UnknownOptionException e) {
 			System.err.println("error: "+e.getMessage());
 			System.err.println();
-			TyphonCommandLine.CMD_PARSER.printUsage(System.err);
+			claHelper.printUsage(System.err);
 			return;
 		}
 	}

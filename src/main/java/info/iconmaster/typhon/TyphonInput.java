@@ -7,6 +7,8 @@ import java.util.List;
 import info.iconmaster.typhon.errors.TyphonError;
 import info.iconmaster.typhon.model.CorePackage;
 import info.iconmaster.typhon.model.Package;
+import info.iconmaster.typhon.plugins.PluginLoader;
+import info.iconmaster.typhon.plugins.TyphonPlugin;
 
 /**
  * This contains general data about the compilation currently in progress.
@@ -55,4 +57,8 @@ public class TyphonInput {
 	 * A list of paths that can be the base for raw import includes.
 	 */
 	public List<File> rawImportLookupPaths = new ArrayList<>();
+	
+	public TyphonInput() {
+		PluginLoader.runHook(TyphonPlugin.OnNewTyphonInput.class, this);
+	}
 }

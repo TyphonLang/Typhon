@@ -1,5 +1,13 @@
 package info.iconmaster.typhon;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import info.iconmaster.typhon.plugins.PluginLoader;
+import info.iconmaster.typhon.plugins.TyphonPlugin;
 import info.iconmaster.typhon.util.CommandLineHelper;
 import info.iconmaster.typhon.util.CommandLineHelper.Option;
 
@@ -21,10 +29,25 @@ public class TyphonCommandLine {
 	/**
 	 * The command line parser Typhon uses.
 	 */
-	public static final CommandLineHelper CMD_PARSER = new CommandLineHelper("typhon [-options] files...", new Option[] {
-			OPTION_HELP,
-			OPTION_VERSION,
-			OPTION_PATH,
-			OPTION_LIBS,
-	});
+	public static CommandLineHelper getCommandLineHelper() {
+		List<Option> options = new ArrayList<Option>() {{
+			add(OPTION_HELP);
+			add(OPTION_VERSION);
+			add(OPTION_PATH);
+			add(OPTION_LIBS);
+		}};
+		
+		Map<Class<?>, Object> additionalOptions = PluginLoader.runHook(TyphonPlugin.AddCommandLineOptions.class);
+		for (Object o : additionalOptions.values()) {
+			if (o instanceof Option) {
+				options.add((Option) o);
+			} else if (o instanceof Option[]) {
+				options.addAll(Arrays.asList((Option[]) o));
+			} else if (o instanceof Collection) {
+				options.addAll((Collection<? extends Option>) o);
+			}
+		}
+		
+		return new CommandLineHelper("typhon [-options] files...", options.toArray(new Option[0]));
+	} 
 }

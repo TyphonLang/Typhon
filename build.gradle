@@ -20,6 +20,7 @@ repositories {
 }
 
 dependencies {
+	compile 'org.reflections:reflections:0.9.11'
 	testCompile 'junit:junit:4.12'
 	antlr "org.antlr:antlr4:4.5"
 }

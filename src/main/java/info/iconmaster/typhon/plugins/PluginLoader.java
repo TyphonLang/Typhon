@@ -54,7 +54,7 @@ public class PluginLoader {
 				try {
 					result.put(plugin, hook.invoke(null, args));
 				} catch (Exception e) {
-					throw new TyphonPluginException(plugin, "An error occured during event @"+annotation.getSimpleName()+": "+e.getMessage());
+					throw new TyphonPluginException(plugin, "An error occured during event @"+annotation.getSimpleName(), e);
 				}
 			}
 		}

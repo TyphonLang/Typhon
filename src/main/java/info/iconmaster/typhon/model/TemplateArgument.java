@@ -43,6 +43,18 @@ public class TemplateArgument extends TyphonModelEntity {
 		this.value = value;
 	}
 	
+	public TemplateArgument(String label, TypeRef value) {
+		super(value.tni);
+		this.value = value;
+		this.label = label;
+	}
+	
+	public TemplateArgument(String label, Type value) {
+		super(value.tni);
+		this.value = new TypeRef(value);
+		this.label = label;
+	}
+	
 	public TemplateArgument(SourceInfo source, TypeRef value) {
 		super(value.tni, source);
 		this.value = value;

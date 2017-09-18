@@ -116,8 +116,8 @@ public abstract class Type extends TyphonModelEntity implements MemberAccess {
 		}
 		
 		// compare templates
-		Map<TemplateType, TypeRef> map1 = TemplateUtils.matchTemplateArgs(a);
-		Map<TemplateType, TypeRef> map2 = TemplateUtils.matchTemplateArgs(b);
+		Map<TemplateType, TypeRef> map1 = TemplateUtils.matchAllTemplateArgs(a);
+		Map<TemplateType, TypeRef> map2 = TemplateUtils.matchAllTemplateArgs(b);
 		
 		for (Entry<TemplateType, TypeRef> entry : map1.entrySet()) {
 			if (!map2.containsKey(entry.getKey())) return false;

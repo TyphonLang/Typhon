@@ -1,17 +1,17 @@
 package info.iconmaster.typhon.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
+import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.errors.TemplateLabelNotFoundError;
 import info.iconmaster.typhon.errors.TemplateNumberError;
 import info.iconmaster.typhon.errors.TemplateTypeError;
 import info.iconmaster.typhon.model.TemplateArgument;
 import info.iconmaster.typhon.types.FunctionType;
 import info.iconmaster.typhon.types.TemplateType;
-import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.types.UserType;
 
@@ -124,6 +124,7 @@ public class TemplateUtils {
 	
 	/**
 	 * Generates a mapping of template parameters to arguments for a type.
+	 * Does NOT include default values in its output. If you want those, use matchAllTemplateArgs instead.
 	 * 
 	 * @param typeToMap The type you're working on. Used for error output.
 	 * @param template The list of template parameters.
@@ -156,46 +157,42 @@ public class TemplateUtils {
 			}
 		}
 		
-		// finally, replace all missing arguments with their defaults.
-		for (TemplateType type : typeToMap.getMemberTemplate()) {
-			if (!result.containsKey(type)) {
-				result.put(type, type.getDefaultValue() == null ? type.getBaseType() : type.getDefaultValue());
-			}
-		}
-		
 		return result;
 	}
 	
 	/**
-	 * Generates a mapping of template parameters to arguments for a type, and all template types held inside this type.
+	 * Generates a mapping of template parameters to arguments for a type, with suitable defaults placed in if not present.
 	 * 
 	 * @param typeToMap The type you're working on. Used for error output.
 	 * @param template The list of template parameters.
 	 * @param args The list of template arguments.
 	 */
 	public static Map<TemplateType, TypeRef> matchAllTemplateArgs(TypeRef typeToMap) {
-		Map<TemplateType, TypeRef> result = new HashMap<>();
+		// generate the template arguments
+		Map<TemplateType, TypeRef> result = matchTemplateArgs(typeToMap);
 		
-		for (TemplateArgument arg : typeToMap.getTemplateArgs()) {
-			result.putAll(matchAllTemplateArgs(arg.getValue()));
+		// replace all missing arguments with their defaults.
+		for (TemplateType type : typeToMap.getMemberTemplate()) {
+			if (!result.containsKey(type)) {
+				result.put(type, type.getDefaultValue() == null ? type.getBaseType() : type.getDefaultValue());
+			}
 		}
 		
-		result.putAll(matchTemplateArgs(typeToMap));
-		
+		// return the result
 		return result;
 	}
 	
-	public static Map<TemplateType, TypeRef> inferMapFromArguments(List<TypeRef> params, List<TypeRef> args, Map<TemplateType, TypeRef> defaults) {
+	public static Map<TemplateType, TypeRef> inferMapFromArguments(TyphonInput tni, List<TypeRef> params, List<TypeRef> args, Map<TemplateType, TypeRef> defaults) {
 		Map<TemplateType, TypeRef> result = new HashMap<>();
 		
-		inferMapFromArguments(params, args, defaults, result);
+		inferMapFromArguments(tni, params, args, defaults, result);
 		
 		return new HashMap<TemplateType, TypeRef>(defaults){{
 			putAll(result);
 		}};
 	}
 	
-	private static void inferMapFromArguments(List<TypeRef> params, List<TypeRef> args, Map<TemplateType, TypeRef> defaults, Map<TemplateType, TypeRef> result) {
+	private static void inferMapFromArguments(TyphonInput tni, List<TypeRef> params, List<TypeRef> args, Map<TemplateType, TypeRef> defaults, Map<TemplateType, TypeRef> result) {
 		int i = 0;
 		for (TypeRef param : params) {
 			TypeRef arg = args.get(i);
@@ -222,11 +219,22 @@ public class TemplateUtils {
 				}
 			} else if (param.getType() instanceof UserType) {
 				// recurse on template arguments
-				int minLen = Math.min(param.getTemplateArgs().size(), arg.getTemplateArgs().size());
-				List<TypeRef> paramList = param.getTemplateArgs().subList(0, minLen).stream().map((a)->a.getValue()).collect(Collectors.toList());
-				List<TypeRef> argList = arg.getTemplateArgs().subList(0, minLen).stream().map((a)->a.getValue()).collect(Collectors.toList());
+				List<TypeRef> paramList = new ArrayList<>();
+				List<TypeRef> argList = new ArrayList<>();
 				
-				inferMapFromArguments(paramList, argList, defaults, result);
+				Map<TemplateType, TypeRef> paramMap = matchTemplateArgs(param);
+				Map<TemplateType, TypeRef> argMap = matchTemplateArgs(arg);
+				
+				HashMap<TemplateType, TypeRef> withAll = new HashMap<>(paramMap);
+				withAll.putAll(argMap);
+				for (TemplateType t : withAll.keySet()) {
+					if (paramMap.containsKey(t) && argMap.containsKey(t)) {
+						paramList.add(paramMap.get(t));
+						argList.add(argMap.get(t));
+					}
+				}
+				
+				inferMapFromArguments(tni, paramList, argList, defaults, result);
 			}
 			
 			i++;

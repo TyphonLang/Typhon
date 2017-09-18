@@ -89,8 +89,8 @@ public class FunctionType extends Type {
 		if (getArgTypes().size() != other.getArgTypes().size()) return false;
 		if (getRetTypes().size() != other.getRetTypes().size()) return false;
 		
-		FunctionType realA = (FunctionType) TemplateUtils.replaceTemplates(a, TemplateUtils.matchTemplateArgs(a)).getType();
-		FunctionType realB = (FunctionType) TemplateUtils.replaceTemplates(b, TemplateUtils.matchTemplateArgs(b)).getType();
+		FunctionType realA = (FunctionType) TemplateUtils.replaceTemplates(a, TemplateUtils.matchAllTemplateArgs(a)).getType();
+		FunctionType realB = (FunctionType) TemplateUtils.replaceTemplates(b, TemplateUtils.matchAllTemplateArgs(b)).getType();
 		
 		for (int i = 0; i < realA.getArgTypes().size(); i++) {
 			if (!realB.getArgTypes().get(i).canCastTo(realA.getArgTypes().get(i))) return false;

@@ -1,5 +1,10 @@
 package info.iconmaster.typhon.model.libs;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.model.Annotation;
 import info.iconmaster.typhon.model.AnnotationDefinition;
@@ -11,15 +16,25 @@ import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.types.Type;
 
 /**
- * The core package.
- * This package contains data for built-in types and functions.
- * All packages derive from the core package.
- * The core package cannot have a parent.
+ * This package contains functions and annotations dealing with the builtin operators and overloading them.
  * 
  * @author iconmaster
  *
  */
 public class CoreLibraryOperators extends Package {
+	
+	/**
+	 * Constants for operator annotations.
+	 */
+	public AnnotationDefinition ANNOT_ADD, ANNOT_SUB, ANNOT_MUL, ANNOT_DIV, ANNOT_MOD,
+	ANNOT_BAND, ANNOT_BOR, ANNOT_XOR, ANNOT_SHL, ANNOT_SHR,
+	ANNOT_LT, ANNOT_LE, ANNOT_GT, ANNOT_GE,
+	ANNOT_NEG, ANNOT_POS, ANNOT_BNOT;
+	
+	/**
+	 * A list of various operator functions.
+	 */
+	public Map<AnnotationDefinition, List<Function>> OP_FUNCS = new HashMap<>();
 	
 	private AnnotationDefinition makeAnnotDef(String name, Parameter... params) {
 		AnnotationDefinition annot = new AnnotationDefinition(tni, name, params);
@@ -32,6 +47,11 @@ public class CoreLibraryOperators extends Package {
 		Annotation a = new Annotation(tni);
 		a.setDefinition(op);
 		f.getAnnots().add(a);
+		
+		if (!OP_FUNCS.containsKey(op)) {
+			OP_FUNCS.put(op, new ArrayList<>());
+		}
+		OP_FUNCS.get(op).add(f);
 	}
 	
 	private void addBinOpFunc(AnnotationDefinition op) {
@@ -160,46 +180,46 @@ public class CoreLibraryOperators extends Package {
 		super(tni, "operator");
 		
 		// add the operator annotations
-		tni.corePackage.ANNOT_OP_ADD = makeAnnotDef("add");
-		tni.corePackage.ANNOT_OP_SUB = makeAnnotDef("sub");
-		tni.corePackage.ANNOT_OP_MUL = makeAnnotDef("mul");
-		tni.corePackage.ANNOT_OP_DIV = makeAnnotDef("div");
-		tni.corePackage.ANNOT_OP_MOD = makeAnnotDef("mod");
+		ANNOT_ADD = makeAnnotDef("add");
+		ANNOT_SUB = makeAnnotDef("sub");
+		ANNOT_MUL = makeAnnotDef("mul");
+		ANNOT_DIV = makeAnnotDef("div");
+		ANNOT_MOD = makeAnnotDef("mod");
 		
-		tni.corePackage.ANNOT_OP_BAND = makeAnnotDef("band");
-		tni.corePackage.ANNOT_OP_BOR = makeAnnotDef("bor");
-		tni.corePackage.ANNOT_OP_XOR = makeAnnotDef("xor");
+		ANNOT_BAND = makeAnnotDef("band");
+		ANNOT_BOR = makeAnnotDef("bor");
+		ANNOT_XOR = makeAnnotDef("xor");
 		
-		tni.corePackage.ANNOT_OP_SHL = makeAnnotDef("shl");
-		tni.corePackage.ANNOT_OP_SHR = makeAnnotDef("shr");
+		ANNOT_SHL = makeAnnotDef("shl");
+		ANNOT_SHR = makeAnnotDef("shr");
 		
-		tni.corePackage.ANNOT_OP_LT = makeAnnotDef("lt");
-		tni.corePackage.ANNOT_OP_LE = makeAnnotDef("le");
-		tni.corePackage.ANNOT_OP_GT = makeAnnotDef("gt");
-		tni.corePackage.ANNOT_OP_GE = makeAnnotDef("ge");
+		ANNOT_LT = makeAnnotDef("lt");
+		ANNOT_LE = makeAnnotDef("le");
+		ANNOT_GT = makeAnnotDef("gt");
+		ANNOT_GE = makeAnnotDef("ge");
 		
-		tni.corePackage.ANNOT_OP_NEG = makeAnnotDef("neg");
-		tni.corePackage.ANNOT_OP_POS = makeAnnotDef("pos");
-		tni.corePackage.ANNOT_OP_BNOT = makeAnnotDef("bnot");
+		ANNOT_NEG = makeAnnotDef("neg");
+		ANNOT_POS = makeAnnotDef("pos");
+		ANNOT_BNOT = makeAnnotDef("bnot");
 		
 		// add the operator functions
-		addBinOpFunc(tni.corePackage.ANNOT_OP_ADD);
-		addBinOpFunc(tni.corePackage.ANNOT_OP_SUB);
-		addBinOpFunc(tni.corePackage.ANNOT_OP_MUL);
-		addBinOpFunc(tni.corePackage.ANNOT_OP_DIV);
-		addBinOpFunc(tni.corePackage.ANNOT_OP_MOD);
+		addBinOpFunc(ANNOT_ADD);
+		addBinOpFunc(ANNOT_SUB);
+		addBinOpFunc(ANNOT_MUL);
+		addBinOpFunc(ANNOT_DIV);
+		addBinOpFunc(ANNOT_MOD);
 		
-		addBitOpFunc(tni.corePackage.ANNOT_OP_BAND);
-		addBitOpFunc(tni.corePackage.ANNOT_OP_BOR);
-		addBitOpFunc(tni.corePackage.ANNOT_OP_XOR);
+		addBitOpFunc(ANNOT_BAND);
+		addBitOpFunc(ANNOT_BOR);
+		addBitOpFunc(ANNOT_XOR);
 		
-		addBitShiftOpFunc(tni.corePackage.ANNOT_OP_SHL);
-		addBitShiftOpFunc(tni.corePackage.ANNOT_OP_SHR);
+		addBitShiftOpFunc(ANNOT_SHL);
+		addBitShiftOpFunc(ANNOT_SHR);
 		
-		addRelOpFunc(tni.corePackage.ANNOT_OP_LT);
-		addRelOpFunc(tni.corePackage.ANNOT_OP_LE);
-		addRelOpFunc(tni.corePackage.ANNOT_OP_GT);
-		addRelOpFunc(tni.corePackage.ANNOT_OP_GE);
+		addRelOpFunc(ANNOT_LT);
+		addRelOpFunc(ANNOT_LE);
+		addRelOpFunc(ANNOT_GT);
+		addRelOpFunc(ANNOT_GE);
 		
 		{
 			// add unary -
@@ -211,7 +231,7 @@ public class CoreLibraryOperators extends Package {
 			// add the specific versions
 			int i = 0;
 			for (Type t : types) {
-				addOpFunc(t.getTypePackage(), c.ANNOT_OP_NEG, new Function(tni, c.ANNOT_OP_NEG.getName(), new TemplateType[] {
+				addOpFunc(t.getTypePackage(), ANNOT_NEG, new Function(tni, ANNOT_NEG.getName(), new TemplateType[] {
 						
 				}, new Parameter[] {
 						
@@ -222,7 +242,7 @@ public class CoreLibraryOperators extends Package {
 			}
 			
 			// add the general version
-			addOpFunc(c.TYPE_NUMBER.getTypePackage(), c.ANNOT_OP_NEG, new Function(tni, c.ANNOT_OP_NEG.getName(), new TemplateType[] {
+			addOpFunc(c.TYPE_NUMBER.getTypePackage(), ANNOT_NEG, new Function(tni, ANNOT_NEG.getName(), new TemplateType[] {
 					
 			}, new Parameter[] {
 					
@@ -239,7 +259,7 @@ public class CoreLibraryOperators extends Package {
 			
 			// add the specific versions
 			for (Type t : types) {
-				addOpFunc(t.getTypePackage(), c.ANNOT_OP_POS, new Function(tni, c.ANNOT_OP_POS.getName(), new TemplateType[] {
+				addOpFunc(t.getTypePackage(), ANNOT_POS, new Function(tni, ANNOT_POS.getName(), new TemplateType[] {
 						
 				}, new Parameter[] {
 						
@@ -249,7 +269,7 @@ public class CoreLibraryOperators extends Package {
 			}
 			
 			// add the general version
-			addOpFunc(c.TYPE_NUMBER.getTypePackage(), c.ANNOT_OP_POS, new Function(tni, c.ANNOT_OP_POS.getName(), new TemplateType[] {
+			addOpFunc(c.TYPE_NUMBER.getTypePackage(), ANNOT_POS, new Function(tni, ANNOT_POS.getName(), new TemplateType[] {
 					
 			}, new Parameter[] {
 					
@@ -259,14 +279,14 @@ public class CoreLibraryOperators extends Package {
 		}
 		
 		{
-			// add binary not
+			// add unary bit-not
 			
 			CorePackage c = tni.corePackage;
 			Type[] types = new Type[] {c.TYPE_UBYTE, c.TYPE_BYTE, c.TYPE_USHORT, c.TYPE_SHORT, c.TYPE_UINT, c.TYPE_INT, c.TYPE_ULONG, c.TYPE_LONG};
 			
 			// add the specific versions
 			for (Type t : types) {
-				addOpFunc(t.getTypePackage(), c.ANNOT_OP_BNOT, new Function(tni, c.ANNOT_OP_BNOT.getName(), new TemplateType[] {
+				addOpFunc(t.getTypePackage(), ANNOT_BNOT, new Function(tni, ANNOT_BNOT.getName(), new TemplateType[] {
 						
 				}, new Parameter[] {
 						
@@ -276,7 +296,7 @@ public class CoreLibraryOperators extends Package {
 			}
 			
 			// add the general version
-			addOpFunc(c.TYPE_INTEGER.getTypePackage(), c.ANNOT_OP_BNOT, new Function(tni, c.ANNOT_OP_BNOT.getName(), new TemplateType[] {
+			addOpFunc(c.TYPE_INTEGER.getTypePackage(), ANNOT_BNOT, new Function(tni, ANNOT_BNOT.getName(), new TemplateType[] {
 					
 			}, new Parameter[] {
 					

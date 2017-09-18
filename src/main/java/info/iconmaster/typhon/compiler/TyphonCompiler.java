@@ -620,13 +620,13 @@ public class TyphonCompiler {
 				
 				switch (ctx.tnOp.getText()) {
 				case "-":
-					operator = core.ANNOT_OP_NEG;
+					operator = core.LIB_OPS.ANNOT_NEG;
 					break;
 				case "+":
-					operator = core.ANNOT_OP_POS;
+					operator = core.LIB_OPS.ANNOT_POS;
 					break;
 				case "~":
-					operator = core.ANNOT_OP_BNOT;
+					operator = core.LIB_OPS.ANNOT_BNOT;
 					break;
 				case "!":
 					if (!lhs.type.canCastTo(new TypeRef(core.TYPE_BOOL))) {
@@ -834,13 +834,13 @@ public class TyphonCompiler {
 				
 				switch (ctx.tnOp.getText()) {
 				case "-":
-					operator = core.ANNOT_OP_NEG;
+					operator = core.LIB_OPS.ANNOT_NEG;
 					break;
 				case "+":
-					operator = core.ANNOT_OP_POS;
+					operator = core.LIB_OPS.ANNOT_POS;
 					break;
 				case "~":
-					operator = core.ANNOT_OP_BNOT;
+					operator = core.LIB_OPS.ANNOT_BNOT;
 					break;
 				case "!":
 					return Arrays.asList(new TypeRef(core.TYPE_BOOL));
@@ -1047,33 +1047,33 @@ public class TyphonCompiler {
 	private static AnnotationDefinition getBinOp(CorePackage core, String s) {
 		switch (s) {
 		case "+":
-			return core.ANNOT_OP_ADD;
+			return core.LIB_OPS.ANNOT_ADD;
 		case "-":
-			return core.ANNOT_OP_SUB;
+			return core.LIB_OPS.ANNOT_SUB;
 		case "*":
-			return core.ANNOT_OP_MUL;
+			return core.LIB_OPS.ANNOT_MUL;
 		case "/":
-			return core.ANNOT_OP_DIV;
+			return core.LIB_OPS.ANNOT_DIV;
 		case "%":
-			return core.ANNOT_OP_MOD;
+			return core.LIB_OPS.ANNOT_MOD;
 		case "&":
-			return core.ANNOT_OP_BAND;
+			return core.LIB_OPS.ANNOT_BAND;
 		case "|":
-			return core.ANNOT_OP_BOR;
+			return core.LIB_OPS.ANNOT_BOR;
 		case "^":
-			return core.ANNOT_OP_XOR;
+			return core.LIB_OPS.ANNOT_XOR;
 		case "<<":
-			return core.ANNOT_OP_SHL;
+			return core.LIB_OPS.ANNOT_SHL;
 		case ">>":
-			return core.ANNOT_OP_SHR;
+			return core.LIB_OPS.ANNOT_SHR;
 		case "<":
-			return core.ANNOT_OP_LT;
+			return core.LIB_OPS.ANNOT_LT;
 		case "<=":
-			return core.ANNOT_OP_LE;
+			return core.LIB_OPS.ANNOT_LE;
 		case ">":
-			return core.ANNOT_OP_GT;
+			return core.LIB_OPS.ANNOT_GT;
 		case ">=":
-			return core.ANNOT_OP_GE;
+			return core.LIB_OPS.ANNOT_GE;
 		default:
 			throw new IllegalArgumentException("unknown operator in getBinOp: "+s+"");
 		}

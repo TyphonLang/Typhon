@@ -8,10 +8,7 @@ import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.types.Type;
 
 /**
- * The core package.
- * This package contains data for built-in types and functions.
- * All packages derive from the core package.
- * The core package cannot have a parent.
+ * This library contains common mathematical functions.
  * 
  * @author iconmaster
  *

@@ -44,12 +44,19 @@ public class CorePackage extends Package {
 	public AnnotationDefinition ANNOT_MAIN;
 	
 	/**
-	 * Constants for operator annotations.
+	 * Constants for functions.
 	 */
-	public AnnotationDefinition ANNOT_OP_ADD, ANNOT_OP_SUB, ANNOT_OP_MUL, ANNOT_OP_DIV, ANNOT_OP_MOD,
-	ANNOT_OP_BAND, ANNOT_OP_BOR, ANNOT_OP_XOR, ANNOT_OP_SHL, ANNOT_OP_SHR,
-	ANNOT_OP_LT, ANNOT_OP_LE, ANNOT_OP_GT, ANNOT_OP_GE,
-	ANNOT_OP_NEG, ANNOT_OP_POS, ANNOT_OP_BNOT;
+	public Function FUNC_PRINT, FUNC_PRINTLN;
+	
+	/**
+	 * The math library. Contains math functions.
+	 */
+	public CoreLibraryMath LIB_MATH;
+	
+	/**
+	 * The operators library. Contains annotations and functions for operator overloading.
+	 */
+	public CoreLibraryOperators LIB_OPS;
 	
 	private UserType makeUserType(String name, Type parent) {
 		UserType type = new UserType(name, parent);
@@ -103,12 +110,29 @@ public class CorePackage extends Package {
 		TYPE_MAP.getTemplates().add(new TemplateType(tni, "K"));
 		TYPE_MAP.getTemplates().add(new TemplateType(tni, "V"));
 		
-		// add any core libraries
-		addSubpackage(new CoreLibraryMath(tni));
-		addSubpackage(new CoreLibraryOperators(tni));
+		// add the functions
+		addFunction(FUNC_PRINT = new Function(tni, "print", new TemplateType[] {
+				
+		}, new Parameter[] {
+				new Parameter(tni, "toPrint", tni.corePackage.TYPE_ANY, false),
+		}, new Type[] {
+				
+		}));
 		
-		// add the annotations defined
+		addFunction(FUNC_PRINTLN = new Function(tni, "println", new TemplateType[] {
+				
+		}, new Parameter[] {
+				new Parameter(tni, "toPrint", tni.corePackage.TYPE_ANY, true),
+		}, new Type[] {
+				
+		}));
+		
+		// add the annotations
 		ANNOT_MAIN = makeAnnotDef("main", new Parameter[] {});
+		
+		// add any core libraries
+		addSubpackage(LIB_MATH = new CoreLibraryMath(tni));
+		addSubpackage(LIB_OPS = new CoreLibraryOperators(tni));
 	}
 	
 	/**

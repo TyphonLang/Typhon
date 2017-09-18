@@ -106,7 +106,7 @@ public class TyphonCompiler {
 		}
 		
 		for (Parameter param : f.getParams()) {
-			scope.addVar(param.getName(), param.getType(), param.source);
+			param.setVar(scope.addVar(param.getName(), param.getType(), param.source));
 		}
 		for (TypeRef retType : f.getRetType()) {
 			block.returnVars.add(scope.addTempVar(retType, null));

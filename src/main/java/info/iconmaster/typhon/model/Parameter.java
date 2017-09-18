@@ -4,6 +4,7 @@ import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
 import info.iconmaster.typhon.compiler.CodeBlock;
+import info.iconmaster.typhon.compiler.Variable;
 import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.util.SourceInfo;
@@ -162,4 +163,24 @@ public class Parameter extends TyphonModelEntity {
 	public String toString() {
 		return type+" "+name;
 	}
+	
+	/**
+	 * The Variable this parameter represents. Will be null if compilation has not yet occured.
+	 */
+	private Variable var;
+
+	/**
+	 * @return The Variable this parameter represents. Will be null if compilation has not yet occured.
+	 */
+	public Variable getVar() {
+		return var;
+	}
+
+	/**
+	 * @param var The Variable this parameter represents.
+	 */
+	public void setVar(Variable var) {
+		this.var = var;
+	}
+	
 }

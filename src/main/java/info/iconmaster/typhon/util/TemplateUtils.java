@@ -65,9 +65,7 @@ public class TemplateUtils {
 	/**
 	 * Checks to ensure a template instantiation is valid. Adds errors if it isn't.
 	 * 
-	 * @param typeToMap The type you're checking. Used for error output.
-	 * @param template The list of template parameters.
-	 * @param args The list of template arguments.
+	 * @param typeToMap The type you're checking.
 	 */
 	public static void checkTemplateArgs(TypeRef typeToMap) {
 		checkTemplateArgs(typeToMap, typeToMap.getName(), typeToMap.getMemberTemplate(), typeToMap.getTemplateArgs());
@@ -77,9 +75,7 @@ public class TemplateUtils {
 	 * Generates a mapping of template parameters to arguments for a type.
 	 * Does NOT include default values in its output. If you want those, use matchAllTemplateArgs instead.
 	 * 
-	 * @param typeToMap The type you're working on. Used for error output.
-	 * @param template The list of template parameters.
-	 * @param args The list of template arguments.
+	 * @param typeToMap The type you're working on.
 	 */
 	public static Map<TemplateType, TypeRef> matchTemplateArgs(TypeRef typeToMap) {
 		return matchTemplateArgs(typeToMap.getMemberTemplate(), typeToMap.getTemplateArgs());
@@ -88,23 +84,10 @@ public class TemplateUtils {
 	/**
 	 * Generates a mapping of template parameters to arguments for a type, with suitable defaults placed in if not present.
 	 * 
-	 * @param typeToMap The type you're working on. Used for error output.
-	 * @param template The list of template parameters.
-	 * @param args The list of template arguments.
+	 * @param typeToMap The type you're working on.
 	 */
 	public static Map<TemplateType, TypeRef> matchAllTemplateArgs(TypeRef typeToMap) {
-		// generate the template arguments
-		Map<TemplateType, TypeRef> result = matchTemplateArgs(typeToMap);
-		
-		// replace all missing arguments with their defaults.
-		for (TemplateType type : typeToMap.getMemberTemplate()) {
-			if (!result.containsKey(type)) {
-				result.put(type, type.getDefaultValue() == null ? type.getBaseType() : type.getDefaultValue());
-			}
-		}
-		
-		// return the result
-		return result;
+		return matchAllTemplateArgs(typeToMap.getMemberTemplate(), typeToMap.getTemplateArgs());
 	}
 	
 	/**
@@ -175,6 +158,13 @@ public class TemplateUtils {
 		}
 	}
 	
+	/**
+	 * Generates a mapping of template parameters to arguments for a type.
+	 * Does NOT include default values in its output. If you want those, use matchAllTemplateArgs instead.
+	 * 
+	 * @param params The list of template parameters.
+	 * @param args The list of template arguments.
+	 */
 	public static Map<TemplateType, TypeRef> matchTemplateArgs(List<TemplateType> params, List<TemplateArgument> args) {
 		Map<TemplateType, TypeRef> result = new HashMap<>();
 		
@@ -206,6 +196,35 @@ public class TemplateUtils {
 		return result;
 	}
 	
+	/**
+	 * Generates a mapping of template parameters to arguments for a type, with suitable defaults placed in if not present.
+	 * 
+	 * @param template The list of template parameters.
+	 * @param args The list of template arguments.
+	 */
+	public static Map<TemplateType, TypeRef> matchAllTemplateArgs(List<TemplateType> params, List<TemplateArgument> args) {
+		// generate the template arguments
+		Map<TemplateType, TypeRef> result = matchTemplateArgs(params, args);
+		
+		// replace all missing arguments with their defaults.
+		for (TemplateType type : params) {
+			if (!result.containsKey(type)) {
+				result.put(type, type.getDefaultValue() == null ? type.getBaseType() : type.getDefaultValue());
+			}
+		}
+		
+		// return the result
+		return result;
+	}
+	
+	/**
+	 * Checks to ensure a template instantiation is valid. Adds errors if it isn't.
+	 * 
+	 * @param toMap The thing you're checking. Used for error output.
+	 * @param toMapDesc The name of the thing you're checking. Used for error output.
+	 * @param params The list of template parameters.
+	 * @param args The list of template arguments.
+	 */
 	public static void checkTemplateArgs(TyphonModelEntity toMap, String toMapDesc, List<TemplateType> params, List<TemplateArgument> args) {
 		Map<TemplateType, TypeRef> result = new HashMap<>();
 		

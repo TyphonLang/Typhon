@@ -614,6 +614,7 @@ public class TyphonCompiler {
 				CorePackage core = scope.getCodeBlock().tni.corePackage;
 				
 				Variable lhs = scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(ctx.tnArg));
+				compileExpr(scope, ctx.tnArg, Arrays.asList(lhs));
 				
 				AnnotationDefinition operator;
 				
@@ -624,17 +625,20 @@ public class TyphonCompiler {
 				case "+":
 					operator = core.ANNOT_OP_POS;
 					break;
-				case "!":
-					operator = core.ANNOT_OP_NOT;
-					break;
 				case "~":
 					operator = core.ANNOT_OP_BNOT;
 					break;
+				case "!":
+					if (!lhs.type.canCastTo(new TypeRef(core.TYPE_BOOL))) {
+						core.tni.errors.add(new TypeError(new SourceInfo(ctx), lhs.type, new TypeRef(core.TYPE_BOOL)));
+					}
+					
+					if (!insertInto.isEmpty()) scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.NOT, new Object[] {insertInto.get(0), lhs}));
+					
+					return Arrays.asList(new TypeRef(core.TYPE_BOOL));
 				default:
 					throw new IllegalArgumentException("unknown operator in getUnOp: "+ctx.tnOp.getText());
 				}
-				
-				compileExpr(scope, ctx.tnArg, Arrays.asList(lhs));
 				
 				List<Function> handlers = lhs.type.getType().getOperatorHandlers(operator);
 				handlers.removeIf((f)->{
@@ -835,12 +839,11 @@ public class TyphonCompiler {
 				case "+":
 					operator = core.ANNOT_OP_POS;
 					break;
-				case "!":
-					operator = core.ANNOT_OP_NOT;
-					break;
 				case "~":
 					operator = core.ANNOT_OP_BNOT;
 					break;
+				case "!":
+					return Arrays.asList(new TypeRef(core.TYPE_BOOL));
 				default:
 					throw new IllegalArgumentException("unknown operator in getUnOp: "+ctx.tnOp.getText());
 				}

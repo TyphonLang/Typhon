@@ -49,7 +49,7 @@ public class CorePackage extends Package {
 	public AnnotationDefinition ANNOT_OP_ADD, ANNOT_OP_SUB, ANNOT_OP_MUL, ANNOT_OP_DIV, ANNOT_OP_MOD,
 	ANNOT_OP_BAND, ANNOT_OP_BOR, ANNOT_OP_XOR, ANNOT_OP_SHL, ANNOT_OP_SHR,
 	ANNOT_OP_LT, ANNOT_OP_LE, ANNOT_OP_GT, ANNOT_OP_GE,
-	ANNOT_OP_NEG, ANNOT_OP_POS, ANNOT_OP_NOT, ANNOT_OP_BNOT;
+	ANNOT_OP_NEG, ANNOT_OP_POS, ANNOT_OP_BNOT;
 	
 	private UserType makeUserType(String name, Type parent) {
 		UserType type = new UserType(name, parent);

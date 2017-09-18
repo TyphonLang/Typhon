@@ -156,10 +156,6 @@ public class CoreLibraryOperators extends Package {
 		}));
 	}
 	
-	private void addUnOpFunc(AnnotationDefinition op) {
-
-	}
-	
 	public CoreLibraryOperators(TyphonInput tni) {
 		super(tni, "operator");
 		
@@ -184,7 +180,6 @@ public class CoreLibraryOperators extends Package {
 		
 		tni.corePackage.ANNOT_OP_NEG = makeAnnotDef("neg");
 		tni.corePackage.ANNOT_OP_POS = makeAnnotDef("pos");
-		tni.corePackage.ANNOT_OP_NOT = makeAnnotDef("not");
 		tni.corePackage.ANNOT_OP_BNOT = makeAnnotDef("bnot");
 		
 		// add the operator functions
@@ -260,20 +255,6 @@ public class CoreLibraryOperators extends Package {
 					
 			}, new Type[] {
 					c.TYPE_NUMBER,
-			}));
-		}
-		
-		{
-			// add logical not
-			
-			CorePackage c = tni.corePackage;
-			
-			addOpFunc(c.TYPE_BOOL.getTypePackage(), c.ANNOT_OP_NOT, new Function(tni, c.ANNOT_OP_NOT.getName(), new TemplateType[] {
-					
-			}, new Parameter[] {
-					
-			}, new Type[] {
-					c.TYPE_BOOL,
 			}));
 		}
 		

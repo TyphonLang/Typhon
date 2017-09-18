@@ -1,7 +1,7 @@
 package info.iconmaster.typhon.errors;
 
 import info.iconmaster.typhon.model.TemplateArgument;
-import info.iconmaster.typhon.types.TypeRef;
+import info.iconmaster.typhon.model.TyphonModelEntity;
 import info.iconmaster.typhon.util.TemplateUtils;
 
 /**
@@ -12,16 +12,18 @@ import info.iconmaster.typhon.util.TemplateUtils;
  */
 public class TemplateLabelNotFoundError extends TyphonError {
 	public TemplateArgument arg;
-	public TypeRef typeToMap;
+	public TyphonModelEntity toMap;
+	public String toMapDesc;
 	
-	public TemplateLabelNotFoundError(TypeRef typeToMap, TemplateArgument arg) {
-		super(typeToMap.source);
-		this.typeToMap = typeToMap;
+	public TemplateLabelNotFoundError(TyphonModelEntity toMap, String toMapDesc, TemplateArgument arg) {
+		super(toMap.source);
+		this.toMap = toMap;
+		this.toMapDesc = toMapDesc;
 		this.arg = arg;
 	}
 	
 	@Override
 	public String getMessage() {
-		return "incorrect template arguments to "+typeToMap.getName()+": template parameter with name "+arg.getLabel()+" not found";
+		return "incorrect template arguments to "+toMapDesc+": template parameter with name "+arg.getLabel()+" not found";
 	}
 }

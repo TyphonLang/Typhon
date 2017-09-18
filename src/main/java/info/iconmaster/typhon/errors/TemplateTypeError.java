@@ -1,5 +1,6 @@
 package info.iconmaster.typhon.errors;
 
+import info.iconmaster.typhon.model.TyphonModelEntity;
 import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.util.TemplateUtils;
@@ -12,18 +13,20 @@ import info.iconmaster.typhon.util.TemplateUtils;
  */
 public class TemplateTypeError extends TyphonError {
 	public TemplateType arg;
-	public TypeRef typeToMap;
+	public TyphonModelEntity toMap;
+	public String toMapDesc;
 	public TypeRef badType;
 	
-	public TemplateTypeError(TypeRef typeToMap, TemplateType arg, TypeRef badType) {
-		super(typeToMap.source);
-		this.typeToMap = typeToMap;
+	public TemplateTypeError(TyphonModelEntity toMap, String toMapDesc, TemplateType arg, TypeRef badType) {
+		super(toMap.source);
+		this.toMap = toMap;
+		this.toMapDesc = toMapDesc;
 		this.arg = arg;
 		this.badType = badType;
 	}
 	
 	@Override
 	public String getMessage() {
-		return "incorrect template arguments to "+typeToMap.getName()+": Template " + arg.getName() + " expects argument castable to " + arg.getBaseType().getName() + "; got type " + badType.getName();
+		return "incorrect template arguments to "+toMapDesc+": Template " + arg.getName() + " expects argument castable to " + arg.getBaseType().getName() + "; got type " + badType.getName();
 	}
 }

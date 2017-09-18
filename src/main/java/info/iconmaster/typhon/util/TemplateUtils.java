@@ -10,6 +10,7 @@ import info.iconmaster.typhon.errors.TemplateLabelNotFoundError;
 import info.iconmaster.typhon.errors.TemplateNumberError;
 import info.iconmaster.typhon.errors.TemplateTypeError;
 import info.iconmaster.typhon.model.TemplateArgument;
+import info.iconmaster.typhon.model.TyphonModelEntity;
 import info.iconmaster.typhon.types.FunctionType;
 import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.types.TypeRef;
@@ -69,57 +70,7 @@ public class TemplateUtils {
 	 * @param args The list of template arguments.
 	 */
 	public static void checkTemplateArgs(TypeRef typeToMap) {
-		Map<TemplateType, TypeRef> result = new HashMap<>();
-		
-		// insert all the named arguments
-		for (TemplateArgument arg : typeToMap.getTemplateArgs()) {
-			if (arg.getLabel() != null) {
-				TemplateType found = null;
-				
-				for (TemplateType type : typeToMap.getMemberTemplate()) {
-					if (type.getName().equals(arg.getLabel())) {
-						found = type;
-						result.put(type, arg.getValue());
-						break;
-					}
-				}
-				
-				if (found == null) {
-					// no position for the argument; error
-					typeToMap.tni.errors.add(new TemplateLabelNotFoundError(typeToMap, arg));
-				}
-			}
-		}
-		
-		// insert all the positional arguments. They should go in the first type in which they can fit.
-		for (TemplateArgument arg : typeToMap.getTemplateArgs()) {
-			if (arg.getLabel() == null) {
-				TemplateType found = null;
-				
-				for (TemplateType type : typeToMap.getMemberTemplate()) {
-					if (!result.containsKey(type)) {
-						if (!arg.getValue().canCastTo(new TypeRef(type))) {
-							// Cannot cast to next logical template in the sequence; error
-							typeToMap.tni.errors.add(new TemplateTypeError(typeToMap, type, arg.getValue()));
-						}
-						
-						found = type;
-						result.put(type, arg.getValue());
-						break;
-					}
-				}
-				
-				if (found == null) {
-					// too many template arguments; error
-					typeToMap.tni.errors.add(new TemplateNumberError(typeToMap));
-				}
-			}
-		}
-		
-		// recursively check subtemplates
-		for (TemplateArgument arg : typeToMap.getTemplateArgs()) {
-			checkTemplateArgs(arg.getValue());
-		}
+		checkTemplateArgs(typeToMap, typeToMap.getName(), typeToMap.getMemberTemplate(), typeToMap.getTemplateArgs());
 	}
 	
 	/**
@@ -131,33 +82,7 @@ public class TemplateUtils {
 	 * @param args The list of template arguments.
 	 */
 	public static Map<TemplateType, TypeRef> matchTemplateArgs(TypeRef typeToMap) {
-		Map<TemplateType, TypeRef> result = new HashMap<>();
-		
-		// insert all the named arguments
-		for (TemplateArgument arg : typeToMap.getTemplateArgs()) {
-			if (arg.getLabel() != null) {
-				for (TemplateType type : typeToMap.getMemberTemplate()) {
-					if (type.getName().equals(arg.getLabel())) {
-						result.put(type, arg.getValue());
-						break;
-					}
-				}
-			}
-		}
-		
-		// insert all the positional arguments. They should go in the first type in which they can fit.
-		for (TemplateArgument arg : typeToMap.getTemplateArgs()) {
-			if (arg.getLabel() == null) {
-				for (TemplateType type : typeToMap.getMemberTemplate()) {
-					if (!result.containsKey(type)) {
-						result.put(type, arg.getValue());
-						break;
-					}
-				}
-			}
-		}
-		
-		return result;
+		return matchTemplateArgs(typeToMap.getMemberTemplate(), typeToMap.getTemplateArgs());
 	}
 	
 	/**
@@ -182,17 +107,26 @@ public class TemplateUtils {
 		return result;
 	}
 	
-	public static Map<TemplateType, TypeRef> inferMapFromArguments(TyphonInput tni, List<TypeRef> params, List<TypeRef> args, Map<TemplateType, TypeRef> defaults) {
+	/**
+	 * This function is used to infer template types where necessary, as in functions or constructors.
+	 * 
+	 * @param tni
+	 * @param params Parameters. Should include {@link TemplateType}s.
+	 * @param args Arguments. Should include the replacements for the {@link TemplateType}s.
+	 * @param defaults The default values for any template types included.
+	 * @return A map of template parameters to the inferred arguments. If nothing was inferred, the default value is used.
+	 */
+	public static Map<TemplateType, TypeRef> inferTemplatesFromArguments(TyphonInput tni, List<TypeRef> params, List<TypeRef> args, Map<TemplateType, TypeRef> defaults) {
 		Map<TemplateType, TypeRef> result = new HashMap<>();
 		
-		inferMapFromArguments(tni, params, args, defaults, result);
+		inferTemplatesFromArguments(tni, params, args, defaults, result);
 		
 		return new HashMap<TemplateType, TypeRef>(defaults){{
 			putAll(result);
 		}};
 	}
 	
-	private static void inferMapFromArguments(TyphonInput tni, List<TypeRef> params, List<TypeRef> args, Map<TemplateType, TypeRef> defaults, Map<TemplateType, TypeRef> result) {
+	private static void inferTemplatesFromArguments(TyphonInput tni, List<TypeRef> params, List<TypeRef> args, Map<TemplateType, TypeRef> defaults, Map<TemplateType, TypeRef> result) {
 		int i = 0;
 		for (TypeRef param : params) {
 			TypeRef arg = args.get(i);
@@ -234,10 +168,95 @@ public class TemplateUtils {
 					}
 				}
 				
-				inferMapFromArguments(tni, paramList, argList, defaults, result);
+				inferTemplatesFromArguments(tni, paramList, argList, defaults, result);
 			}
 			
 			i++;
+		}
+	}
+	
+	public static Map<TemplateType, TypeRef> matchTemplateArgs(List<TemplateType> params, List<TemplateArgument> args) {
+		Map<TemplateType, TypeRef> result = new HashMap<>();
+		
+		// insert all the named arguments
+		for (TemplateArgument arg : args) {
+			if (arg.getLabel() != null) {
+				for (TemplateType type : params) {
+					if (type.getName().equals(arg.getLabel())) {
+						result.put(type, arg.getValue());
+						break;
+					}
+				}
+			}
+		}
+		
+		// insert all the positional arguments. They should go in the first type in which they can fit.
+		for (TemplateArgument arg : args) {
+			if (arg.getLabel() == null) {
+				for (TemplateType type : params) {
+					if (!result.containsKey(type)) {
+						result.put(type, arg.getValue());
+						break;
+					}
+				}
+			}
+		}
+		
+		// return the result
+		return result;
+	}
+	
+	public static void checkTemplateArgs(TyphonModelEntity toMap, String toMapDesc, List<TemplateType> params, List<TemplateArgument> args) {
+		Map<TemplateType, TypeRef> result = new HashMap<>();
+		
+		// insert all the named arguments
+		for (TemplateArgument arg : args) {
+			if (arg.getLabel() != null) {
+				TemplateType found = null;
+				
+				for (TemplateType type : params) {
+					if (type.getName().equals(arg.getLabel())) {
+						found = type;
+						result.put(type, arg.getValue());
+						break;
+					}
+				}
+				
+				if (found == null) {
+					// no position for the argument; error
+					toMap.tni.errors.add(new TemplateLabelNotFoundError(toMap, toMapDesc, arg));
+				}
+			}
+		}
+		
+		// insert all the positional arguments. They should go in the first type in which they can fit.
+		for (TemplateArgument arg : args) {
+			if (arg.getLabel() == null) {
+				TemplateType found = null;
+				
+				for (TemplateType type : params) {
+					if (!result.containsKey(type)) {
+						if (!arg.getValue().canCastTo(new TypeRef(type))) {
+							// Cannot cast to next logical template in the sequence; error
+							toMap.tni.errors.add(new TemplateTypeError(toMap, toMapDesc, type, arg.getValue()));
+						}
+						
+						found = type;
+						result.put(type, arg.getValue());
+						break;
+					}
+				}
+				
+				if (found == null) {
+					// too many template arguments; error
+					toMap.tni.errors.add(new TemplateNumberError(toMap, toMapDesc));
+				}
+			}
+		}
+		
+		// recursively check subtemplates
+		for (TemplateArgument arg : args) {
+			checkTemplateArgs(arg.getValue(), arg.getValue().getName(), arg.getValue().getMemberTemplate(), arg.getValue().getTemplateArgs());
 		}
 	}
 }

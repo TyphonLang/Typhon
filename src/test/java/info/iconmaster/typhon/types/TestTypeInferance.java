@@ -85,7 +85,7 @@ public class TestTypeInferance extends TyphonTest {
 		
 		@Override
 		public void run() {
-			f.accept(TemplateUtils.inferMapFromArguments(tni, Arrays.asList(params), Arrays.asList(args), defaults));
+			f.accept(TemplateUtils.inferTemplatesFromArguments(tni, Arrays.asList(params), Arrays.asList(args), defaults));
 		}
     }
 }

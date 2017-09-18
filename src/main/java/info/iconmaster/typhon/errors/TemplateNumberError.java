@@ -1,6 +1,6 @@
 package info.iconmaster.typhon.errors;
 
-import info.iconmaster.typhon.types.TypeRef;
+import info.iconmaster.typhon.model.TyphonModelEntity;
 import info.iconmaster.typhon.util.TemplateUtils;
 
 /**
@@ -10,15 +10,17 @@ import info.iconmaster.typhon.util.TemplateUtils;
  *
  */
 public class TemplateNumberError extends TyphonError {
-	public TypeRef typeToMap;
+	public TyphonModelEntity toMap;
+	public String toMapDesc;
 	
-	public TemplateNumberError(TypeRef typeToMap) {
-		super(typeToMap.source);
-		this.typeToMap = typeToMap;
+	public TemplateNumberError(TyphonModelEntity toMap, String toMapDesc) {
+		super(toMap.source);
+		this.toMap = toMap;
+		this.toMapDesc = toMapDesc;
 	}
 	
 	@Override
 	public String getMessage() {
-		return "incorrect template arguments to "+typeToMap.getName()+": too many template arguments";
+		return "incorrect template arguments to "+toMapDesc+": too many template arguments";
 	}
 }

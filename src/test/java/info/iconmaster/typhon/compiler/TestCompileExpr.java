@@ -182,6 +182,10 @@ public class TestCompileExpr extends TyphonTest {
 			Assert.assertEquals(0, code.tni.errors.size());
 		}),new TestCase("1 is int is bool", 1, (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("null ?? null", 1, (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("1 ?? 'c'", 1, (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
 		}));
 	}
     

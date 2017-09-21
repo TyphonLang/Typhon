@@ -510,6 +510,28 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(1, code.ops.size());
 			
 			Assert.assertEquals(OpCode.INSTANCEOF, code.ops.get(0).op);
+		}),new TestCase("void f() {int x = 1 ?? 2;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(5, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.ISNULL, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(2).op);
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(3).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(4).op);
+		}),new TestCase("void f() {var x = 1 ?? 'c';}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(5, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.ISNULL, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(2).op);
+			Assert.assertEquals(OpCode.MOVCHAR, code.ops.get(3).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(4).op);
+		}),new TestCase("void f() {int x = 1 ?? 'c';}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
 		}));
 	}
     

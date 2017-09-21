@@ -34,6 +34,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.LogicOpsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.LvalueContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MemberExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MemberLvalueContext;
+import info.iconmaster.typhon.antlr.TyphonParser.NullCoalesceExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.NullConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.NumConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ParamNameContext;
@@ -1139,6 +1140,33 @@ public class TyphonCompiler {
 				
 				return Arrays.asList(new TypeRef(core.TYPE_BOOL));
 			}
+			
+			@Override
+			public List<TypeRef> visitNullCoalesceExpr(NullCoalesceExprContext ctx) {
+				Variable lhs;
+				if (insertInto.isEmpty()) {
+					lhs = scope.addTempVar(new TypeRef(core.TYPE_ANY), new SourceInfo(ctx.tnLhs));
+				} else {
+					lhs = insertInto.get(0);
+				}
+				
+				TypeRef oldType = lhs.type; lhs.type = lhs.type.copy();
+				compileExpr(scope, ctx.tnLhs, Arrays.asList(lhs));
+				lhs.type = oldType;
+				
+				Label label = scope.addTempLabel();
+				Variable tempVar = scope.addTempVar(new TypeRef(core.TYPE_BOOL), new SourceInfo(ctx));
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.ISNULL, new Object[] {tempVar, lhs}));
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPFALSE, new Object[] {tempVar, label}));
+				
+				oldType = lhs.type; lhs.type = lhs.type.copy();
+				compileExpr(scope, ctx.tnRhs, Arrays.asList(lhs));
+				lhs.type = oldType;
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {label}));
+				
+				return Arrays.asList(lhs.type);
+			}
 		};
 		
 		List<TypeRef> a = visitor.visit(rule);
@@ -1302,7 +1330,7 @@ public class TyphonCompiler {
 			
 			@Override
 			public List<TypeRef> visitParensExpr(ParensExprContext ctx) {
-				return getExprType(scope, ctx.tnExpr, expectedTypes);
+				return visit(ctx.tnExpr);
 			}
 			
 			@Override
@@ -1389,6 +1417,11 @@ public class TyphonCompiler {
 			@Override
 			public List<TypeRef> visitIsExpr(IsExprContext ctx) {
 				return Arrays.asList(new TypeRef(core.TYPE_BOOL));
+			}
+			
+			@Override
+			public List<TypeRef> visitNullCoalesceExpr(NullCoalesceExprContext ctx) {
+				return visit(ctx.tnLhs);
 			}
 		};
 		

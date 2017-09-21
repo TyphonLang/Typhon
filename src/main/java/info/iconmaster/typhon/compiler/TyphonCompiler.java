@@ -1109,7 +1109,7 @@ public class TyphonCompiler {
 					
 					if (result.size() != 1 || result.get(0).getType() != core.TYPE_BOOL) {
 						// error; signature of == incorrect
-						core.tni.errors.add(new TypeError(new SourceInfo(ctx), result.isEmpty() ? new TypeRef(core.TYPE_ANY) : result.get(0), new TypeRef(core.TYPE_BOOL)));
+						core.tni.errors.add(new UndefinedOperatorError(new SourceInfo(ctx), op, getExprType(scope, ctx.tnLhs, Arrays.asList()).get(0), getExprType(scope, ctx.tnRhs, Arrays.asList()).get(0)));
 						return result;
 					}
 					

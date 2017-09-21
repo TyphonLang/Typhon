@@ -342,6 +342,37 @@ public class TestCompileStat extends TyphonTest {
 					Assert.assertEquals(1, code.tni.errors.size());
 				}),new TestCase("{name: {} continue name;}", (code)->{
 					Assert.assertEquals(1, code.tni.errors.size());
+				}),new TestCase("repeat {} until true;", (code)->{
+					Assert.assertEquals(0, code.tni.errors.size());
+					
+					Assert.assertEquals(5, code.ops.size());
+					
+					Assert.assertEquals(OpCode.LABEL, code.ops.get(0).op);
+					Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(1).op);
+					Assert.assertEquals(OpCode.NOT, code.ops.get(2).op);
+					Assert.assertEquals(OpCode.JUMPIF, code.ops.get(3).op);
+					Assert.assertEquals(OpCode.LABEL, code.ops.get(4).op);
+				}),new TestCase("repeat name: {} until true;", (code)->{
+					Assert.assertEquals(0, code.tni.errors.size());
+					
+					Assert.assertEquals(5, code.ops.size());
+					
+					Assert.assertEquals(OpCode.LABEL, code.ops.get(0).op);
+					Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(1).op);
+					Assert.assertEquals(OpCode.NOT, code.ops.get(2).op);
+					Assert.assertEquals(OpCode.JUMPIF, code.ops.get(3).op);
+					Assert.assertEquals(OpCode.LABEL, code.ops.get(4).op);
+				}),new TestCase("repeat {println();} until true;", (code)->{
+					Assert.assertEquals(0, code.tni.errors.size());
+					
+					Assert.assertEquals(6, code.ops.size());
+					
+					Assert.assertEquals(OpCode.LABEL, code.ops.get(0).op);
+					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(1).op);
+					Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(2).op);
+					Assert.assertEquals(OpCode.NOT, code.ops.get(3).op);
+					Assert.assertEquals(OpCode.JUMPIF, code.ops.get(4).op);
+					Assert.assertEquals(OpCode.LABEL, code.ops.get(5).op);
 				}));
 	}
     

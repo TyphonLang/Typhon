@@ -1392,7 +1392,8 @@ public class TyphonCompiler {
 			}
 		};
 		
-		return visitor.visit(rule);
+		List<TypeRef> result = visitor.visit(rule);
+		return result == null ? Arrays.asList(new TypeRef(core.TYPE_ANY)) : result;
 	}
 	
 	/**

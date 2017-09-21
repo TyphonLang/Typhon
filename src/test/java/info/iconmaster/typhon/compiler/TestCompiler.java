@@ -351,6 +351,64 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(0, code.tni.errors.size());
 		}),new TestCase("class a {int b} void f() {a a; a..b..b = a;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("class a {int g() {}} void f() {a a; a = a..g()..g();}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("class a {int g() {}} void f() {a a; int x = a.?g();}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("void f() {string s = \"Hello!\";}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVSTR, code.ops.get(0).op);
+			Assert.assertEquals("Hello!", code.ops.get(0).args[1]);
+		}),new TestCase("void f() {string s = \"One\\nTwo\";}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVSTR, code.ops.get(0).op);
+			Assert.assertEquals("One\nTwo", code.ops.get(0).args[1]);
+		}),new TestCase("void f() {char c = 'c';}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVCHAR, code.ops.get(0).op);
+			Assert.assertEquals('c', code.ops.get(0).args[1]);
+		}),new TestCase("void f() {char c = '\\n';}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVCHAR, code.ops.get(0).op);
+			Assert.assertEquals('\n', code.ops.get(0).args[1]);
+		}),new TestCase("void f() {bool b = true;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(0).op);
+		}),new TestCase("void f() {bool b = false;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVFALSE, code.ops.get(0).op);
+		}),new TestCase("void f() {var x = this;}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("class c {void f() {var x = this;}}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOV, code.ops.get(0).op);
+		}),new TestCase("void f() {var x = null;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVNULL, code.ops.get(0).op);
 		}));
 	}
     

@@ -16,24 +16,32 @@ import info.iconmaster.typhon.antlr.TyphonParser.BinOps1ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BinOps2ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BitOpsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.CastExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.CharConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DefStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprStatContext;
+import info.iconmaster.typhon.antlr.TyphonParser.FalseConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.FuncCallExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.LvalueContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MemberExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MemberLvalueContext;
+import info.iconmaster.typhon.antlr.TyphonParser.NullConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.NumConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ParamNameContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ParensExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.RelOpsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.StatContext;
+import info.iconmaster.typhon.antlr.TyphonParser.StringConstExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.ThisConstExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.TrueConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.UnOpsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.VarExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.VarLvalueContext;
 import info.iconmaster.typhon.compiler.Instruction.OpCode;
 import info.iconmaster.typhon.errors.DuplicateVarNameError;
 import info.iconmaster.typhon.errors.ReadOnlyError;
+import info.iconmaster.typhon.errors.StringFormatError;
+import info.iconmaster.typhon.errors.ThisInStaticContextError;
 import info.iconmaster.typhon.errors.TypeError;
 import info.iconmaster.typhon.errors.UndefinedOperatorError;
 import info.iconmaster.typhon.errors.UndefinedVariableError;
@@ -57,6 +65,7 @@ import info.iconmaster.typhon.util.LookupUtils.LookupElement.AccessType;
 import info.iconmaster.typhon.util.LookupUtils.LookupPath;
 import info.iconmaster.typhon.util.LookupUtils.LookupPath.Subject;
 import info.iconmaster.typhon.util.SourceInfo;
+import info.iconmaster.typhon.util.StringUtils;
 import info.iconmaster.typhon.util.TemplateUtils;
 
 /**
@@ -660,6 +669,80 @@ public class TyphonCompiler {
 				
 				return handler.getRetType();
 			}
+			
+			@Override
+			public List<TypeRef> visitCharConstExpr(CharConstExprContext ctx) {
+				String s = StringUtils.formatTyphonString(ctx.tnValue.getText());
+				if (s == null || s.length() != 1) {
+					// error; string format bad
+					core.tni.errors.add(new StringFormatError(new SourceInfo(ctx), ctx.tnValue.getText()));
+					return Arrays.asList(new TypeRef(core.TYPE_CHAR));
+				}
+				
+				if (!insertInto.isEmpty()) {
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.MOVCHAR, new Object[] {insertInto.get(0), s.charAt(0)}));
+				}
+				
+				return Arrays.asList(new TypeRef(core.TYPE_CHAR));
+			}
+			
+			@Override
+			public List<TypeRef> visitStringConstExpr(StringConstExprContext ctx) {
+				String s = StringUtils.formatTyphonString(ctx.tnValue.getText());
+				if (s == null) {
+					// error; string format bad
+					core.tni.errors.add(new StringFormatError(new SourceInfo(ctx), ctx.tnValue.getText()));
+					return Arrays.asList(new TypeRef(core.TYPE_CHAR));
+				}
+				
+				if (!insertInto.isEmpty()) {
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.MOVSTR, new Object[] {insertInto.get(0), s}));
+				}
+				
+				return Arrays.asList(new TypeRef(core.TYPE_STRING));
+			}
+			
+			@Override
+			public List<TypeRef> visitFalseConstExpr(FalseConstExprContext ctx) {
+				if (!insertInto.isEmpty()) {
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.MOVFALSE, new Object[] {insertInto.get(0)}));
+				}
+				
+				return Arrays.asList(new TypeRef(core.TYPE_BOOL));
+			}
+			
+			@Override
+			public List<TypeRef> visitNullConstExpr(NullConstExprContext ctx) {
+				if (!insertInto.isEmpty()) {
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.MOVNULL, new Object[] {insertInto.get(0)}));
+				}
+				
+				return Arrays.asList(new TypeRef(core.TYPE_ANY));
+			}
+			
+			@Override
+			public List<TypeRef> visitThisConstExpr(ThisConstExprContext ctx) {
+				if (scope.getCodeBlock().instance == null) {
+					// error; accessing 'this' in static context
+					core.tni.errors.add(new ThisInStaticContextError(new SourceInfo(ctx)));
+					return Arrays.asList(new TypeRef(core.TYPE_ANY));
+				}
+				
+				if (!insertInto.isEmpty()) {
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.MOV, new Object[] {insertInto.get(0), scope.getCodeBlock().instance}));
+				}
+				
+				return Arrays.asList(scope.getCodeBlock().instance.type);
+			}
+			
+			@Override
+			public List<TypeRef> visitTrueConstExpr(TrueConstExprContext ctx) {
+				if (!insertInto.isEmpty()) {
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.MOVTRUE, new Object[] {insertInto.get(0)}));
+				}
+				
+				return Arrays.asList(new TypeRef(core.TYPE_BOOL));
+			}
 		};
 		
 		List<TypeRef> a = visitor.visit(rule);
@@ -865,6 +948,36 @@ public class TyphonCompiler {
 				
 				Function handler = handlers.get(0);
 				return handler.getRetType();
+			}
+			
+			@Override
+			public List<TypeRef> visitCharConstExpr(CharConstExprContext ctx) {
+				return Arrays.asList(new TypeRef(core.TYPE_CHAR));
+			}
+			
+			@Override
+			public List<TypeRef> visitStringConstExpr(StringConstExprContext ctx) {
+				return Arrays.asList(new TypeRef(core.TYPE_STRING));
+			}
+			
+			@Override
+			public List<TypeRef> visitFalseConstExpr(FalseConstExprContext ctx) {
+				return Arrays.asList(new TypeRef(core.TYPE_BOOL));
+			}
+			
+			@Override
+			public List<TypeRef> visitNullConstExpr(NullConstExprContext ctx) {
+				return Arrays.asList(new TypeRef(core.TYPE_ANY));
+			}
+			
+			@Override
+			public List<TypeRef> visitThisConstExpr(ThisConstExprContext ctx) {
+				return scope.getCodeBlock().instance == null ? Arrays.asList(new TypeRef(core.TYPE_ANY)) : Arrays.asList(scope.getCodeBlock().instance.type);
+			}
+			
+			@Override
+			public List<TypeRef> visitTrueConstExpr(TrueConstExprContext ctx) {
+				return Arrays.asList(new TypeRef(core.TYPE_BOOL));
 			}
 		};
 		

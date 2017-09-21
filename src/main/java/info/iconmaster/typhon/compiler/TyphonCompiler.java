@@ -17,8 +17,10 @@ import info.iconmaster.typhon.antlr.TyphonParser.BinOps2ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BitOpsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BlockContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BlockStatContext;
+import info.iconmaster.typhon.antlr.TyphonParser.BreakStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.CastExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.CharConstExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.ContStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DefStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprStatContext;
@@ -42,6 +44,8 @@ import info.iconmaster.typhon.antlr.TyphonParser.VarLvalueContext;
 import info.iconmaster.typhon.antlr.TyphonParser.WhileStatContext;
 import info.iconmaster.typhon.compiler.Instruction.OpCode;
 import info.iconmaster.typhon.errors.DuplicateVarNameError;
+import info.iconmaster.typhon.errors.LabelNotFoundError;
+import info.iconmaster.typhon.errors.NotAllowedHereError;
 import info.iconmaster.typhon.errors.ReadOnlyError;
 import info.iconmaster.typhon.errors.StringFormatError;
 import info.iconmaster.typhon.errors.ThisInStaticContextError;
@@ -234,21 +238,32 @@ public class TyphonCompiler {
 			
 			@Override
 			public Void visitBlockStat(BlockStatContext ctx) {
+				Label beginLabel;
+				Label endLabel;
+				
 				Scope newScope = new Scope(scope.getCodeBlock(), scope);
 				
 				if (ctx.tnBlock.tnLabel != null) {
-					Label label = newScope.addLabel(ctx.tnBlock.tnLabel.getText()+":begin");
-					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnBlock.tnLabel), OpCode.LABEL, new Object[] {label}));
+					beginLabel = newScope.addLabel(ctx.tnBlock.tnLabel.getText()+":begin");
+				} else {
+					beginLabel = newScope.addTempLabel();
 				}
+				
+				if (ctx.tnBlock.tnLabel != null) {
+					endLabel = newScope.addLabel(ctx.tnBlock.tnLabel.getText()+":end");
+				} else {
+					endLabel = newScope.addTempLabel();
+				}
+				
+				newScope.beginScopeLabel = beginLabel; newScope.endScopeLabel = endLabel;
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnBlock), OpCode.LABEL, new Object[] {beginLabel}));
 				
 				for (StatContext stat : ctx.tnBlock.tnBlock) {
 					compileStat(newScope, stat, expectedType);
 				}
 				
-				if (ctx.tnBlock.tnLabel != null) {
-					Label label = newScope.addLabel(ctx.tnBlock.tnLabel.getText()+":end");
-					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnBlock.tnLabel), OpCode.LABEL, new Object[] {label}));
-				}
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnBlock), OpCode.LABEL, new Object[] {endLabel}));
 				return null;
 			}
 			
@@ -271,7 +286,9 @@ public class TyphonCompiler {
 					endLabel = newScope.addTempLabel();
 				}
 				
-				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnExpr), OpCode.LABEL, new Object[] {beginLabel}));
+				newScope.beginScopeLabel = beginLabel; newScope.endScopeLabel = endLabel;
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {beginLabel}));
 				
 				Variable condVar = scope.addTempVar(new TypeRef(core.TYPE_BOOL), new SourceInfo(ctx.tnExpr));
 				compileExpr(scope, ctx.tnExpr, Arrays.asList(condVar));
@@ -283,8 +300,88 @@ public class TyphonCompiler {
 					compileStat(newScope, stat, expectedType);
 				}
 				
-				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnExpr), OpCode.JUMP, new Object[] {beginLabel}));
-				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnExpr), OpCode.LABEL, new Object[] {endLabel}));
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMP, new Object[] {beginLabel}));
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {endLabel}));
+				
+				return null;
+			}
+			
+			@Override
+			public Void visitBreakStat(BreakStatContext ctx) {
+				Label label = null;
+				
+				if (ctx.tnLabel == null) {
+					Scope search = scope;
+					while (search != null && label == null) {
+						label = search.endScopeLabel;
+						search = search.getParent();
+					}
+					
+					if (label == null) {
+						// error; can't break here
+						core.tni.errors.add(new NotAllowedHereError(new SourceInfo(ctx), "break statements"));
+						return null;
+					}
+				} else {
+					String s = ctx.tnLabel.getText()+":end";
+					Scope search = scope;
+					while (search != null) {
+						if (search.endScopeLabel != null && search.endScopeLabel.name != null && search.endScopeLabel.name.equals(s)) {
+							label = search.endScopeLabel;
+							break;
+						}
+						
+						search = search.getParent();
+					}
+					
+					if (label == null) {
+						// error; break not found
+						core.tni.errors.add(new LabelNotFoundError(new SourceInfo(ctx), ctx.tnLabel.getText()));
+						return null;
+					}
+				}
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMP, new Object[] {label}));
+				
+				return null;
+			}
+			
+			@Override
+			public Void visitContStat(ContStatContext ctx) {
+				Label label = null;
+				
+				if (ctx.tnLabel == null) {
+					Scope search = scope;
+					while (search != null && label == null) {
+						label = search.beginScopeLabel;
+						search = search.getParent();
+					}
+					
+					if (label == null) {
+						// error; can't break here
+						core.tni.errors.add(new NotAllowedHereError(new SourceInfo(ctx), "continue statements"));
+						return null;
+					}
+				} else {
+					String s = ctx.tnLabel.getText()+":begin";
+					Scope search = scope;
+					while (search != null) {
+						if (search.beginScopeLabel != null && search.beginScopeLabel.name != null && search.beginScopeLabel.name.equals(s)) {
+							label = search.beginScopeLabel;
+							break;
+						}
+						
+						search = search.getParent();
+					}
+					
+					if (label == null) {
+						// error; break not found
+						core.tni.errors.add(new LabelNotFoundError(new SourceInfo(ctx), ctx.tnLabel.getText()));
+						return null;
+					}
+				}
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMP, new Object[] {label}));
 				
 				return null;
 			}

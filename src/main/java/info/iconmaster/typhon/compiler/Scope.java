@@ -45,6 +45,11 @@ public class Scope implements MemberAccess {
 	private List<Label> labels = new ArrayList<>();
 	
 	/**
+	 * Labels that represent the beginning and end of this scope. May be null.
+	 */
+	public Label beginScopeLabel, endScopeLabel;
+	
+	/**
 	 * Construct a root scope.
 	 * 
 	 * @param codeBlock

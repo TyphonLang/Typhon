@@ -115,7 +115,7 @@ paramsDecl: tnArgs+=paramDecl (',' tnArgs+=paramDecl)* |;
 argDecl: (tnKey=WORD ':')? tnValue=expr;
 argsDecl: tnArgs+=argDecl (',' tnArgs+=argDecl)* |;
 
-block: ('<' tnLabel=WORD '>')? '{' tnBlock+=stat* '}';
+block: (tnLabel=WORD ':')? '{' tnBlock+=stat* '}';
 
 fragment LETTER: [a-zA-Z] | '_';
 fragment DIGIT: [0-9];

@@ -136,6 +136,50 @@ public class TestCompileStat extends TyphonTest {
 			Assert.assertEquals(1, code.ops.size());
 			Assert.assertEquals(OpCode.MOVFLOAT, code.ops.get(0).op);
 			Assert.assertEquals((Float) 1.0f, (Float) code.ops.get(0).arg(1));
+		}),new TestCase("{}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(0, code.ops.size());
+		}),new TestCase("{var x = 1; {var x = 2;}}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(2, code.ops.size());
+		}),new TestCase("while true {}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(6, code.ops.size());
+			
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.NOT, code.ops.get(2).op);
+			Assert.assertEquals(OpCode.JUMPIF, code.ops.get(3).op);
+			Assert.assertEquals(OpCode.JUMP, code.ops.get(4).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(5).op);
+		}),new TestCase("while true name: {}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(6, code.ops.size());
+			
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.NOT, code.ops.get(2).op);
+			Assert.assertEquals(OpCode.JUMPIF, code.ops.get(3).op);
+			Assert.assertEquals(OpCode.JUMP, code.ops.get(4).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(5).op);
+		}),new TestCase("while true {println();}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(7, code.ops.size());
+			
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.NOT, code.ops.get(2).op);
+			Assert.assertEquals(OpCode.JUMPIF, code.ops.get(3).op);
+			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(4).op);
+			Assert.assertEquals(OpCode.JUMP, code.ops.get(5).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(6).op);
+		}),new TestCase("while 0 {}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
 		}));
 	}
     

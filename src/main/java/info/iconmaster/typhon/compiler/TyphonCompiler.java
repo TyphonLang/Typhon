@@ -15,6 +15,8 @@ import info.iconmaster.typhon.antlr.TyphonParser.AssignStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BinOps1ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BinOps2ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BitOpsExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.BlockContext;
+import info.iconmaster.typhon.antlr.TyphonParser.BlockStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.CastExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.CharConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DefStatContext;
@@ -37,6 +39,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.TrueConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.UnOpsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.VarExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.VarLvalueContext;
+import info.iconmaster.typhon.antlr.TyphonParser.WhileStatContext;
 import info.iconmaster.typhon.compiler.Instruction.OpCode;
 import info.iconmaster.typhon.errors.DuplicateVarNameError;
 import info.iconmaster.typhon.errors.ReadOnlyError;
@@ -226,6 +229,63 @@ public class TyphonCompiler {
 			@Override
 			public Void visitExprStat(ExprStatContext ctx) {
 				compileExpr(scope, ctx.tnExpr, Arrays.asList());
+				return null;
+			}
+			
+			@Override
+			public Void visitBlockStat(BlockStatContext ctx) {
+				Scope newScope = new Scope(scope.getCodeBlock(), scope);
+				
+				if (ctx.tnBlock.tnLabel != null) {
+					Label label = newScope.addLabel(ctx.tnBlock.tnLabel.getText()+":begin");
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnBlock.tnLabel), OpCode.LABEL, new Object[] {label}));
+				}
+				
+				for (StatContext stat : ctx.tnBlock.tnBlock) {
+					compileStat(newScope, stat, expectedType);
+				}
+				
+				if (ctx.tnBlock.tnLabel != null) {
+					Label label = newScope.addLabel(ctx.tnBlock.tnLabel.getText()+":end");
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnBlock.tnLabel), OpCode.LABEL, new Object[] {label}));
+				}
+				return null;
+			}
+			
+			@Override
+			public Void visitWhileStat(WhileStatContext ctx) {
+				Label beginLabel;
+				Label endLabel;
+				
+				Scope newScope = new Scope(scope.getCodeBlock(), scope);
+				
+				if (ctx.tnBlock.tnLabel != null) {
+					beginLabel = newScope.addLabel(ctx.tnBlock.tnLabel.getText()+":begin");
+				} else {
+					beginLabel = newScope.addTempLabel();
+				}
+				
+				if (ctx.tnBlock.tnLabel != null) {
+					endLabel = newScope.addLabel(ctx.tnBlock.tnLabel.getText()+":end");
+				} else {
+					endLabel = newScope.addTempLabel();
+				}
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnExpr), OpCode.LABEL, new Object[] {beginLabel}));
+				
+				Variable condVar = scope.addTempVar(new TypeRef(core.TYPE_BOOL), new SourceInfo(ctx.tnExpr));
+				compileExpr(scope, ctx.tnExpr, Arrays.asList(condVar));
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnExpr), OpCode.NOT, new Object[] {condVar, condVar}));
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnExpr), OpCode.JUMPIF, new Object[] {condVar, endLabel}));
+				
+				for (StatContext stat : ctx.tnBlock.tnBlock) {
+					compileStat(newScope, stat, expectedType);
+				}
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnExpr), OpCode.JUMP, new Object[] {beginLabel}));
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnExpr), OpCode.LABEL, new Object[] {endLabel}));
+				
 				return null;
 			}
 		};

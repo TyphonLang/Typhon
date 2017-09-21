@@ -560,9 +560,9 @@ public class TestGrammar extends TyphonTest {
 			new CaseValid("1, key: value, 3", (parser)->{parser.argsDecl();}),
 			//block
 			new CaseValid("{}", (parser)->{parser.block();}),
-			new CaseValid("<label>{}", (parser)->{parser.block();}),
+			new CaseValid("label: {}", (parser)->{parser.block();}),
 			new CaseValid("{1;2;}", (parser)->{parser.block();}),
-			new CaseValid("<label>{1;2;}", (parser)->{parser.block();}),
+			new CaseValid("label: {1;2;}", (parser)->{parser.block();}),
 			new CaseInvalid("{1;", (parser)->{parser.block();}),
 			new CaseInvalid("1;}", (parser)->{parser.block();}),
 			// misc. invalid cases

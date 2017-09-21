@@ -301,7 +301,7 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(4, code.ops.size());
 			
 			Assert.assertEquals(OpCode.ISNULL, code.ops.get(0).op);
-			Assert.assertEquals(OpCode.JUMPIF, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.JUMPTRUE, code.ops.get(1).op);
 			
 			Assert.assertEquals(OpCode.CALL, code.ops.get(2).op);
 			Assert.assertEquals(1, code.ops.get(2).<List<Variable>>arg(0).size());

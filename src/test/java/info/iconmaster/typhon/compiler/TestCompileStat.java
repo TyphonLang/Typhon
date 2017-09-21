@@ -153,107 +153,100 @@ public class TestCompileStat extends TyphonTest {
 		}),new TestCase("while true {}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
-			Assert.assertEquals(6, code.ops.size());
+			Assert.assertEquals(5, code.ops.size());
 			
 			Assert.assertEquals(OpCode.LABEL, code.ops.get(0).op);
 			Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(1).op);
-			Assert.assertEquals(OpCode.NOT, code.ops.get(2).op);
-			Assert.assertEquals(OpCode.JUMPIF, code.ops.get(3).op);
-			Assert.assertEquals(OpCode.JUMP, code.ops.get(4).op);
-			Assert.assertEquals(OpCode.LABEL, code.ops.get(5).op);
+			Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(2).op);
+			Assert.assertEquals(OpCode.JUMP, code.ops.get(3).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(4).op);
 		}),new TestCase("while true name: {}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
+			Assert.assertEquals(5, code.ops.size());
+			
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(2).op);
+			Assert.assertEquals(OpCode.JUMP, code.ops.get(3).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(4).op);
+		}),new TestCase("while true {println();}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
 			Assert.assertEquals(6, code.ops.size());
 			
 			Assert.assertEquals(OpCode.LABEL, code.ops.get(0).op);
 			Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(1).op);
-			Assert.assertEquals(OpCode.NOT, code.ops.get(2).op);
-			Assert.assertEquals(OpCode.JUMPIF, code.ops.get(3).op);
+			Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(2).op);
+			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(3).op);
 			Assert.assertEquals(OpCode.JUMP, code.ops.get(4).op);
 			Assert.assertEquals(OpCode.LABEL, code.ops.get(5).op);
-		}),new TestCase("while true {println();}", (code)->{
-			Assert.assertEquals(0, code.tni.errors.size());
-			
-			Assert.assertEquals(7, code.ops.size());
-			
-			Assert.assertEquals(OpCode.LABEL, code.ops.get(0).op);
-			Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(1).op);
-			Assert.assertEquals(OpCode.NOT, code.ops.get(2).op);
-			Assert.assertEquals(OpCode.JUMPIF, code.ops.get(3).op);
-			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(4).op);
-			Assert.assertEquals(OpCode.JUMP, code.ops.get(5).op);
-			Assert.assertEquals(OpCode.LABEL, code.ops.get(6).op);
 		}),new TestCase("while 0 {}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
 		}),new TestCase("while true {println(); break; println();}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
-			Assert.assertEquals(9, code.ops.size());
+			Assert.assertEquals(8, code.ops.size());
 			
 			Assert.assertEquals(OpCode.LABEL, code.ops.get(0).op);
 			Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(1).op);
-			Assert.assertEquals(OpCode.NOT, code.ops.get(2).op);
-			Assert.assertEquals(OpCode.JUMPIF, code.ops.get(3).op);
-			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(4).op);
-			Assert.assertEquals(OpCode.JUMP, code.ops.get(5).op);
-			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(6).op);
-			Assert.assertEquals(OpCode.JUMP, code.ops.get(7).op);
-			Assert.assertEquals(OpCode.LABEL, code.ops.get(8).op);
+			Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(2).op);
+			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(3).op);
+			Assert.assertEquals(OpCode.JUMP, code.ops.get(4).op);
+			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(5).op);
+			Assert.assertEquals(OpCode.JUMP, code.ops.get(6).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(7).op);
 			
-			Assert.assertEquals(code.ops.get(8).args[0], code.ops.get(5).args[0]);
+			Assert.assertEquals(code.ops.get(7).args[0], code.ops.get(4).args[0]);
 		}),new TestCase("while true name: {println(); break name; println();}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
-			Assert.assertEquals(9, code.ops.size());
+			Assert.assertEquals(8, code.ops.size());
 			
 			Assert.assertEquals(OpCode.LABEL, code.ops.get(0).op);
 			Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(1).op);
-			Assert.assertEquals(OpCode.NOT, code.ops.get(2).op);
-			Assert.assertEquals(OpCode.JUMPIF, code.ops.get(3).op);
+			Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(2).op);
+			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(3).op);
+			Assert.assertEquals(OpCode.JUMP, code.ops.get(4).op);
+			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(5).op);
+			Assert.assertEquals(OpCode.JUMP, code.ops.get(6).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(7).op);
+			
+			Assert.assertEquals(code.ops.get(7).args[0], code.ops.get(4).args[0]);
+		}),new TestCase("name: {while true {println(); break name; println();}}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(10, code.ops.size());
+			
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(2).op);
+			Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(3).op);
 			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(4).op);
 			Assert.assertEquals(OpCode.JUMP, code.ops.get(5).op);
 			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(6).op);
 			Assert.assertEquals(OpCode.JUMP, code.ops.get(7).op);
 			Assert.assertEquals(OpCode.LABEL, code.ops.get(8).op);
-			
-			Assert.assertEquals(code.ops.get(8).args[0], code.ops.get(5).args[0]);
-		}),new TestCase("name: {while true {println(); break name; println();}}", (code)->{
-			Assert.assertEquals(0, code.tni.errors.size());
-			
-			Assert.assertEquals(11, code.ops.size());
-			
-			Assert.assertEquals(OpCode.LABEL, code.ops.get(0).op);
-			Assert.assertEquals(OpCode.LABEL, code.ops.get(1).op);
-			Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(2).op);
-			Assert.assertEquals(OpCode.NOT, code.ops.get(3).op);
-			Assert.assertEquals(OpCode.JUMPIF, code.ops.get(4).op);
-			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(5).op);
-			Assert.assertEquals(OpCode.JUMP, code.ops.get(6).op);
-			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(7).op);
-			Assert.assertEquals(OpCode.JUMP, code.ops.get(8).op);
 			Assert.assertEquals(OpCode.LABEL, code.ops.get(9).op);
-			Assert.assertEquals(OpCode.LABEL, code.ops.get(10).op);
 			
-			Assert.assertEquals(code.ops.get(10).args[0], code.ops.get(6).args[0]);
+			Assert.assertEquals(code.ops.get(9).args[0], code.ops.get(5).args[0]);
 		}),new TestCase("name: {while true name: {println(); break name; println();}}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
-			Assert.assertEquals(11, code.ops.size());
+			Assert.assertEquals(10, code.ops.size());
 			
 			Assert.assertEquals(OpCode.LABEL, code.ops.get(0).op);
 			Assert.assertEquals(OpCode.LABEL, code.ops.get(1).op);
 			Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(2).op);
-			Assert.assertEquals(OpCode.NOT, code.ops.get(3).op);
-			Assert.assertEquals(OpCode.JUMPIF, code.ops.get(4).op);
-			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(5).op);
-			Assert.assertEquals(OpCode.JUMP, code.ops.get(6).op);
-			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(7).op);
-			Assert.assertEquals(OpCode.JUMP, code.ops.get(8).op);
+			Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(3).op);
+			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(4).op);
+			Assert.assertEquals(OpCode.JUMP, code.ops.get(5).op);
+			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(6).op);
+			Assert.assertEquals(OpCode.JUMP, code.ops.get(7).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(8).op);
 			Assert.assertEquals(OpCode.LABEL, code.ops.get(9).op);
-			Assert.assertEquals(OpCode.LABEL, code.ops.get(10).op);
 			
-			Assert.assertEquals(code.ops.get(9).args[0], code.ops.get(6).args[0]);
+			Assert.assertEquals(code.ops.get(8).args[0], code.ops.get(5).args[0]);
 		}),new TestCase("name: {while true name: {println(); break notaname; println();}}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
 		}),new TestCase("break;", (code)->{
@@ -262,78 +255,70 @@ public class TestCompileStat extends TyphonTest {
 			Assert.assertEquals(1, code.tni.errors.size());
 		}),new TestCase("{name: {} break name;}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
-		})
-				
-				
-				
-				,new TestCase("while true {println(); continue; println();}", (code)->{
+		}),new TestCase("while true {println(); continue; println();}", (code)->{
 					Assert.assertEquals(0, code.tni.errors.size());
 					
-					Assert.assertEquals(9, code.ops.size());
+					Assert.assertEquals(8, code.ops.size());
 					
 					Assert.assertEquals(OpCode.LABEL, code.ops.get(0).op);
 					Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(1).op);
-					Assert.assertEquals(OpCode.NOT, code.ops.get(2).op);
-					Assert.assertEquals(OpCode.JUMPIF, code.ops.get(3).op);
-					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(4).op);
-					Assert.assertEquals(OpCode.JUMP, code.ops.get(5).op);
-					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(6).op);
-					Assert.assertEquals(OpCode.JUMP, code.ops.get(7).op);
-					Assert.assertEquals(OpCode.LABEL, code.ops.get(8).op);
+					Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(2).op);
+					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(3).op);
+					Assert.assertEquals(OpCode.JUMP, code.ops.get(4).op);
+					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(5).op);
+					Assert.assertEquals(OpCode.JUMP, code.ops.get(6).op);
+					Assert.assertEquals(OpCode.LABEL, code.ops.get(7).op);
 					
-					Assert.assertEquals(code.ops.get(0).args[0], code.ops.get(5).args[0]);
+					Assert.assertEquals(code.ops.get(0).args[0], code.ops.get(4).args[0]);
 				}),new TestCase("while true name: {println(); continue name; println();}", (code)->{
 					Assert.assertEquals(0, code.tni.errors.size());
 					
-					Assert.assertEquals(9, code.ops.size());
+					Assert.assertEquals(8, code.ops.size());
 					
 					Assert.assertEquals(OpCode.LABEL, code.ops.get(0).op);
 					Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(1).op);
-					Assert.assertEquals(OpCode.NOT, code.ops.get(2).op);
-					Assert.assertEquals(OpCode.JUMPIF, code.ops.get(3).op);
+					Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(2).op);
+					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(3).op);
+					Assert.assertEquals(OpCode.JUMP, code.ops.get(4).op);
+					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(5).op);
+					Assert.assertEquals(OpCode.JUMP, code.ops.get(6).op);
+					Assert.assertEquals(OpCode.LABEL, code.ops.get(7).op);
+					
+					Assert.assertEquals(code.ops.get(0).args[0], code.ops.get(4).args[0]);
+				}),new TestCase("name: {while true {println(); continue name; println();}}", (code)->{
+					Assert.assertEquals(0, code.tni.errors.size());
+					
+					Assert.assertEquals(10, code.ops.size());
+					
+					Assert.assertEquals(OpCode.LABEL, code.ops.get(0).op);
+					Assert.assertEquals(OpCode.LABEL, code.ops.get(1).op);
+					Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(2).op);
+					Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(3).op);
 					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(4).op);
 					Assert.assertEquals(OpCode.JUMP, code.ops.get(5).op);
 					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(6).op);
 					Assert.assertEquals(OpCode.JUMP, code.ops.get(7).op);
 					Assert.assertEquals(OpCode.LABEL, code.ops.get(8).op);
+					Assert.assertEquals(OpCode.LABEL, code.ops.get(9).op);
 					
 					Assert.assertEquals(code.ops.get(0).args[0], code.ops.get(5).args[0]);
-				}),new TestCase("name: {while true {println(); continue name; println();}}", (code)->{
-					Assert.assertEquals(0, code.tni.errors.size());
-					
-					Assert.assertEquals(11, code.ops.size());
-					
-					Assert.assertEquals(OpCode.LABEL, code.ops.get(0).op);
-					Assert.assertEquals(OpCode.LABEL, code.ops.get(1).op);
-					Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(2).op);
-					Assert.assertEquals(OpCode.NOT, code.ops.get(3).op);
-					Assert.assertEquals(OpCode.JUMPIF, code.ops.get(4).op);
-					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(5).op);
-					Assert.assertEquals(OpCode.JUMP, code.ops.get(6).op);
-					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(7).op);
-					Assert.assertEquals(OpCode.JUMP, code.ops.get(8).op);
-					Assert.assertEquals(OpCode.LABEL, code.ops.get(9).op);
-					Assert.assertEquals(OpCode.LABEL, code.ops.get(10).op);
-					
-					Assert.assertEquals(code.ops.get(0).args[0], code.ops.get(6).args[0]);
 				}),new TestCase("name: {while true name: {println(); continue name; println();}}", (code)->{
 					Assert.assertEquals(0, code.tni.errors.size());
 					
-					Assert.assertEquals(11, code.ops.size());
+					Assert.assertEquals(10, code.ops.size());
 					
 					Assert.assertEquals(OpCode.LABEL, code.ops.get(0).op);
 					Assert.assertEquals(OpCode.LABEL, code.ops.get(1).op);
 					Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(2).op);
-					Assert.assertEquals(OpCode.NOT, code.ops.get(3).op);
-					Assert.assertEquals(OpCode.JUMPIF, code.ops.get(4).op);
-					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(5).op);
-					Assert.assertEquals(OpCode.JUMP, code.ops.get(6).op);
-					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(7).op);
-					Assert.assertEquals(OpCode.JUMP, code.ops.get(8).op);
+					Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(3).op);
+					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(4).op);
+					Assert.assertEquals(OpCode.JUMP, code.ops.get(5).op);
+					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(6).op);
+					Assert.assertEquals(OpCode.JUMP, code.ops.get(7).op);
+					Assert.assertEquals(OpCode.LABEL, code.ops.get(8).op);
 					Assert.assertEquals(OpCode.LABEL, code.ops.get(9).op);
-					Assert.assertEquals(OpCode.LABEL, code.ops.get(10).op);
 					
-					Assert.assertEquals(code.ops.get(1).args[0], code.ops.get(6).args[0]);
+					Assert.assertEquals(code.ops.get(1).args[0], code.ops.get(5).args[0]);
 				}),new TestCase("name: {while true name: {println(); continue notaname; println();}}", (code)->{
 					Assert.assertEquals(1, code.tni.errors.size());
 				}),new TestCase("continue;", (code)->{
@@ -345,127 +330,114 @@ public class TestCompileStat extends TyphonTest {
 				}),new TestCase("repeat {} until true;", (code)->{
 					Assert.assertEquals(0, code.tni.errors.size());
 					
-					Assert.assertEquals(5, code.ops.size());
+					Assert.assertEquals(4, code.ops.size());
 					
 					Assert.assertEquals(OpCode.LABEL, code.ops.get(0).op);
 					Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(1).op);
-					Assert.assertEquals(OpCode.NOT, code.ops.get(2).op);
-					Assert.assertEquals(OpCode.JUMPIF, code.ops.get(3).op);
-					Assert.assertEquals(OpCode.LABEL, code.ops.get(4).op);
+					Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(2).op);
+					Assert.assertEquals(OpCode.LABEL, code.ops.get(3).op);
 				}),new TestCase("repeat name: {} until true;", (code)->{
 					Assert.assertEquals(0, code.tni.errors.size());
 					
-					Assert.assertEquals(5, code.ops.size());
+					Assert.assertEquals(4, code.ops.size());
 					
 					Assert.assertEquals(OpCode.LABEL, code.ops.get(0).op);
 					Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(1).op);
-					Assert.assertEquals(OpCode.NOT, code.ops.get(2).op);
-					Assert.assertEquals(OpCode.JUMPIF, code.ops.get(3).op);
-					Assert.assertEquals(OpCode.LABEL, code.ops.get(4).op);
+					Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(2).op);
+					Assert.assertEquals(OpCode.LABEL, code.ops.get(3).op);
 				}),new TestCase("repeat {println();} until true;", (code)->{
 					Assert.assertEquals(0, code.tni.errors.size());
 					
-					Assert.assertEquals(6, code.ops.size());
+					Assert.assertEquals(5, code.ops.size());
 					
 					Assert.assertEquals(OpCode.LABEL, code.ops.get(0).op);
 					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(1).op);
 					Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(2).op);
-					Assert.assertEquals(OpCode.NOT, code.ops.get(3).op);
-					Assert.assertEquals(OpCode.JUMPIF, code.ops.get(4).op);
-					Assert.assertEquals(OpCode.LABEL, code.ops.get(5).op);
+					Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(3).op);
+					Assert.assertEquals(OpCode.LABEL, code.ops.get(4).op);
 				}),new TestCase("if true {}", (code)->{
+					Assert.assertEquals(0, code.tni.errors.size());
+					
+					Assert.assertEquals(4, code.ops.size());
+					
+					Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(0).op);
+					Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(1).op);
+					Assert.assertEquals(OpCode.JUMP, code.ops.get(2).op);
+					Assert.assertEquals(OpCode.LABEL, code.ops.get(3).op);
+				}),new TestCase("if true {println();}", (code)->{
 					Assert.assertEquals(0, code.tni.errors.size());
 					
 					Assert.assertEquals(5, code.ops.size());
 					
 					Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(0).op);
-					Assert.assertEquals(OpCode.NOT, code.ops.get(1).op);
-					Assert.assertEquals(OpCode.JUMPIF, code.ops.get(2).op);
+					Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(1).op);
+					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(2).op);
 					Assert.assertEquals(OpCode.JUMP, code.ops.get(3).op);
 					Assert.assertEquals(OpCode.LABEL, code.ops.get(4).op);
-				}),new TestCase("if true {println();}", (code)->{
-					Assert.assertEquals(0, code.tni.errors.size());
-					
-					Assert.assertEquals(6, code.ops.size());
-					
-					Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(0).op);
-					Assert.assertEquals(OpCode.NOT, code.ops.get(1).op);
-					Assert.assertEquals(OpCode.JUMPIF, code.ops.get(2).op);
-					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(3).op);
-					Assert.assertEquals(OpCode.JUMP, code.ops.get(4).op);
-					Assert.assertEquals(OpCode.LABEL, code.ops.get(5).op);
 				}),new TestCase("if true {} else {}", (code)->{
 					Assert.assertEquals(0, code.tni.errors.size());
 					
-					Assert.assertEquals(6, code.ops.size());
+					Assert.assertEquals(5, code.ops.size());
 					
 					Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(0).op);
-					Assert.assertEquals(OpCode.NOT, code.ops.get(1).op);
-					Assert.assertEquals(OpCode.JUMPIF, code.ops.get(2).op);
-					Assert.assertEquals(OpCode.JUMP, code.ops.get(3).op);
+					Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(1).op);
+					Assert.assertEquals(OpCode.JUMP, code.ops.get(2).op);
+					Assert.assertEquals(OpCode.LABEL, code.ops.get(3).op);
 					Assert.assertEquals(OpCode.LABEL, code.ops.get(4).op);
-					Assert.assertEquals(OpCode.LABEL, code.ops.get(5).op);
 				}),new TestCase("if true {println();} else {println();}", (code)->{
 					Assert.assertEquals(0, code.tni.errors.size());
 					
-					Assert.assertEquals(8, code.ops.size());
+					Assert.assertEquals(7, code.ops.size());
 					
 					Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(0).op);
-					Assert.assertEquals(OpCode.NOT, code.ops.get(1).op);
-					Assert.assertEquals(OpCode.JUMPIF, code.ops.get(2).op);
-					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(3).op);
-					Assert.assertEquals(OpCode.JUMP, code.ops.get(4).op);
-					Assert.assertEquals(OpCode.LABEL, code.ops.get(5).op);
-					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(6).op);
-					Assert.assertEquals(OpCode.LABEL, code.ops.get(7).op);
+					Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(1).op);
+					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(2).op);
+					Assert.assertEquals(OpCode.JUMP, code.ops.get(3).op);
+					Assert.assertEquals(OpCode.LABEL, code.ops.get(4).op);
+					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(5).op);
+					Assert.assertEquals(OpCode.LABEL, code.ops.get(6).op);
 				}),new TestCase("if true {println();} elseif false {println();}", (code)->{
-					Assert.assertEquals(0, code.tni.errors.size());
-					
-					Assert.assertEquals(12, code.ops.size());
-					
-					Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(0).op);
-					Assert.assertEquals(OpCode.NOT, code.ops.get(1).op);
-					Assert.assertEquals(OpCode.JUMPIF, code.ops.get(2).op);
-					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(3).op);
-					Assert.assertEquals(OpCode.JUMP, code.ops.get(4).op);
-					Assert.assertEquals(OpCode.LABEL, code.ops.get(5).op);
-					Assert.assertEquals(OpCode.MOVFALSE, code.ops.get(6).op);
-					Assert.assertEquals(OpCode.NOT, code.ops.get(7).op);
-					Assert.assertEquals(OpCode.JUMPIF, code.ops.get(8).op);
-					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(9).op);
-					Assert.assertEquals(OpCode.JUMP, code.ops.get(10).op);
-					Assert.assertEquals(OpCode.LABEL, code.ops.get(11).op);
-				}),new TestCase("if true {} elseif false {}", (code)->{
 					Assert.assertEquals(0, code.tni.errors.size());
 					
 					Assert.assertEquals(10, code.ops.size());
 					
 					Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(0).op);
-					Assert.assertEquals(OpCode.NOT, code.ops.get(1).op);
-					Assert.assertEquals(OpCode.JUMPIF, code.ops.get(2).op);
+					Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(1).op);
+					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(2).op);
 					Assert.assertEquals(OpCode.JUMP, code.ops.get(3).op);
 					Assert.assertEquals(OpCode.LABEL, code.ops.get(4).op);
 					Assert.assertEquals(OpCode.MOVFALSE, code.ops.get(5).op);
-					Assert.assertEquals(OpCode.NOT, code.ops.get(6).op);
-					Assert.assertEquals(OpCode.JUMPIF, code.ops.get(7).op);
+					Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(6).op);
+					Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(7).op);
 					Assert.assertEquals(OpCode.JUMP, code.ops.get(8).op);
 					Assert.assertEquals(OpCode.LABEL, code.ops.get(9).op);
+				}),new TestCase("if true {} elseif false {}", (code)->{
+					Assert.assertEquals(0, code.tni.errors.size());
+					
+					Assert.assertEquals(8, code.ops.size());
+					
+					Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(0).op);
+					Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(1).op);
+					Assert.assertEquals(OpCode.JUMP, code.ops.get(2).op);
+					Assert.assertEquals(OpCode.LABEL, code.ops.get(3).op);
+					Assert.assertEquals(OpCode.MOVFALSE, code.ops.get(4).op);
+					Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(5).op);
+					Assert.assertEquals(OpCode.JUMP, code.ops.get(6).op);
+					Assert.assertEquals(OpCode.LABEL, code.ops.get(7).op);
 				}),new TestCase("if true {} elseif false {} else {}", (code)->{
 					Assert.assertEquals(0, code.tni.errors.size());
 					
-					Assert.assertEquals(11, code.ops.size());
+					Assert.assertEquals(9, code.ops.size());
 					
 					Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(0).op);
-					Assert.assertEquals(OpCode.NOT, code.ops.get(1).op);
-					Assert.assertEquals(OpCode.JUMPIF, code.ops.get(2).op);
-					Assert.assertEquals(OpCode.JUMP, code.ops.get(3).op);
-					Assert.assertEquals(OpCode.LABEL, code.ops.get(4).op);
-					Assert.assertEquals(OpCode.MOVFALSE, code.ops.get(5).op);
-					Assert.assertEquals(OpCode.NOT, code.ops.get(6).op);
-					Assert.assertEquals(OpCode.JUMPIF, code.ops.get(7).op);
-					Assert.assertEquals(OpCode.JUMP, code.ops.get(8).op);
-					Assert.assertEquals(OpCode.LABEL, code.ops.get(9).op);
-					Assert.assertEquals(OpCode.LABEL, code.ops.get(10).op);
+					Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(1).op);
+					Assert.assertEquals(OpCode.JUMP, code.ops.get(2).op);
+					Assert.assertEquals(OpCode.LABEL, code.ops.get(3).op);
+					Assert.assertEquals(OpCode.MOVFALSE, code.ops.get(4).op);
+					Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(5).op);
+					Assert.assertEquals(OpCode.JUMP, code.ops.get(6).op);
+					Assert.assertEquals(OpCode.LABEL, code.ops.get(7).op);
+					Assert.assertEquals(OpCode.LABEL, code.ops.get(8).op);
 				}),new TestCase("if true {} elseif true {} elseif true {} elseif true {} elseif true {} elseif true {} else {}", (code)->{
 					Assert.assertEquals(0, code.tni.errors.size());
 				}));

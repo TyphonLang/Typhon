@@ -512,7 +512,7 @@ public class LookupUtils {
 				
 				Variable tempVar = scope.addTempVar(new TypeRef(scope.getCodeBlock().tni.corePackage.TYPE_BOOL), name.source);
 				scope.getCodeBlock().ops.add(new Instruction(scope.getCodeBlock().tni, source, OpCode.ISNULL, new Object[] {tempVar, var}));
-				scope.getCodeBlock().ops.add(new Instruction(scope.getCodeBlock().tni, source, OpCode.JUMPIF, new Object[] {tempVar, label}));
+				scope.getCodeBlock().ops.add(new Instruction(scope.getCodeBlock().tni, source, OpCode.JUMPTRUE, new Object[] {tempVar, label}));
 			}
 			
 			if (sub.member instanceof Variable) {

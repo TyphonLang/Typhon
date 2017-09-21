@@ -299,8 +299,7 @@ public class TyphonCompiler {
 				Variable condVar = scope.addTempVar(new TypeRef(core.TYPE_BOOL), new SourceInfo(ctx.tnExpr));
 				compileExpr(scope, ctx.tnExpr, Arrays.asList(condVar));
 				
-				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnExpr), OpCode.NOT, new Object[] {condVar, condVar}));
-				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnExpr), OpCode.JUMPIF, new Object[] {condVar, endLabel}));
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnExpr), OpCode.JUMPFALSE, new Object[] {condVar, endLabel}));
 				
 				for (StatContext stat : ctx.tnBlock.tnBlock) {
 					compileStat(newScope, stat, expectedType);
@@ -342,8 +341,7 @@ public class TyphonCompiler {
 				Variable condVar = scope.addTempVar(new TypeRef(core.TYPE_BOOL), new SourceInfo(ctx.tnExpr));
 				compileExpr(newScope, ctx.tnExpr, Arrays.asList(condVar));
 				
-				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnExpr), OpCode.NOT, new Object[] {condVar, condVar}));
-				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnExpr), OpCode.JUMPIF, new Object[] {condVar, beginLabel}));
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnExpr), OpCode.JUMPFALSE, new Object[] {condVar, beginLabel}));
 				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {endLabel}));
 				
 				return null;
@@ -462,8 +460,7 @@ public class TyphonCompiler {
 					Variable condVar = scope.addTempVar(new TypeRef(core.TYPE_BOOL), new SourceInfo(ctx.tnIfExpr));
 					compileExpr(scope, ctx.tnIfExpr, Arrays.asList(condVar));
 					
-					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.NOT, new Object[] {condVar, condVar}));
-					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPIF, new Object[] {labels.get(0)}));
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPFALSE, new Object[] {labels.get(0)}));
 					
 					for (StatContext stat : ctx.tnIfBlock.tnBlock) {
 						compileStat(scope, stat, expectedType);
@@ -483,8 +480,7 @@ public class TyphonCompiler {
 					Variable condVar = scope.addTempVar(new TypeRef(core.TYPE_BOOL), new SourceInfo(cond));
 					compileExpr(scope, cond, Arrays.asList(condVar));
 					
-					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.NOT, new Object[] {condVar, condVar}));
-					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPIF, new Object[] {labels.get(0)}));
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPFALSE, new Object[] {labels.get(0)}));
 					
 					for (StatContext stat : block.tnBlock) {
 						compileStat(scope, stat, expectedType);
@@ -842,7 +838,7 @@ public class TyphonCompiler {
 							
 							Variable tempVar = scope.addTempVar(new TypeRef(core.TYPE_BOOL), sub.source);
 							scope.getCodeBlock().ops.add(new Instruction(core.tni, sub.source, OpCode.ISNULL, new Object[] {tempVar, instanceVar}));
-							scope.getCodeBlock().ops.add(new Instruction(core.tni, sub.source, OpCode.JUMPIF, new Object[] {tempVar, label}));
+							scope.getCodeBlock().ops.add(new Instruction(core.tni, sub.source, OpCode.JUMPTRUE, new Object[] {tempVar, label}));
 						}
 						
 						if (sub.infix == AccessType.DOUBLE_DOT) {
@@ -918,7 +914,7 @@ public class TyphonCompiler {
 					Variable var1 = scope.addTempVar(new TypeRef(core.TYPE_BOOL), new SourceInfo(ctx));
 					
 					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.INSTANCEOF, new Object[] {var1, insertInto.get(0), newType}));
-					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPIF, new Object[] {label, var1}));
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPTRUE, new Object[] {label, var1}));
 					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.MOVNULL, new Object[] {insertInto.get(0)}));
 					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {label}));
 				}
@@ -1072,12 +1068,10 @@ public class TyphonCompiler {
 				
 				if (ctx.tnOp.equals("&&")) {
 					// and
-					Variable tempVar = scope.addTempVar(new TypeRef(core.TYPE_BOOL), new SourceInfo(ctx));
-					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.NOT, new Object[] {tempVar, lhs}));
-					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPIF, new Object[] {tempVar, label}));
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPFALSE, new Object[] {lhs, label}));
 				} else {
 					// or
-					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPIF, new Object[] {lhs, label}));
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPTRUE, new Object[] {lhs, label}));
 				}
 				
 				compileExpr(scope, ctx.tnRhs, Arrays.asList(lhs));
@@ -1468,7 +1462,7 @@ public class TyphonCompiler {
 							
 						Variable tempVar = scope.addTempVar(new TypeRef(core.TYPE_BOOL), sub.source);
 						scope.getCodeBlock().ops.add(new Instruction(core.tni, sub.source, OpCode.ISNULL, new Object[] {tempVar, instanceVar}));
-						scope.getCodeBlock().ops.add(new Instruction(core.tni, sub.source, OpCode.JUMPIF, new Object[] {tempVar, label}));
+						scope.getCodeBlock().ops.add(new Instruction(core.tni, sub.source, OpCode.JUMPTRUE, new Object[] {tempVar, label}));
 					}
 					
 					if (f.getSetter() == null) {

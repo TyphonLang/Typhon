@@ -409,6 +409,40 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(1, code.ops.size());
 			
 			Assert.assertEquals(OpCode.MOVNULL, code.ops.get(0).op);
+		}),new TestCase("void f() {return;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			
+			Assert.assertEquals(OpCode.RET, code.ops.get(0).op);
+			Assert.assertEquals(0, code.ops.get(0).<List>arg(0).size());
+		}),new TestCase("int f() {return 0;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(2, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.RET, code.ops.get(1).op);
+			Assert.assertEquals(1, code.ops.get(1).<List>arg(0).size());
+		}),new TestCase("(int,int) f() {return 0, 1;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(3, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.RET, code.ops.get(2).op);
+			Assert.assertEquals(2, code.ops.get(2).<List>arg(0).size());
+		}),new TestCase("void f() {return 0;}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("void f() {return 0, 1;}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("(int,int) f() {return 0;}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("int f() {return 'c';}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("(int, int) f() {return 0, 'c';}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
 		}));
 	}
     

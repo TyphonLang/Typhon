@@ -36,6 +36,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.ParamNameContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ParensExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.RelOpsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.RepeatStatContext;
+import info.iconmaster.typhon.antlr.TyphonParser.RetStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.StatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.StringConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ThisConstExprContext;
@@ -49,6 +50,7 @@ import info.iconmaster.typhon.errors.DuplicateVarNameError;
 import info.iconmaster.typhon.errors.LabelNotFoundError;
 import info.iconmaster.typhon.errors.NotAllowedHereError;
 import info.iconmaster.typhon.errors.ReadOnlyError;
+import info.iconmaster.typhon.errors.ReturnArgumentNumberError;
 import info.iconmaster.typhon.errors.StringFormatError;
 import info.iconmaster.typhon.errors.ThisInStaticContextError;
 import info.iconmaster.typhon.errors.TypeError;
@@ -501,6 +503,35 @@ public class TyphonCompiler {
 				}
 				
 				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {allEndLabel}));
+				return null;
+			}
+			
+			@Override
+			public Void visitRetStat(RetStatContext ctx) {
+				List<Variable> retVars = new ArrayList<>();
+				
+				if (ctx.tnValues != null) {
+					int i = 0;
+					for (ExprContext expr : ctx.tnValues) {
+						Variable var;
+						
+						if (i < expectedType.size()) {
+							var = scope.addTempVar(expectedType.get(i), new SourceInfo(ctx));
+						} else {
+							var = scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(ctx));
+						}
+						
+						retVars.add(var);
+						compileExpr(scope, expr, Arrays.asList(var));
+						i++;
+					}
+				}
+				
+				if (retVars.size() != expectedType.size()) {
+					core.tni.errors.add(new ReturnArgumentNumberError(new SourceInfo(ctx), expectedType.size(), retVars.size()));
+				}
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.RET, new Object[] {retVars}));
 				return null;
 			}
 		};

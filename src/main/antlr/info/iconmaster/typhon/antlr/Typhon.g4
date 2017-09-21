@@ -82,7 +82,7 @@ stat:
 |	tnAnnots+=annotation* 'try' tnTryBlock=block tnCatchBlocks+=catchBlock*																								#tryStat
 |	tnAnnots+=annotation* 'break' tnLabel=WORD? ';'																														#breakStat
 |	tnAnnots+=annotation* 'continue' tnLabel=WORD? ';'																													#contStat
-|	tnAnnots+=annotation* 'switch' tnExpr=expr ('<' tnLabel=WORD '>')? '{' tnCaseBlocks+=caseBlock* (tnDefaultAnnots+=annotation* 'default' tnDefaultBlock=block)? '}'	#switchStat
+|	tnAnnots+=annotation* 'switch' tnExpr=expr (tnLabel=WORD ':')? '{' tnCaseBlocks+=caseBlock* (tnDefaultAnnots+=annotation* 'default' tnDefaultBlock=block)? '}'	#switchStat
 |	tnGlobalAnnot=globalAnnotation																																		#globalAnnotStat
 |	tnExpr=expr ';'																																						#exprStat
 |	tnAnnots+=annotation* tnBlock=block																																	#blockStat

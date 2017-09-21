@@ -15,6 +15,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.AssignStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BinOps1ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BinOps2ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BitOpsExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.BlockContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BlockStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BreakStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.CastExprContext;
@@ -25,6 +26,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.FalseConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.FuncCallExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.IfStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.LvalueContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MemberExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MemberLvalueContext;
@@ -420,6 +422,85 @@ public class TyphonCompiler {
 				
 				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMP, new Object[] {label}));
 				
+				return null;
+			}
+			
+			@Override
+			public Void visitIfStat(IfStatContext ctx) {
+				Label allEndLabel = scope.addTempLabel();
+				List<Label> labels = new ArrayList<>();
+				
+				// add all the labels in advance
+				if (ctx.tnIfBlock.tnLabel != null) {
+					core.tni.errors.add(new NotAllowedHereError(new SourceInfo(ctx.tnIfBlock.tnLabel), "block label"));
+				}
+				
+				for (BlockContext block : ctx.tnElseifBlocks) {
+					if (block.tnLabel != null) {
+						core.tni.errors.add(new NotAllowedHereError(new SourceInfo(block.tnLabel), "block label"));
+					}
+					
+					labels.add(scope.addTempLabel());
+				}
+				
+				if (ctx.tnElseBlock != null) {
+					if (ctx.tnElseBlock.tnLabel != null) {
+						core.tni.errors.add(new NotAllowedHereError(new SourceInfo(ctx.tnElseBlock.tnLabel), "block label"));
+					}
+					
+					labels.add(scope.addTempLabel());
+				}
+				
+				labels.add(allEndLabel);
+				
+				// parse the 'if' block
+				{
+					Variable condVar = scope.addTempVar(new TypeRef(core.TYPE_BOOL), new SourceInfo(ctx.tnIfExpr));
+					compileExpr(scope, ctx.tnIfExpr, Arrays.asList(condVar));
+					
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.NOT, new Object[] {condVar, condVar}));
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPIF, new Object[] {labels.get(0)}));
+					
+					for (StatContext stat : ctx.tnIfBlock.tnBlock) {
+						compileStat(scope, stat, expectedType);
+					}
+					
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMP, new Object[] {allEndLabel}));
+				}
+				
+				// parse the 'elseif' blocks
+				int i = 0;
+				for (ExprContext cond : ctx.tnElseifExprs) {
+					BlockContext block = ctx.tnElseifBlocks.get(i);
+					Label label = labels.remove(0);
+					
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {label}));
+					
+					Variable condVar = scope.addTempVar(new TypeRef(core.TYPE_BOOL), new SourceInfo(cond));
+					compileExpr(scope, cond, Arrays.asList(condVar));
+					
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.NOT, new Object[] {condVar, condVar}));
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPIF, new Object[] {labels.get(0)}));
+					
+					for (StatContext stat : block.tnBlock) {
+						compileStat(scope, stat, expectedType);
+					}
+					
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMP, new Object[] {allEndLabel}));
+				}
+				
+				// parse the 'else' block
+				if (ctx.tnElseBlock != null) {
+					Label label = labels.remove(0);
+					
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {label}));
+					
+					for (StatContext stat : ctx.tnElseBlock.tnBlock) {
+						compileStat(scope, stat, expectedType);
+					}
+				}
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {allEndLabel}));
 				return null;
 			}
 		};

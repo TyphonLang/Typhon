@@ -20,6 +20,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.BlockStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BreakStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.CastExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.CharConstExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.ComboAssignStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ContStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DefStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
@@ -27,6 +28,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.ExprStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.FalseConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.FuncCallExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.IfStatContext;
+import info.iconmaster.typhon.antlr.TyphonParser.LogicOpsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.LvalueContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MemberExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MemberLvalueContext;
@@ -1046,6 +1048,42 @@ public class TyphonCompiler {
 				if (!insertInto.isEmpty()) {
 					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.MOVTRUE, new Object[] {insertInto.get(0)}));
 				}
+				
+				return Arrays.asList(new TypeRef(core.TYPE_BOOL));
+			}
+			
+			@Override
+			public List<TypeRef> visitLogicOpsExpr(LogicOpsExprContext ctx) {
+				Label label = scope.addTempLabel();
+				
+				Variable lhs;
+				if (insertInto.isEmpty()) {
+					lhs = scope.addTempVar(new TypeRef(core.TYPE_BOOL), new SourceInfo(ctx));
+				} else {
+					lhs = insertInto.get(0);
+					
+					if (!new TypeRef(core.TYPE_BOOL).canCastTo(lhs.type)) {
+						core.tni.errors.add(new TypeError(new SourceInfo(ctx.tnLhs), new TypeRef(core.TYPE_BOOL), lhs.type));
+					}
+				}
+				
+				TypeRef oldType = lhs.type; lhs.type = new TypeRef(core.TYPE_BOOL);
+				compileExpr(scope, ctx.tnLhs, Arrays.asList(lhs));
+				
+				if (ctx.tnOp.equals("&&")) {
+					// and
+					Variable tempVar = scope.addTempVar(new TypeRef(core.TYPE_BOOL), new SourceInfo(ctx));
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.NOT, new Object[] {tempVar, lhs}));
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPIF, new Object[] {tempVar, label}));
+				} else {
+					// or
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPIF, new Object[] {lhs, label}));
+				}
+				
+				compileExpr(scope, ctx.tnRhs, Arrays.asList(lhs));
+				lhs.type = oldType;
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {label}));
 				
 				return Arrays.asList(new TypeRef(core.TYPE_BOOL));
 			}

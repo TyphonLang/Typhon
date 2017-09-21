@@ -29,6 +29,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.ExprStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.FalseConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.FuncCallExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.IfStatContext;
+import info.iconmaster.typhon.antlr.TyphonParser.IsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.LogicOpsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.LvalueContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MemberExprContext;
@@ -1120,6 +1121,24 @@ public class TyphonCompiler {
 					return result;
 				}
 			}
+			
+			@Override
+			public List<TypeRef> visitIsExpr(IsExprContext ctx) {
+				Variable lhs = scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(ctx.tnLhs));
+				compileExpr(scope, ctx.tnLhs, Arrays.asList(lhs));
+				
+				TypeRef rhs = TyphonTypeResolver.readType(core.tni, ctx.tnRhs, scope);
+				
+				if (!insertInto.isEmpty()) {
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.INSTANCEOF, new Object[] {insertInto.get(0), lhs, rhs}));
+					
+					if (ctx.tnOp.equals("!")) {
+						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.NOT, new Object[] {insertInto.get(0), insertInto.get(0)}));
+					}
+				}
+				
+				return Arrays.asList(new TypeRef(core.TYPE_BOOL));
+			}
 		};
 		
 		List<TypeRef> a = visitor.visit(rule);
@@ -1359,6 +1378,16 @@ public class TyphonCompiler {
 			
 			@Override
 			public List<TypeRef> visitLogicOpsExpr(LogicOpsExprContext ctx) {
+				return Arrays.asList(new TypeRef(core.TYPE_BOOL));
+			}
+			
+			@Override
+			public List<TypeRef> visitEqOpsExpr(EqOpsExprContext ctx) {
+				return Arrays.asList(new TypeRef(core.TYPE_BOOL));
+			}
+			
+			@Override
+			public List<TypeRef> visitIsExpr(IsExprContext ctx) {
 				return Arrays.asList(new TypeRef(core.TYPE_BOOL));
 			}
 		};

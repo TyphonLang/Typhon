@@ -48,7 +48,7 @@ expr:
 |	tnLhs=expr (tnOp='&'|tnOp='|'|tnOp='^'|tnOp='<' tnOp2='<'|tnOp='>' tnOp2='>') tnRhs=expr												#bitOpsExpr
 |	tnLhs=expr '??' tnRhs=expr																												#nullCoalesceExpr
 |	tnLhs=expr (tnOp='<'|tnOp='>'|tnOp='<='|tnOp='>=') tnRhs=expr																			#relOpsExpr
-|	tnLhs=expr 'is' tnRhs=type																												#isExpr
+|	tnLhs=expr (tnOp='is'|tnOp='!' 'is') tnRhs=type																							#isExpr
 |	tnLhs=expr (tnOp='=='|tnOp='!='|tnOp='==='|tnOp='!==') tnRhs=expr																		#eqOpsExpr
 |	tnLhs=expr (tnOp='&&'|tnOp='||') tnRhs=expr																								#logicOpsExpr
 |	tnAnnots+=annotation* 'throw' tnArg=expr																								#throwExpr

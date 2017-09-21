@@ -485,6 +485,31 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(1).op);
 			Assert.assertEquals(OpCode.RAWEQ, code.ops.get(2).op);
 			Assert.assertEquals(OpCode.NOT, code.ops.get(3).op);
+		}),new TestCase("void f() {int x = 1 == 2;}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("void f() {bool x = 1 is int}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(2, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.INSTANCEOF, code.ops.get(1).op);
+		}),new TestCase("void f() {bool x = 1 !is int}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(3, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.INSTANCEOF, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.NOT, code.ops.get(2).op);
+		}),new TestCase("void f() {int x = 1 is int}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("void f() {var v; int x = v is List<List<Number>>}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			
+			Assert.assertEquals(OpCode.INSTANCEOF, code.ops.get(0).op);
 		}));
 	}
     

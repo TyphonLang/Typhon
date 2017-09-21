@@ -443,6 +443,48 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(1, code.tni.errors.size());
 		}),new TestCase("(int, int) f() {return 0, 'c';}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("void f() {bool x = 1 == 2;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(3, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.CALL, code.ops.get(2).op);
+		}),new TestCase("void f() {bool x = 1 == 'c';}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(3, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.MOVCHAR, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.CALL, code.ops.get(2).op);
+		}),new TestCase("void f() {bool x = 1 != 2;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(4, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.CALL, code.ops.get(2).op);
+			Assert.assertEquals(OpCode.NOT, code.ops.get(3).op);
+		}),new TestCase("void f() {bool x = 1 === 2;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(3, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.RAWEQ, code.ops.get(2).op);
+		}),new TestCase("void f() {bool x = 1 !== 2;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(4, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.RAWEQ, code.ops.get(2).op);
+			Assert.assertEquals(OpCode.NOT, code.ops.get(3).op);
 		}));
 	}
     

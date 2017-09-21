@@ -23,6 +23,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.CharConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ComboAssignStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ContStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DefStatContext;
+import info.iconmaster.typhon.antlr.TyphonParser.EqOpsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.FalseConstExprContext;
@@ -1081,6 +1082,44 @@ public class TyphonCompiler {
 				
 				return Arrays.asList(new TypeRef(core.TYPE_BOOL));
 			}
+			
+			@Override
+			public List<TypeRef> visitEqOpsExpr(EqOpsExprContext ctx) {
+				String op = ctx.tnOp.getText();
+				if (op.length() == 3) {
+					// raw equality
+					Variable lhs = scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(ctx.tnLhs));
+					Variable rhs = scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(ctx.tnRhs));
+					
+					compileExpr(scope, ctx.tnLhs, Arrays.asList(lhs));
+					compileExpr(scope, ctx.tnRhs, Arrays.asList(rhs));
+					
+					if (!insertInto.isEmpty()) {
+						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.RAWEQ, new Object[] {insertInto.get(0), lhs, rhs}));
+						
+						if (op.equals("!==")) {
+							scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.NOT, new Object[] {insertInto.get(0), insertInto.get(0)}));
+						}
+					}
+					
+					return Arrays.asList(new TypeRef(core.TYPE_BOOL));
+				} else {
+					// binary op
+					List<TypeRef> result = compileBinOp(scope, ctx.tnLhs, ctx.tnRhs, "==", insertInto);
+					
+					if (result.size() != 1 || result.get(0).getType() != core.TYPE_BOOL) {
+						// error; signature of == incorrect
+						core.tni.errors.add(new TypeError(new SourceInfo(ctx), result.isEmpty() ? new TypeRef(core.TYPE_ANY) : result.get(0), new TypeRef(core.TYPE_BOOL)));
+						return result;
+					}
+					
+					if (op.equals("!=") && !insertInto.isEmpty()) {
+						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.NOT, new Object[] {insertInto.get(0), insertInto.get(0)}));
+					}
+					
+					return result;
+				}
+			}
 		};
 		
 		List<TypeRef> a = visitor.visit(rule);
@@ -1317,6 +1356,11 @@ public class TyphonCompiler {
 			public List<TypeRef> visitTrueConstExpr(TrueConstExprContext ctx) {
 				return Arrays.asList(new TypeRef(core.TYPE_BOOL));
 			}
+			
+			@Override
+			public List<TypeRef> visitLogicOpsExpr(LogicOpsExprContext ctx) {
+				return Arrays.asList(new TypeRef(core.TYPE_BOOL));
+			}
 		};
 		
 		return visitor.visit(rule);
@@ -1525,6 +1569,8 @@ public class TyphonCompiler {
 			return core.LIB_OPS.ANNOT_GT;
 		case ">=":
 			return core.LIB_OPS.ANNOT_GE;
+		case "==":
+			return core.LIB_OPS.ANNOT_EQ;
 		default:
 			throw new IllegalArgumentException("unknown operator in getBinOp: "+s+"");
 		}

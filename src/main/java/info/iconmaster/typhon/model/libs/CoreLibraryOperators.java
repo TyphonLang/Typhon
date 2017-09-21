@@ -29,7 +29,8 @@ public class CoreLibraryOperators extends Package {
 	public AnnotationDefinition ANNOT_ADD, ANNOT_SUB, ANNOT_MUL, ANNOT_DIV, ANNOT_MOD,
 	ANNOT_BAND, ANNOT_BOR, ANNOT_XOR, ANNOT_SHL, ANNOT_SHR,
 	ANNOT_LT, ANNOT_LE, ANNOT_GT, ANNOT_GE,
-	ANNOT_NEG, ANNOT_POS, ANNOT_BNOT;
+	ANNOT_NEG, ANNOT_POS, ANNOT_BNOT,
+	ANNOT_EQ;
 	
 	/**
 	 * A list of various operator functions.
@@ -202,6 +203,8 @@ public class CoreLibraryOperators extends Package {
 		ANNOT_POS = makeAnnotDef("pos");
 		ANNOT_BNOT = makeAnnotDef("bnot");
 		
+		ANNOT_EQ = makeAnnotDef("eq");
+		
 		// add the operator functions
 		addBinOpFunc(ANNOT_ADD);
 		addBinOpFunc(ANNOT_SUB);
@@ -302,6 +305,19 @@ public class CoreLibraryOperators extends Package {
 					
 			}, new Type[] {
 					c.TYPE_INTEGER,
+			}));
+		}
+		
+		{
+			// add equality
+			CorePackage c = tni.corePackage;
+			
+			addOpFunc(c.TYPE_ANY.getTypePackage(), ANNOT_EQ, new Function(tni, ANNOT_EQ.getName(), new TemplateType[] {
+					
+			}, new Parameter[] {
+					new Parameter(tni, "other", c.TYPE_ANY, false),
+			}, new Type[] {
+					c.TYPE_BOOL,
 			}));
 		}
 	}

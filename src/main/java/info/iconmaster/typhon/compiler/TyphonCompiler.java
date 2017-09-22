@@ -463,7 +463,7 @@ public class TyphonCompiler {
 					Variable condVar = scope.addTempVar(new TypeRef(core.TYPE_BOOL), new SourceInfo(ctx.tnIfExpr));
 					compileExpr(scope, ctx.tnIfExpr, Arrays.asList(condVar));
 					
-					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPFALSE, new Object[] {labels.get(0)}));
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPFALSE, new Object[] {condVar, labels.get(0)}));
 					
 					for (StatContext stat : ctx.tnIfBlock.tnBlock) {
 						compileStat(scope, stat, expectedType);
@@ -483,7 +483,7 @@ public class TyphonCompiler {
 					Variable condVar = scope.addTempVar(new TypeRef(core.TYPE_BOOL), new SourceInfo(cond));
 					compileExpr(scope, cond, Arrays.asList(condVar));
 					
-					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPFALSE, new Object[] {labels.get(0)}));
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPFALSE, new Object[] {condVar, labels.get(0)}));
 					
 					for (StatContext stat : block.tnBlock) {
 						compileStat(scope, stat, expectedType);

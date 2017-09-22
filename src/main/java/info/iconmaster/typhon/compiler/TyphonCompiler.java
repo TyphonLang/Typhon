@@ -1069,7 +1069,7 @@ public class TyphonCompiler {
 				TypeRef oldType = lhs.type; lhs.type = new TypeRef(core.TYPE_BOOL);
 				compileExpr(scope, ctx.tnLhs, Arrays.asList(lhs));
 				
-				if (ctx.tnOp.equals("&&")) {
+				if (ctx.tnOp.getText().equals("&&")) {
 					// and
 					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPFALSE, new Object[] {lhs, label}));
 				} else {

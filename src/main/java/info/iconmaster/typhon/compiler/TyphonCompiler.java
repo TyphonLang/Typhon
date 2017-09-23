@@ -781,11 +781,13 @@ public class TyphonCompiler {
 						}
 						
 						// calculate the function's template map
-						// TODO: add explicit specifications on top of the inferences
 						List<TypeRef> params = f.getParams().stream().filter(p->map.containsKey(p)).map(p->p.getType()).collect(Collectors.toList());
 						List<TypeRef> args2 = f.getParams().stream().filter(p->map.containsKey(p)).map(p->map.get(p).type).collect(Collectors.toList());
 						
 						Map<TemplateType, TypeRef> funcTempMap = TemplateUtils.inferTemplatesFromArguments(core.tni, params, args2, f.getFuncTemplateMap());
+						if (ctx.tnTemplate != null) {
+							funcTempMap.putAll(TemplateUtils.matchTemplateArgs(f.getTemplate(), TyphonTypeResolver.readTemplateArgs(core.tni, ctx.tnTemplate.tnArgs, scope)));
+						}
 						
 						// check if the types match up to the signature
 						for (Entry<Parameter, Variable> entry : map.entrySet()) {
@@ -880,11 +882,13 @@ public class TyphonCompiler {
 					}
 					
 					// calculate the function's return type
-					// TODO: add explicit specifications on top of the inferences
 					List<TypeRef> params = f.getParams().stream().filter(p->map.containsKey(p)).map(p->p.getType()).collect(Collectors.toList());
 					List<TypeRef> args2 = f.getParams().stream().filter(p->map.containsKey(p)).map(p->map.get(p).type).collect(Collectors.toList());
 					
 					Map<TemplateType, TypeRef> funcTempMap = TemplateUtils.inferTemplatesFromArguments(core.tni, params, args2, f.getFuncTemplateMap());
+					if (ctx.tnTemplate != null) {
+						funcTempMap.putAll(TemplateUtils.matchTemplateArgs(f.getTemplate(), TyphonTypeResolver.readTemplateArgs(core.tni, ctx.tnTemplate.tnArgs, scope)));
+					}
 					
 					List<TypeRef> retType = f.getRetType().subList(0, outputVars.size()).stream().map(t->TemplateUtils.replaceTemplates(TemplateUtils.replaceTemplates(t, funcTempMap), sub.typeMap)).collect(Collectors.toList());
 					return retType;

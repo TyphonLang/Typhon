@@ -173,4 +173,33 @@ public abstract class Type extends TyphonModelEntity implements MemberAccess {
 		
 		return result;
 	}
+	
+	/**
+	 * This is called by {@link TypeRef} to find a common ancestor type.
+	 * 
+	 * @param a A type. <tt>a.getType()</tt> must be equal to <tt>this</tt>.
+	 * @param b Another type.
+	 * @return The closest common ancestor type. May be a ComboType in case of parent ambiguity. May not be null.
+	 */
+	public TypeRef commonType(TypeRef a, TypeRef b) {
+		// test if the types are direct suptypes of one another
+		if (a.equals(b)) {
+			return a.copy();
+		}
+		
+		if (b.canCastTo(a) && !a.canCastTo(b)) {
+			return a.copy();
+		}
+		
+		if (a.canCastTo(b) && !b.canCastTo(a)) {
+			return b.copy();
+		}
+		
+		// the only possibility left: Neither a nor b can cast to each other directly
+		if (b.getType() instanceof TemplateType) {
+			return a.commonType(((TemplateType)b.getType()).getBaseType());
+		}
+		
+		return new TypeRef(tni.corePackage.TYPE_ANY);
+	}
 }

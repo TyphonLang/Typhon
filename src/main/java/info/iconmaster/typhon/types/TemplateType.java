@@ -149,6 +149,11 @@ public class TemplateType extends Type {
 		return getBaseType().canCastTo(b);
 	}
 	
+	@Override
+	public TypeRef commonType(TypeRef a, TypeRef b) {
+		return getBaseType().commonType(b);
+	}
+	
 	/**
 	 * Creates a library template type.
 	 * 

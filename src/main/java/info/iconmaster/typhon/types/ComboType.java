@@ -1,6 +1,7 @@
 package info.iconmaster.typhon.types;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.stream.Collectors;
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.util.SourceInfo;
+import info.iconmaster.typhon.util.TemplateUtils;
 
 public class ComboType extends Type {
 	/**
@@ -22,6 +24,18 @@ public class ComboType extends Type {
 
 	public ComboType(TyphonInput input) {
 		super(input);
+	}
+	
+	public ComboType(TyphonInput input, Type... types) {
+		super(input);
+		
+		getTypes().addAll(Arrays.asList(types).stream().map(t->new TypeRef(t)).collect(Collectors.toList()));
+	}
+	
+	public ComboType(TyphonInput input, TypeRef... types) {
+		super(input);
+		
+		getTypes().addAll(Arrays.asList(types));
 	}
 
 	/**
@@ -69,5 +83,33 @@ public class ComboType extends Type {
 		}
 		
 		return super.canCastTo(a, b);
+	}
+	
+	@Override
+	public TypeRef commonType(TypeRef a, TypeRef b) {
+		List<TypeRef> commons = new ArrayList<>();
+		for (TypeRef parent : ((ComboType)a.getType()).getTypes()) {
+			TypeRef trueParent = TemplateUtils.replaceTemplates(parent, TemplateUtils.matchAllTemplateArgs(a));
+			
+			if (trueParent.equals(b)) {
+				return trueParent;
+			}
+			
+			commons.add(super.commonType(trueParent, b));
+		}
+		
+		List<TypeRef> commons2 = commons.stream().filter(t1->
+			commons.stream().allMatch(t2->(t1 == t2 || !t1.canCastTo(t2)))
+		).collect(Collectors.toList());
+		
+		if (commons2.isEmpty()) {
+			return super.commonType(a, b);
+		} else if (commons2.size() == 1) {
+			return commons2.get(0);
+		} else {
+			ComboType combo = new ComboType(tni);
+			combo.getTypes().addAll(commons2);
+			return new TypeRef(combo);
+		}
 	}
 }

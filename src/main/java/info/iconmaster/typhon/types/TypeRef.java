@@ -227,4 +227,11 @@ public class TypeRef extends TyphonModelEntity implements MemberAccess {
 	public Map<TemplateType, TypeRef> getTemplateMap(Map<TemplateType, TypeRef> templateMap) {
 		return TemplateUtils.matchAllTemplateArgs(TemplateUtils.replaceTemplates(this, templateMap));
 	}
+	
+	public TypeRef commonType(TypeRef other) {
+		TypeRef a = getType().commonType(this, other);
+		TypeRef b = other.getType().commonType(other, this);
+		
+		return a.canCastTo(b) ? a : b;
+	}
 }

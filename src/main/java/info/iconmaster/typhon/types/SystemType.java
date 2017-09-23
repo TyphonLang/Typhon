@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.model.MemberAccess;
+import info.iconmaster.typhon.util.TemplateUtils;
 
 /**
  * These types are created by the system.
@@ -94,5 +95,33 @@ public class SystemType extends Type {
 		StringBuilder sb = new StringBuilder("sys:");
 		sb.append(getName());
 		return sb.toString();
+	}
+	
+	@Override
+	public TypeRef commonType(TypeRef a, TypeRef b) {
+		List<TypeRef> commons = new ArrayList<>();
+		for (TypeRef parent : ((SystemType)a.getType()).getParentTypes()) {
+			TypeRef trueParent = TemplateUtils.replaceTemplates(parent, TemplateUtils.matchAllTemplateArgs(a));
+			
+			if (trueParent.equals(b)) {
+				return trueParent;
+			}
+			
+			commons.add(super.commonType(trueParent, b));
+		}
+		
+		List<TypeRef> commons2 = commons.stream().filter(t1->
+			commons.stream().allMatch(t2->(t1 == t2 || !t1.canCastTo(t2)))
+		).collect(Collectors.toList());
+		
+		if (commons2.isEmpty()) {
+			return super.commonType(a, b);
+		} else if (commons2.size() == 1) {
+			return commons2.get(0);
+		} else {
+			ComboType combo = new ComboType(tni);
+			combo.getTypes().addAll(commons2);
+			return new TypeRef(combo);
+		}
 	}
 }

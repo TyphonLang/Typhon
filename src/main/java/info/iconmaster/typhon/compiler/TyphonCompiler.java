@@ -33,6 +33,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.IfStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.IsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.LogicOpsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.LvalueContext;
+import info.iconmaster.typhon.antlr.TyphonParser.MapConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MemberExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MemberLvalueContext;
 import info.iconmaster.typhon.antlr.TyphonParser.NullCoalesceExprContext;
@@ -1380,6 +1381,63 @@ public class TyphonCompiler {
 				// return the list type
 				return Arrays.asList(new TypeRef(core.TYPE_LIST, new TemplateArgument(common)));
 			}
+			
+			@Override
+			public List<TypeRef> visitMapConstExpr(MapConstExprContext ctx) {
+				TypeRef commonKey = null;
+				TypeRef commonValue = null;
+				
+				Map<Variable, Variable> vars = new HashMap<>();
+				
+				// try to infer what the element types should be.
+				TypeRef keyType = new TypeRef(core.TYPE_ANY);
+				TypeRef valueType = new TypeRef(core.TYPE_ANY);
+				
+				if (!insertInto.isEmpty() && insertInto.get(0).type.getType() == core.TYPE_MAP && insertInto.get(0).type.getTemplateArgs().size() == 2) {
+					keyType = insertInto.get(0).type.getTemplateArgs().get(0).getValue();
+					valueType = insertInto.get(0).type.getTemplateArgs().get(1).getValue();
+				}
+				
+				// compile the elements.
+				int i = 0;
+				for (ExprContext value : ctx.tnValues) {
+					ExprContext key = ctx.tnKeys.get(i);
+					
+					Variable keyVar = scope.addTempVar(TypeRef.var(keyType), new SourceInfo(key));
+					compileExpr(scope, key, Arrays.asList(keyVar));
+					
+					if (commonKey == null) {
+						commonKey = keyVar.type;
+					} else {
+						commonKey = commonKey.commonType(keyVar.type);
+					}
+					
+					Variable valueVar = scope.addTempVar(TypeRef.var(valueType), new SourceInfo(value));
+					compileExpr(scope, value, Arrays.asList(valueVar));
+					
+					if (commonValue == null) {
+						commonValue = valueVar.type;
+					} else {
+						commonValue = commonValue.commonType(valueVar.type);
+					}
+					
+					vars.put(keyVar, valueVar);
+					i++;
+				}
+				
+				if (!insertInto.isEmpty()) {
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.MOVMAP, new Object[] {insertInto.get(0), vars}));
+				}
+				
+				// if the map is empty, infer the type
+				if (commonKey == null) {
+					commonKey = keyType;
+					commonValue = valueType;
+				}
+				
+				// return the map type
+				return Arrays.asList(new TypeRef(core.TYPE_MAP, new TemplateArgument(commonKey), new TemplateArgument(commonValue)));
+			}
 		};
 		
 		List<TypeRef> a = visitor.visit(rule);
@@ -1667,6 +1725,54 @@ public class TyphonCompiler {
 				
 				// return the list type
 				return Arrays.asList(new TypeRef(core.TYPE_LIST, new TemplateArgument(common)));
+			}
+			
+			@Override
+			public List<TypeRef> visitMapConstExpr(MapConstExprContext ctx) {
+				TypeRef commonKey = null;
+				TypeRef commonValue = null;
+				
+				// try to infer what the element types should be.
+				TypeRef keyType = new TypeRef(core.TYPE_ANY);
+				TypeRef valueType = new TypeRef(core.TYPE_ANY);
+				
+				if (!expectedTypes.isEmpty() && expectedTypes.get(0).getType() == core.TYPE_MAP && expectedTypes.get(0).getTemplateArgs().size() == 2) {
+					keyType = expectedTypes.get(0).getTemplateArgs().get(0).getValue();
+					valueType = expectedTypes.get(0).getTemplateArgs().get(1).getValue();
+				}
+				
+				// compile the elements.
+				int i = 0;
+				for (ExprContext value : ctx.tnValues) {
+					ExprContext key = ctx.tnKeys.get(i);
+					
+					TypeRef thisKeyType = getExprType(scope, key, Arrays.asList(keyType)).get(0);
+					
+					if (commonKey == null) {
+						commonKey = thisKeyType;
+					} else {
+						commonKey = commonKey.commonType(thisKeyType);
+					}
+					
+					TypeRef thisValueType = getExprType(scope, value, Arrays.asList(valueType)).get(0);
+					
+					if (commonValue == null) {
+						commonValue = thisValueType;
+					} else {
+						commonValue = commonValue.commonType(thisValueType);
+					}
+					
+					i++;
+				}
+				
+				// if the map is empty, infer the type
+				if (commonKey == null) {
+					commonKey = keyType;
+					commonValue = valueType;
+				}
+				
+				// return the map type
+				return Arrays.asList(new TypeRef(core.TYPE_MAP, new TemplateArgument(commonKey), new TemplateArgument(commonValue)));
 			}
 		};
 		

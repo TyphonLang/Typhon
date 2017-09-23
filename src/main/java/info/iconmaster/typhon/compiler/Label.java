@@ -21,4 +21,9 @@ public class Label {
 		this.scope = scope;
 		this.name = name;
 	}
+	
+	@Override
+	public String toString() {
+		return "label("+(name == null? super.toString().split("@")[1] : name)+")";
+	}
 }

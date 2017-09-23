@@ -74,6 +74,6 @@ public class Variable implements MemberAccess {
 	
 	@Override
 	public String toString() {
-		return "var("+type+" "+name+")";
+		return "var("+type+" "+(name == null? super.toString().split("@")[1] : name)+")";
 	}
 }

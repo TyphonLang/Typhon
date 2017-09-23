@@ -74,4 +74,15 @@ public class CodeBlock extends TyphonModelEntity {
 		super(input);
 		this.lookup = lookup;
 	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("CodeBlock(this = ");
+		sb.append(instance).append(", returns ").append(returnType).append(") {\n");
+		for (Instruction i : ops) {
+			sb.append('\t').append(i).append('\n');
+		}
+		sb.append("}\n");
+		return sb.toString();
+	}
 }

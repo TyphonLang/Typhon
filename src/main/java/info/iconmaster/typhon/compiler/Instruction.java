@@ -1,5 +1,8 @@
 package info.iconmaster.typhon.compiler;
 
+import java.util.Arrays;
+import java.util.stream.StreamSupport;
+
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.model.TyphonModelEntity;
 import info.iconmaster.typhon.util.SourceInfo;
@@ -90,5 +93,10 @@ public class Instruction extends TyphonModelEntity {
 	@SuppressWarnings("unchecked")
 	public <T> T arg(int i) {
 		return (T) args[i];
+	}
+	
+	@Override
+	public String toString() {
+		return op+" "+Arrays.asList(args).stream().reduce("", (a,b)->a+" "+b);
 	}
 }

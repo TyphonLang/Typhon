@@ -261,12 +261,12 @@ public class TestGrammar extends TyphonTest {
 			new CaseInvalid("if true: 1 elseif false: 2", (parser)->{parser.expr();}),
 			new CaseInvalid("if true: 1 else: 0 elseif false: 2", (parser)->{parser.expr();}),
 			//matchExpr
-			new CaseValid("match 0 {}", (parser)->{parser.expr();}),
-			new CaseValid("match 0 {case 0: 1}", (parser)->{parser.expr();}),
-			new CaseValid("match 0 {case 0: 1 case 1: 2}", (parser)->{parser.expr();}),
 			new CaseValid("match 0 {default: -1}", (parser)->{parser.expr();}),
 			new CaseValid("match 0 {case 0: 1 case 1: 2 default: -1}", (parser)->{parser.expr();}),
 			new CaseValid("match 0 {case 0,1,2: 1 case 3,4: 2 default: -1}", (parser)->{parser.expr();}),
+			new CaseInvalid("match 0 {}", (parser)->{parser.expr();}),
+			new CaseInvalid("match 0 {case 0: 1}", (parser)->{parser.expr();}),
+			new CaseInvalid("match 0 {case 0: 1 case 1: 2}", (parser)->{parser.expr();}),
 			new CaseInvalid("match 0 case 0: 1", (parser)->{parser.expr();}),
 			new CaseInvalid("match 0 {case: 1}", (parser)->{parser.expr();}),
 			//typeConstExpr

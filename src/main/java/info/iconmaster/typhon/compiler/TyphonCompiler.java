@@ -498,6 +498,7 @@ public class TyphonCompiler {
 					}
 					
 					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMP, new Object[] {allEndLabel}));
+					i++;
 				}
 				
 				// parse the 'else' block
@@ -1329,6 +1330,7 @@ public class TyphonCompiler {
 					common = common.commonType(out.type); out.type = old;
 					
 					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMP, new Object[] {allEndLabel}));
+					i++;
 				}
 				
 				// parse the 'else' block

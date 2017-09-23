@@ -33,12 +33,18 @@ public class TestTypeResolver extends TyphonTest {
 			Assert.assertEquals(0, p.getFunctions().get(0).getRetType().get(0).getTemplateArgs().size());
 			Assert.assertEquals(p.tni.corePackage.TYPE_INT, p.getFunctions().get(0).getParams().get(0).getType().getType());
 			Assert.assertEquals(0, p.getFunctions().get(0).getParams().get(0).getType().getTemplateArgs().size());
-		}),new TestCase("class x : int {}", (p)->{
+		}),new TestCase("class x : Number {}", (p)->{
 			Assert.assertEquals(0, p.tni.errors.size());
 			
 			Assert.assertEquals(1, ((UserType)p.getType("x")).getParentTypes().size());
-			Assert.assertEquals(p.tni.corePackage.TYPE_INT, ((UserType)p.getType("x")).getParentTypes().get(0).getType());
+			Assert.assertEquals(p.tni.corePackage.TYPE_NUMBER, ((UserType)p.getType("x")).getParentTypes().get(0).getType());
 			Assert.assertEquals(0, ((UserType)p.getType("x")).getParentTypes().get(0).getTemplateArgs().size());
+		}),new TestCase("class x : int {}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("class x : (int && float) {}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("class x : (int) -> float {}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
 		}),new TestCase("class a {} a x;", (p)->{
 			Assert.assertEquals(0, p.tni.errors.size());
 			

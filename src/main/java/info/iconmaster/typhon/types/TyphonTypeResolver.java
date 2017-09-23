@@ -22,6 +22,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.VarTypeContext;
 import info.iconmaster.typhon.errors.AmbiguousAnnotError;
 import info.iconmaster.typhon.errors.AmbiguousTypeError;
 import info.iconmaster.typhon.errors.AnnotNotFoundError;
+import info.iconmaster.typhon.errors.ParentTypeError;
 import info.iconmaster.typhon.errors.TemplateDefaultTypeError;
 import info.iconmaster.typhon.errors.TypeNotFoundError;
 import info.iconmaster.typhon.model.Annotation;
@@ -121,7 +122,12 @@ public class TyphonTypeResolver {
 			UserType userType = (UserType) t;
 
 			for (TypeContext rule : userType.getRawParentTypes()) {
-				userType.getParentTypes().add(readType(userType.tni, rule, t));
+				TypeRef parentType = readType(userType.tni, rule, t);
+				userType.getParentTypes().add(parentType);
+				
+				if (!(parentType.getType() instanceof AnyType || parentType.getType() instanceof UserType)) {
+					t.tni.errors.add(new ParentTypeError(parentType.source, userType, parentType));
+				}
 			}
 			
 			if (userType.getParentTypes().isEmpty()) {

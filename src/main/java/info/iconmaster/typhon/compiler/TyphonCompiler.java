@@ -18,6 +18,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.BitOpsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BlockContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BlockStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BreakStatContext;
+import info.iconmaster.typhon.antlr.TyphonParser.CaseBlockContext;
 import info.iconmaster.typhon.antlr.TyphonParser.CastExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.CharConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ContStatContext;
@@ -43,6 +44,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.RepeatStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.RetStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.StatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.StringConstExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.SwitchStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TerneryOpExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ThisConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TrueConstExprContext;
@@ -534,6 +536,80 @@ public class TyphonCompiler {
 				}
 				
 				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.RET, new Object[] {retVars}));
+				return null;
+			}
+			
+			@Override
+			public Void visitSwitchStat(SwitchStatContext ctx) {
+				Scope newScope = new Scope(scope.getCodeBlock(), scope);
+				if (ctx.tnLabel != null) {
+					newScope.beginScopeLabel = newScope.addLabel(ctx.tnLabel.getText()+":begin");
+					newScope.endScopeLabel = newScope.addLabel(ctx.tnLabel.getText()+":end");
+				} else {
+					newScope.beginScopeLabel = newScope.addTempLabel();
+					newScope.endScopeLabel = newScope.addTempLabel();
+				}
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {newScope.beginScopeLabel}));
+				
+				Variable switchVar = scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(ctx.tnExpr));
+				compileExpr(scope, ctx.tnExpr, Arrays.asList(switchVar));
+				
+				Label defaultLabel = newScope.addTempLabel();
+				
+				for (CaseBlockContext caze : ctx.tnCaseBlocks) {
+					Scope caseScope = new Scope(scope.getCodeBlock(), newScope);
+					if (caze.tnBlock.tnLabel != null) {
+						caseScope.beginScopeLabel = caseScope.addLabel(caze.tnBlock.tnLabel.getText()+":begin");
+						caseScope.endScopeLabel = caseScope.addLabel(caze.tnBlock.tnLabel.getText()+":end");
+					} else {
+						caseScope.beginScopeLabel = caseScope.addTempLabel();
+						caseScope.endScopeLabel = caseScope.addTempLabel();
+					}
+					
+					for (ExprContext expr : caze.tnExprs) {
+						Variable caseVar = caseScope.addTempVar(switchVar.type, new SourceInfo(expr));
+						compileExpr(caseScope, expr, Arrays.asList(caseVar));
+						
+						Variable caseCondVar = caseScope.addTempVar(new TypeRef(core.TYPE_BOOL), new SourceInfo(expr));
+						compileBinOp(caseScope, switchVar, caseVar, "==", Arrays.asList(caseCondVar), new SourceInfo(expr));
+						
+						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPTRUE, new Object[] {caseScope.beginScopeLabel}));
+					}
+					
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMP, new Object[] {caseScope.endScopeLabel}));
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {caseScope.beginScopeLabel}));
+					
+					for (StatContext stat : caze.tnBlock.tnBlock) {
+						compileStat(caseScope, stat, expectedType);
+					}
+					
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMP, new Object[] {newScope.endScopeLabel}));
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {caseScope.endScopeLabel}));
+				}
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {defaultLabel}));
+				
+				if (ctx.tnDefaultBlock != null) {
+					Scope caseScope = new Scope(scope.getCodeBlock(), newScope);
+					if (ctx.tnDefaultBlock.tnLabel != null) {
+						caseScope.beginScopeLabel = caseScope.addLabel(ctx.tnDefaultBlock.tnLabel.getText()+":begin");
+						caseScope.endScopeLabel = caseScope.addLabel(ctx.tnDefaultBlock.tnLabel.getText()+":end");
+					} else {
+						caseScope.beginScopeLabel = caseScope.addTempLabel();
+						caseScope.endScopeLabel = caseScope.addTempLabel();
+					}
+					
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {caseScope.beginScopeLabel}));
+					
+					for (StatContext stat : ctx.tnDefaultBlock.tnBlock) {
+						compileStat(caseScope, stat, expectedType);
+					}
+					
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {caseScope.endScopeLabel}));
+				}
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {newScope.endScopeLabel}));
 				return null;
 			}
 		};
@@ -1777,10 +1853,16 @@ public class TyphonCompiler {
 		Variable lhs = scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(lhsExpr));
 		Variable rhs = scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(rhsExpr));
 		
-		AnnotationDefinition operator = getBinOp(core, opStr);
-		
 		compileExpr(scope, lhsExpr, Arrays.asList(lhs));
 		compileExpr(scope, rhsExpr, Arrays.asList(rhs));
+		
+		return compileBinOp(scope, lhs, rhs, opStr, insertInto, new SourceInfo(lhsExpr, rhsExpr));
+	}
+	
+	private static List<TypeRef> compileBinOp(Scope scope, Variable lhs, Variable rhs, String opStr, List<Variable> insertInto, SourceInfo source) {
+		CorePackage core = scope.getCodeBlock().tni.corePackage;
+		
+		AnnotationDefinition operator = getBinOp(core, opStr);
 		
 		List<Function> handlers = lhs.type.getType().getOperatorHandlers(operator);
 		handlers.removeIf((f)->{
@@ -1793,12 +1875,12 @@ public class TyphonCompiler {
 		
 		if (handlers.isEmpty()) {
 			// error; handler not found
-			core.tni.errors.add(new UndefinedOperatorError(new SourceInfo(lhsExpr, rhsExpr), opStr, lhs.type, rhs.type));
+			core.tni.errors.add(new UndefinedOperatorError(source, opStr, lhs.type, rhs.type));
 			return Arrays.asList(TypeRef.var(core.tni));
 		}
 		
 		Function handler = handlers.get(0);
-		scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(lhsExpr, rhsExpr), OpCode.CALL, new Object[] {insertInto.isEmpty() ? Arrays.asList() : Arrays.asList(insertInto.get(0)), lhs, handler, Arrays.asList(rhs)}));
+		scope.getCodeBlock().ops.add(new Instruction(core.tni, source, OpCode.CALL, new Object[] {insertInto.isEmpty() ? Arrays.asList() : Arrays.asList(insertInto.get(0)), lhs, handler, Arrays.asList(rhs)}));
 		
 		return handler.getRetType();
 	}

@@ -43,6 +43,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.RepeatStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.RetStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.StatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.StringConstExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.TerneryOpExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ThisConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TrueConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.UnOpsExprContext;
@@ -1190,6 +1191,82 @@ public class TyphonCompiler {
 			@Override
 			public List<TypeRef> visitParensExpr(ParensExprContext ctx) {
 				return visit(ctx.tnExpr);
+			}
+			
+			@Override
+			public List<TypeRef> visitTerneryOpExpr(TerneryOpExprContext ctx) {
+				TypeRef common = getExprType(scope, ctx.tnThen, Arrays.asList(new TypeRef(core.TYPE_ANY))).get(0);
+				
+				Label allEndLabel = scope.addTempLabel();
+				List<Label> labels = new ArrayList<>();
+				
+				Variable out;
+				if (insertInto.isEmpty()) {
+					out = scope.addTempVar(new TypeRef(core.TYPE_ANY), new SourceInfo(ctx));
+				} else {
+					out = insertInto.get(0);
+				}
+				
+				// add all the labels in advance
+				
+				for (ExprContext expr : ctx.tnElseIf) {
+					labels.add(scope.addTempLabel());
+				}
+				
+				if (ctx.tnElse != null) {
+					labels.add(scope.addTempLabel());
+				}
+				
+				labels.add(allEndLabel);
+				
+				// parse the 'if' block
+				{
+					Variable condVar = scope.addTempVar(new TypeRef(core.TYPE_BOOL), new SourceInfo(ctx.tnIf));
+					compileExpr(scope, ctx.tnIf, Arrays.asList(condVar));
+					
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPFALSE, new Object[] {condVar, labels.get(0)}));
+					
+					TypeRef old = out.type; out.type = TypeRef.var(core.tni);
+					compileExpr(scope, ctx.tnThen, Arrays.asList(out));
+					out.type = old;
+					
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMP, new Object[] {allEndLabel}));
+				}
+				
+				// parse the 'elseif' blocks
+				int i = 0;
+				for (ExprContext cond : ctx.tnElseIf) {
+					ExprContext expr = ctx.tnElseThen.get(i);
+					Label label = labels.remove(0);
+					
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {label}));
+					
+					Variable condVar = scope.addTempVar(new TypeRef(core.TYPE_BOOL), new SourceInfo(cond));
+					compileExpr(scope, cond, Arrays.asList(condVar));
+					
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPFALSE, new Object[] {condVar, labels.get(0)}));
+					
+					TypeRef old = out.type; out.type = TypeRef.var(core.tni);
+					compileExpr(scope, expr, Arrays.asList(out));
+					common = common.commonType(out.type); out.type = old;
+					
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMP, new Object[] {allEndLabel}));
+				}
+				
+				// parse the 'else' block
+				if (ctx.tnElse != null) {
+					Label label = labels.remove(0);
+					
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {label}));
+					
+					TypeRef old = out.type; out.type = TypeRef.var(core.tni);
+					compileExpr(scope, ctx.tnElse, Arrays.asList(out));
+					common = common.commonType(out.type); out.type = old;
+				}
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {allEndLabel}));
+				
+				return Arrays.asList(common);
 			}
 		};
 		

@@ -548,6 +548,41 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(1, code.tni.errors.size());
 		}),new TestCase("T g<T>(T a) {} void f() {int x = g(1);}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("void f() {int x = if true: 1 else: 0;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(7, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(2).op);
+			Assert.assertEquals(OpCode.JUMP, code.ops.get(3).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(4).op);
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(5).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(6).op);
+		}),new TestCase("void f() {int x = if true: 1 elseif false: 2 else: 3;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(12, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVTRUE, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(2).op);
+			Assert.assertEquals(OpCode.JUMP, code.ops.get(3).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(4).op);
+			Assert.assertEquals(OpCode.MOVFALSE, code.ops.get(5).op);
+			Assert.assertEquals(OpCode.JUMPFALSE, code.ops.get(6).op);
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(7).op);
+			Assert.assertEquals(OpCode.JUMP, code.ops.get(8).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(9).op);
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(10).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(11).op);
+		}),new TestCase("void f() {var x = if true: 1 elseif false: 2.0 elseif false: 'c' elseif false: 2 elseif false: 3.0 else: 'd';}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("void f() {int x = if true: 1 else: 'c';}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("void f() {Integer x = if true: 1 else: 'c';}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
 		}));
 	}
     

@@ -53,7 +53,7 @@ expr:
 |	tnLhs=expr (tnOp='=='|tnOp='!='|tnOp='==='|tnOp='!==') tnRhs=expr																		#eqOpsExpr
 |	tnLhs=expr (tnOp='&&'|tnOp='||') tnRhs=expr																								#logicOpsExpr
 |	tnAnnots+=annotation* 'throw' tnArg=expr																								#throwExpr
-|	'if' tnIf=expr ':' tnThen=expr ('elseif' tnElseIf=expr ':' tnElseThen=expr)* 'else' ':' tnElse=expr										#terneryOpExpr
+|	'if' tnIf=expr ':' tnThen=expr ('elseif' tnElseIf+=expr ':' tnElseThen+=expr)* 'else' ':' tnElse=expr									#terneryOpExpr
 |	'match' tnMatch=expr '{' (tnCases+=caseExpr)* ('default' ':' tnDefault=expr)? '}'														#matchExpr
 |	tnAnnots+=annotation* 'class' tnType=type																								#typeConstExpr
 |	tnAnnots+=annotation* 'null'																											#nullConstExpr

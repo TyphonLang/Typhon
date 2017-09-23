@@ -561,11 +561,11 @@ public class TyphonCompiler {
 					Scope caseScope = new Scope(scope.getCodeBlock(), newScope);
 					if (caze.tnBlock.tnLabel != null) {
 						caseScope.beginScopeLabel = caseScope.addLabel(caze.tnBlock.tnLabel.getText()+":begin");
-						caseScope.endScopeLabel = caseScope.addLabel(caze.tnBlock.tnLabel.getText()+":end");
 					} else {
 						caseScope.beginScopeLabel = caseScope.addTempLabel();
-						caseScope.endScopeLabel = caseScope.addTempLabel();
 					}
+					caseScope.endScopeLabel = newScope.endScopeLabel;
+					Label caseLabel = caseScope.addTempLabel();
 					
 					for (ExprContext expr : caze.tnExprs) {
 						Variable caseVar = caseScope.addTempVar(switchVar.type, new SourceInfo(expr));
@@ -574,18 +574,18 @@ public class TyphonCompiler {
 						Variable caseCondVar = caseScope.addTempVar(new TypeRef(core.TYPE_BOOL), new SourceInfo(expr));
 						compileBinOp(caseScope, switchVar, caseVar, "==", Arrays.asList(caseCondVar), new SourceInfo(expr));
 						
-						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPTRUE, new Object[] {caseScope.beginScopeLabel}));
+						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPTRUE, new Object[] {caseLabel}));
 					}
 					
 					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMP, new Object[] {caseScope.endScopeLabel}));
-					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {caseScope.beginScopeLabel}));
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {caseLabel}));
 					
 					for (StatContext stat : caze.tnBlock.tnBlock) {
 						compileStat(caseScope, stat, expectedType);
 					}
 					
 					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMP, new Object[] {newScope.endScopeLabel}));
-					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {caseScope.endScopeLabel}));
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {caseScope.beginScopeLabel}));
 				}
 				
 				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {defaultLabel}));
@@ -594,19 +594,16 @@ public class TyphonCompiler {
 					Scope caseScope = new Scope(scope.getCodeBlock(), newScope);
 					if (ctx.tnDefaultBlock.tnLabel != null) {
 						caseScope.beginScopeLabel = caseScope.addLabel(ctx.tnDefaultBlock.tnLabel.getText()+":begin");
-						caseScope.endScopeLabel = caseScope.addLabel(ctx.tnDefaultBlock.tnLabel.getText()+":end");
 					} else {
 						caseScope.beginScopeLabel = caseScope.addTempLabel();
-						caseScope.endScopeLabel = caseScope.addTempLabel();
 					}
-					
-					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {caseScope.beginScopeLabel}));
+					caseScope.endScopeLabel = newScope.endScopeLabel;
 					
 					for (StatContext stat : ctx.tnDefaultBlock.tnBlock) {
 						compileStat(caseScope, stat, expectedType);
 					}
 					
-					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {caseScope.endScopeLabel}));
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {caseScope.beginScopeLabel}));
 				}
 				
 				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {newScope.endScopeLabel}));

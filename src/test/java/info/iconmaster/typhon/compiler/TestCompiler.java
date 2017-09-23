@@ -585,10 +585,10 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(0, code.tni.errors.size());
 		}),new TestCase("void f() {switch 1 {}}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
-		}),new TestCase("void f() {switch 1 {case 1 {}}}", (code)->{
+		}),new TestCase("void f() {switch 1 {case 1 {println();}}}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
-			Assert.assertEquals(11, code.ops.size());
+			Assert.assertEquals(12, code.ops.size());
 			
 			// switch {
 			Assert.assertEquals(OpCode.LABEL, code.ops.get(0).op);
@@ -599,12 +599,14 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(OpCode.JUMPTRUE, code.ops.get(4).op);
 			Assert.assertEquals(OpCode.JUMP, code.ops.get(5).op);
 			Assert.assertEquals(OpCode.LABEL, code.ops.get(6).op);
-			// {}
-			Assert.assertEquals(OpCode.JUMP, code.ops.get(7).op);
-			Assert.assertEquals(OpCode.LABEL, code.ops.get(8).op);
+			// {
+			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(7).op);
 			// }
+			Assert.assertEquals(OpCode.JUMP, code.ops.get(8).op);
 			Assert.assertEquals(OpCode.LABEL, code.ops.get(9).op);
+			// }
 			Assert.assertEquals(OpCode.LABEL, code.ops.get(10).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(11).op);
 		}));
 	}
     

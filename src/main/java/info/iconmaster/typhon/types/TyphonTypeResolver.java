@@ -11,6 +11,7 @@ import org.antlr.v4.runtime.Token;
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonParser.ArrayTypeContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BasicTypeContext;
+import info.iconmaster.typhon.antlr.TyphonParser.ComboTypeContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ConstTypeContext;
 import info.iconmaster.typhon.antlr.TyphonParser.FuncTypeContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MapTypeContext;
@@ -259,6 +260,15 @@ public class TyphonTypeResolver {
 			TypeRef ref = readType(tni, ((ConstTypeContext) rule).tnType, lookup);
 			ref.source = new SourceInfo(rule);
 			ref.isConst(true);
+			return ref;
+		} else if (rule instanceof ComboTypeContext) {
+			ComboType type = new ComboType(tni, new SourceInfo(rule));
+			
+			for (TypeContext subtype : ((ComboTypeContext) rule).tnTypes) {
+				type.getTypes().add(readType(tni, subtype, lookup));
+			}
+			
+			TypeRef ref = new TypeRef(new SourceInfo(rule), type);
 			return ref;
 		} else if (rule instanceof BasicTypeContext) {
 			MemberAccess base = lookup;

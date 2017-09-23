@@ -30,6 +30,18 @@ public class TestCastingRules extends TyphonTest {
     	TemplateType f1 = new TemplateType(tni, "F1");
     	TemplateType f2 = new TemplateType(tni, "F2");
     	
+    	ComboType c = new ComboType(tni);
+    	c.getTypes().add(new TypeRef(p.TYPE_INT));
+    	c.getTypes().add(new TypeRef(p.TYPE_FLOAT));
+    	
+    	ComboType d = new ComboType(tni);
+    	d.getTypes().add(new TypeRef(p.TYPE_LIST, new TemplateArgument(p.TYPE_ANY)));
+    	d.getTypes().add(new TypeRef(p.TYPE_NUMBER));
+    	
+    	UserType b = new UserType(tni, "b");
+    	b.getParentTypes().add(new TypeRef(p.TYPE_LIST, new TemplateArgument(p.TYPE_ANY)));
+    	b.getParentTypes().add(new TypeRef(p.TYPE_NUMBER));
+    	
 		return TyphonTest.makeData(
 				new TestCase(p.TYPE_INT, p.TYPE_INT),
 				new TestCase(p.TYPE_NUMBER, p.TYPE_NUMBER),
@@ -46,6 +58,11 @@ public class TestCastingRules extends TyphonTest {
 				new TestCase(new FunctionType(tni, new Type[] {p.TYPE_ANY}, new Type[] {}), new FunctionType(tni, new Type[] {p.TYPE_INT}, new Type[] {})),
 				new TestCase(new FunctionType(tni, new Type[] {}, new Type[] {p.TYPE_INT}), new FunctionType(tni, new Type[] {}, new Type[] {p.TYPE_ANY})),
 				new TestCase(new FunctionType(tni, new Type[] {f1}, new Type[] {}, f1), new FunctionType(tni, new Type[] {f2}, new Type[] {}, f2)),
+				new TestCase(c, p.TYPE_ANY),
+				new TestCase(c, p.TYPE_INT),
+				new TestCase(c, p.TYPE_FLOAT),
+				new TestCase(c, c),
+				new TestCase(b, d),
 				new InvalidCase(p.TYPE_ANY, p.TYPE_INT),
 				new InvalidCase(p.TYPE_NUMBER, p.TYPE_INT),
 				new InvalidCase(p.TYPE_INT, p.TYPE_FLOAT),
@@ -56,6 +73,9 @@ public class TestCastingRules extends TyphonTest {
 				new InvalidCase(new FunctionType(tni, new Type[] {}, new Type[] {}), new FunctionType(tni, new Type[] {}, new Type[] {p.TYPE_INT})),
 				new InvalidCase(new FunctionType(tni, new Type[] {p.TYPE_FLOAT}, new Type[] {}), new FunctionType(tni, new Type[] {p.TYPE_INT}, new Type[] {})),
 				new InvalidCase(new FunctionType(tni, new Type[] {}, new Type[] {p.TYPE_FLOAT}), new FunctionType(tni, new Type[] {}, new Type[] {p.TYPE_INT})),
+				new InvalidCase(c, p.TYPE_BOOL),
+				new InvalidCase(p.TYPE_INT, c),
+				new InvalidCase(d, b),
 				new TestCase(p.TYPE_ANY, p.TYPE_ANY)
 		);
 	}

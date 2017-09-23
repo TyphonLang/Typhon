@@ -141,6 +141,10 @@ public class TestTypeResolver extends TyphonTest {
 			Assert.assertEquals(0, p.tni.errors.size());
 		}),new TestCase("class a<A> {} class b {class B {}} a<a<b>>.A.A.B x;", (p)->{
 			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("(int && float) x;", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("(int && float && Any) x;", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
 		}));
 	}
     

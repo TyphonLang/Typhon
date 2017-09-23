@@ -43,7 +43,7 @@ public class TestTypeInferance extends TyphonTest {
 					Assert.assertEquals(p.TYPE_INT, map.get(ta).getType());
 				}),new TestCase(tni, new TypeRef[] {new TypeRef(ta), new TypeRef(ta)}, new TypeRef[] {new TypeRef(p.TYPE_INT), new TypeRef(p.TYPE_FLOAT)}, new HashMap<TemplateType, TypeRef>() {{put(ta, new TypeRef(p.TYPE_ANY));}}, (map)->{
 					Assert.assertNotNull(map.get(ta));
-					Assert.assertEquals(p.TYPE_ANY, map.get(ta).getType());
+					Assert.assertEquals(p.TYPE_NUMBER, map.get(ta).getType());
 				}),new TestCase(tni, new TypeRef[] {new TypeRef(tb), new TypeRef(tb)}, new TypeRef[] {new TypeRef(p.TYPE_INT), new TypeRef(p.TYPE_STRING)}, new HashMap<TemplateType, TypeRef>() {{put(tb, new TypeRef(p.TYPE_NUMBER));}}, (map)->{
 					Assert.assertNotNull(map.get(tb));
 					Assert.assertEquals(p.TYPE_INT, map.get(tb).getType());

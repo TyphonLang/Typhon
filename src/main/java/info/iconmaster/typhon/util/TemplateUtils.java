@@ -120,14 +120,13 @@ public class TemplateUtils {
 				if (!defaults.containsKey(t) || arg.canCastTo(defaults.get(t))) {
 					if (result.containsKey(t)) {
 						TypeRef inMap = result.get(t);
+						TypeRef common = arg.commonType(inMap);
+						result.put(t, common);
 						
-						if (!arg.canCastTo(inMap) && inMap.canCastTo(arg)) {
-							// widening of current value.
-							result.put(t, arg);
-						} else if (defaults.containsKey(t)) {
-							// they both cast to the default, so do that at the very least.
-							// TODO: find most narrow common parentage instead
-							result.put(t, defaults.get(t));
+						if (defaults.containsKey(t)) {
+							if (!common.canCastTo(defaults.get(t))) {
+								result.put(t, defaults.get(t));
+							}
 						}
 					} else if (arg.canCastTo(param)) {
 						// narrowing of default

@@ -532,6 +532,8 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(OpCode.LABEL, code.ops.get(4).op);
 		}),new TestCase("void f() {int x = 1 ?? 'c';}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("void f() {Number x = 1 ?? 1.0;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
 		}));
 	}
     

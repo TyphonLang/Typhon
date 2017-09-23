@@ -829,7 +829,8 @@ public class TyphonCompiler {
 					if (fieldOf == null) {
 						// CALLSTATIC
 						if (sub.infix == AccessType.NULLABLE_DOT || sub.infix == AccessType.DOUBLE_DOT) {
-							// TODO: error
+							// error; dots only apply in non-static context
+							core.tni.errors.add(new NotAllowedHereError(new SourceInfo(ctx), "special dot operators"));
 						}
 						
 						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALLSTATIC, new Object[] {outputVars, f, inputVars}));
@@ -1150,7 +1151,9 @@ public class TyphonCompiler {
 					lhs = insertInto.get(0);
 				}
 				
-				TypeRef oldType = lhs.type; lhs.type = lhs.type.copy();
+				TypeRef common = getExprType(scope, ctx, Arrays.asList(lhs.type)).get(0);
+				
+				TypeRef oldType = lhs.type; lhs.type = common;
 				compileExpr(scope, ctx.tnLhs, Arrays.asList(lhs));
 				lhs.type = oldType;
 				
@@ -1159,13 +1162,13 @@ public class TyphonCompiler {
 				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.ISNULL, new Object[] {tempVar, lhs}));
 				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPFALSE, new Object[] {tempVar, label}));
 				
-				oldType = lhs.type; lhs.type = lhs.type.copy();
+				oldType = lhs.type; lhs.type = common;
 				compileExpr(scope, ctx.tnRhs, Arrays.asList(lhs));
 				lhs.type = oldType;
 				
 				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {label}));
 				
-				return Arrays.asList(lhs.type);
+				return Arrays.asList(common);
 			}
 		};
 		
@@ -1421,7 +1424,9 @@ public class TyphonCompiler {
 			
 			@Override
 			public List<TypeRef> visitNullCoalesceExpr(NullCoalesceExprContext ctx) {
-				return visit(ctx.tnLhs);
+				TypeRef lhs = visit(ctx.tnLhs).get(0);
+				TypeRef rhs = visit(ctx.tnRhs).get(0);
+				return Arrays.asList(lhs.commonType(rhs));
 			}
 		};
 		

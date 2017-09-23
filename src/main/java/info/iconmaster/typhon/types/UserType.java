@@ -158,6 +158,20 @@ public class UserType extends Type {
 	
 	@Override
 	public TypeRef commonType(TypeRef a, TypeRef b) {
+		// test if the types are direct suptypes of one another
+		if (a.equals(b)) {
+			return a.copy();
+		}
+		
+		if (b.canCastTo(a) && !a.canCastTo(b)) {
+			return a.copy();
+		}
+		
+		if (a.canCastTo(b) && !b.canCastTo(a)) {
+			return b.copy();
+		}
+		
+		// the only possibility left: Neither a nor b can cast to each other directly
 		List<TypeRef> commons = new ArrayList<>();
 		for (TypeRef parent : ((UserType)a.getType()).getParentTypes()) {
 			TypeRef trueParent = TemplateUtils.replaceTemplates(parent, TemplateUtils.matchAllTemplateArgs(a));
@@ -166,7 +180,7 @@ public class UserType extends Type {
 				return trueParent;
 			}
 			
-			commons.add(super.commonType(trueParent, b));
+			commons.add(trueParent.commonType(b));
 		}
 		
 		List<TypeRef> commons2 = commons.stream().filter(t1->

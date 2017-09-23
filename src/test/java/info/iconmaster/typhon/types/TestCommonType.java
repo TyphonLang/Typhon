@@ -61,6 +61,8 @@ public class TestCommonType extends TyphonTest {
 				new TestCase(new ComboType(tni, a, b), d, new ComboType(tni, a, b)),
 				new TestCase(new ComboType(tni, a, b), e, new ComboType(tni, a, b)),
 				new TestCase(new ComboType(tni, a, b), p.TYPE_NUMBER, p.TYPE_NUMBER),
+				new TestCase(p.TYPE_INT, p.TYPE_INT, p.TYPE_INT),
+				new TestCase(p.TYPE_INT, p.TYPE_FLOAT, p.TYPE_NUMBER),
 				new TestCase(p.TYPE_ANY, p.TYPE_ANY, p.TYPE_ANY)
 		);
 	}

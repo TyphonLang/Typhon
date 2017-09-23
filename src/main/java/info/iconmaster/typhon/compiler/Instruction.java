@@ -43,6 +43,8 @@ public class Instruction extends TyphonModelEntity {
 		MOVCHAR,
 		MOVSTR,
 		MOVNULL,
+		MOVLIST,
+		MOVMAP,
 		CALL,
 		CALLSTATIC,
 		CALLFPTR,

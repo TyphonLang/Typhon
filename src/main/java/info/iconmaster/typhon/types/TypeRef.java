@@ -218,6 +218,16 @@ public class TypeRef extends TyphonModelEntity implements MemberAccess {
 		return t;
 	}
 	
+	/**
+	 * @param tni
+	 * @return The typeref universally understood as 'var', plus a type hint.
+	 */
+	public static TypeRef var(TypeRef hint) {
+		TypeRef t = hint.copy();
+		t.isVar(true);
+		return t;
+	}
+	
 	@Override
 	public List<TemplateType> getMemberTemplate() {
 		return getType().getMemberTemplate();

@@ -607,6 +607,35 @@ public class TestCompiler extends TyphonTest {
 			// }
 			Assert.assertEquals(OpCode.LABEL, code.ops.get(10).op);
 			Assert.assertEquals(OpCode.LABEL, code.ops.get(11).op);
+		}),new TestCase("void f() {[int] a = [1]}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(2, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.MOVLIST, code.ops.get(1).op);
+		}),new TestCase("void f() {[int] a = [1, 2]}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(3, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.MOVLIST, code.ops.get(2).op);
+		}),new TestCase("void f() {[Number] a = [1, 2.0]}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(3, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.MOVDOUBLE, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.MOVLIST, code.ops.get(2).op);
+		}),new TestCase("void f() {[long] a = [1, 2, 3]}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("void f() {[long] a = []}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			Assert.assertEquals(1, code.ops.size());
+			Assert.assertEquals(OpCode.MOVLIST, code.ops.get(0).op);
 		}));
 	}
     

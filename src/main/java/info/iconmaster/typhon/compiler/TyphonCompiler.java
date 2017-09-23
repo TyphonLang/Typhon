@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 import info.iconmaster.typhon.antlr.TyphonBaseVisitor;
+import info.iconmaster.typhon.antlr.TyphonParser.ArrayConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.AssignStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BinOps1ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BinOps2ExprContext;
@@ -1341,6 +1342,44 @@ public class TyphonCompiler {
 				
 				return Arrays.asList(common);
 			}
+			
+			@Override
+			public List<TypeRef> visitArrayConstExpr(ArrayConstExprContext ctx) {
+				TypeRef common = null;
+				List<Variable> vars = new ArrayList<>();
+				
+				// try to infer what the element type should be.
+				TypeRef elemType = new TypeRef(core.TYPE_ANY);
+				if (!insertInto.isEmpty() && insertInto.get(0).type.getType() == core.TYPE_LIST && !insertInto.get(0).type.getTemplateArgs().isEmpty()) {
+					elemType = insertInto.get(0).type.getTemplateArgs().get(0).getValue();
+				}
+				
+				// compile the elements.
+				for (ExprContext expr : ctx.tnValues) {
+					Variable var = scope.addTempVar(TypeRef.var(elemType), new SourceInfo(expr));
+					compileExpr(scope, expr, Arrays.asList(var));
+					
+					if (common == null) {
+						common = var.type;
+					} else {
+						common = common.commonType(var.type);
+					}
+					
+					vars.add(var);
+				}
+				
+				if (!insertInto.isEmpty()) {
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.MOVLIST, new Object[] {insertInto.get(0), vars}));
+				}
+				
+				// if the list is empty, infer the type.
+				if (common == null) {
+					common = elemType;
+				}
+				
+				// return the list type
+				return Arrays.asList(new TypeRef(core.TYPE_LIST, new TemplateArgument(common)));
+			}
 		};
 		
 		List<TypeRef> a = visitor.visit(rule);
@@ -1598,6 +1637,36 @@ public class TyphonCompiler {
 				TypeRef lhs = visit(ctx.tnLhs).get(0);
 				TypeRef rhs = visit(ctx.tnRhs).get(0);
 				return Arrays.asList(lhs.commonType(rhs));
+			}
+			
+			@Override
+			public List<TypeRef> visitArrayConstExpr(ArrayConstExprContext ctx) {
+				TypeRef common = null;
+				
+				// try to infer what the element type should be.
+				TypeRef elemType = new TypeRef(core.TYPE_ANY);
+				if (!expectedTypes.isEmpty() && expectedTypes.get(0).getType() == core.TYPE_LIST && !expectedTypes.get(0).getTemplateArgs().isEmpty()) {
+					elemType = expectedTypes.get(0).getTemplateArgs().get(0).getValue();
+				}
+				
+				// compile the elements.
+				for (ExprContext expr : ctx.tnValues) {
+					TypeRef type = getExprType(scope, expr, Arrays.asList(elemType)).get(0);
+					
+					if (common == null) {
+						common = type;
+					} else {
+						common = common.commonType(type);
+					}
+				}
+				
+				// if the list is empty, infer the type.
+				if (common == null) {
+					common = elemType;
+				}
+				
+				// return the list type
+				return Arrays.asList(new TypeRef(core.TYPE_LIST, new TemplateArgument(common)));
 			}
 		};
 		

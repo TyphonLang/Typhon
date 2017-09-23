@@ -66,7 +66,7 @@ expr:
 |	tnAnnots+=annotation* tnValue=CHAR																										#charConstExpr
 |	tnAnnots+=annotation* tnFuncTemplate=templateDecls? '(' tnFuncArgs=paramsDecl ')' ('=>' tnExprForm=exprs | '{' tnBlockForm+=stat* '}')	#funcConstExpr
 |	tnAnnots+=annotation* '[' (tnValues+=expr (',' tnValues+=expr)*)? ','? ']'																#arrayConstExpr
-|	tnAnnots+=annotation* '{' (tnKeys+=expr '=' tnValues+=expr (',' tnKeys+=expr '=' tnValues+=expr)*)? ','? '}'							#mapConstExpr
+|	tnAnnots+=annotation* '{' (tnKeys+=expr ':' tnValues+=expr (',' tnKeys+=expr ':' tnValues+=expr)*)? ','? '}'							#mapConstExpr
 |	tnAnnots+=annotation* '(' tnExpr=expr ')'																								#parensExpr
 ;
 exprs: tnExprs+=expr | '(' (tnExprs+=expr (',' tnExprs+=expr)*)? ')';

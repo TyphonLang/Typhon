@@ -685,6 +685,12 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(0, code.tni.errors.size());
 		}),new TestCase("void f() {int x = match 1 {case 0: 1 case 1, 2: 2.0 default: 'd'};}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("import reflect; void f() {type t = class int;};}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVTYPE, code.ops.get(0).op);
 		}));
 	}
     

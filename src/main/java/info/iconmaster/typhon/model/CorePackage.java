@@ -6,6 +6,7 @@ import java.util.List;
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.model.libs.CoreLibraryMath;
 import info.iconmaster.typhon.model.libs.CoreLibraryOperators;
+import info.iconmaster.typhon.model.libs.CoreLibraryReflection;
 import info.iconmaster.typhon.types.AnyType;
 import info.iconmaster.typhon.types.SystemType;
 import info.iconmaster.typhon.types.TemplateType;
@@ -57,6 +58,11 @@ public class CorePackage extends Package {
 	 * The operators library. Contains annotations and functions for operator overloading.
 	 */
 	public CoreLibraryOperators LIB_OPS;
+	
+	/**
+	 * The reflection library. Contains things useful for reflection. Not all implementations of Typhon need to fully implement this library.
+	 */
+	public CoreLibraryReflection LIB_REFLECT;
 	
 	private UserType makeUserType(String name, Type parent) {
 		UserType type = new UserType(name, parent);
@@ -133,6 +139,7 @@ public class CorePackage extends Package {
 		// add any core libraries
 		addSubpackage(LIB_MATH = new CoreLibraryMath(tni));
 		addSubpackage(LIB_OPS = new CoreLibraryOperators(tni));
+		addSubpackage(LIB_REFLECT = new CoreLibraryReflection(tni));
 	}
 	
 	/**

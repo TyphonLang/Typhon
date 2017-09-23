@@ -52,6 +52,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.SwitchStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TerneryOpExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ThisConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TrueConstExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.TypeConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.UnOpsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.VarExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.VarLvalueContext;
@@ -1507,6 +1508,17 @@ public class TyphonCompiler {
 				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {newScope.endScopeLabel}));
 				return Arrays.asList(common);
 			}
+			
+			@Override
+			public List<TypeRef> visitTypeConstExpr(TypeConstExprContext ctx) {
+				TypeRef type = TyphonTypeResolver.readType(core.tni, ctx.tnType, scope);
+				
+				if (!insertInto.isEmpty()) {
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.MOVTYPE, new Object[] {insertInto.get(0), type}));
+				}
+				
+				return Arrays.asList(new TypeRef(core.LIB_REFLECT.TYPE_TYPE));
+			}
 		};
 		
 		List<TypeRef> a = visitor.visit(rule);
@@ -1853,6 +1865,11 @@ public class TyphonCompiler {
 				}
 				
 				return Arrays.asList(common);
+			}
+			
+			@Override
+			public List<TypeRef> visitTypeConstExpr(TypeConstExprContext ctx) {
+				return Arrays.asList(new TypeRef(core.LIB_REFLECT.TYPE_TYPE));
 			}
 		};
 		

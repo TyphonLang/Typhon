@@ -675,6 +675,16 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
 			Assert.assertEquals(OpCode.MOVLONG, code.ops.get(1).op);
 			Assert.assertEquals(OpCode.MOVMAP, code.ops.get(4).op);
+		}),new TestCase("void f() {char x = match 1 {default: 'd'};}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("void f() {char x = match 1 {case 0: 'z' default: 'd'};}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("void f() {char x = match 1 {case 0: 'z' case 1, 2: 'o' default: 'd'};}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("void f() {Number x = match 1 {case 0: 1 case 1, 2: 2.0 default: 'd'};}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("void f() {int x = match 1 {case 0: 1 case 1, 2: 2.0 default: 'd'};}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
 		}));
 	}
     

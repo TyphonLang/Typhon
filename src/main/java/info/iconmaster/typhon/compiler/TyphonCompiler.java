@@ -20,6 +20,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.BlockContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BlockStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BreakStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.CaseBlockContext;
+import info.iconmaster.typhon.antlr.TyphonParser.CaseExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.CastExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.CharConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ContStatContext;
@@ -34,6 +35,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.IsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.LogicOpsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.LvalueContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MapConstExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.MatchExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MemberExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MemberLvalueContext;
 import info.iconmaster.typhon.antlr.TyphonParser.NullCoalesceExprContext;
@@ -1438,6 +1440,73 @@ public class TyphonCompiler {
 				// return the map type
 				return Arrays.asList(new TypeRef(core.TYPE_MAP, new TemplateArgument(commonKey), new TemplateArgument(commonValue)));
 			}
+			
+			@Override
+			public List<TypeRef> visitMatchExpr(MatchExprContext ctx) {
+				Variable out;
+				if (insertInto.isEmpty()) {
+					out = scope.addTempVar(new TypeRef(core.TYPE_ANY), new SourceInfo(ctx));
+				} else {
+					out = insertInto.get(0);
+				}
+				
+				TypeRef common = getExprType(scope, ctx.tnDefault, Arrays.asList(out.type)).get(0);
+				
+				Scope newScope = new Scope(scope.getCodeBlock(), scope);
+				newScope.beginScopeLabel = newScope.addTempLabel();
+				newScope.endScopeLabel = newScope.addTempLabel();
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {newScope.beginScopeLabel}));
+				
+				Variable switchVar = scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(ctx.tnMatch));
+				compileExpr(scope, ctx.tnMatch, Arrays.asList(switchVar));
+				
+				Label defaultLabel = newScope.addTempLabel();
+				
+				for (CaseExprContext caze : ctx.tnCases) {
+					Scope caseScope = new Scope(scope.getCodeBlock(), newScope);
+					caseScope.beginScopeLabel = caseScope.addTempLabel();
+					caseScope.endScopeLabel = newScope.endScopeLabel;
+					Label caseLabel = caseScope.addTempLabel();
+					
+					for (ExprContext expr : caze.tnIf) {
+						Variable caseVar = caseScope.addTempVar(switchVar.type, new SourceInfo(expr));
+						compileExpr(caseScope, expr, Arrays.asList(caseVar));
+						
+						Variable caseCondVar = caseScope.addTempVar(new TypeRef(core.TYPE_BOOL), new SourceInfo(expr));
+						compileBinOp(caseScope, switchVar, caseVar, "==", Arrays.asList(caseCondVar), new SourceInfo(expr));
+						
+						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPTRUE, new Object[] {caseLabel}));
+					}
+					
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMP, new Object[] {caseScope.endScopeLabel}));
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {caseLabel}));
+					
+					TypeRef old = out.type; out.type = TypeRef.var(core.tni);
+					compileExpr(scope, caze.tnThen, insertInto);
+					common = common.commonType(out.type); out.type = old;
+					
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMP, new Object[] {newScope.endScopeLabel}));
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {caseScope.beginScopeLabel}));
+				}
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {defaultLabel}));
+				
+				if (ctx.tnDefault != null) {
+					Scope caseScope = new Scope(scope.getCodeBlock(), newScope);
+					caseScope.beginScopeLabel = caseScope.addTempLabel();
+					caseScope.endScopeLabel = newScope.endScopeLabel;
+					
+					TypeRef old = out.type; out.type = TypeRef.var(core.tni);
+					compileExpr(scope, ctx.tnDefault, insertInto);
+					common = common.commonType(out.type); out.type = old;
+					
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {caseScope.beginScopeLabel}));
+				}
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {newScope.endScopeLabel}));
+				return Arrays.asList(common);
+			}
 		};
 		
 		List<TypeRef> a = visitor.visit(rule);
@@ -1773,6 +1842,17 @@ public class TyphonCompiler {
 				
 				// return the map type
 				return Arrays.asList(new TypeRef(core.TYPE_MAP, new TemplateArgument(commonKey), new TemplateArgument(commonValue)));
+			}
+			
+			@Override
+			public List<TypeRef> visitMatchExpr(MatchExprContext ctx) {
+				TypeRef common = getExprType(scope, ctx.tnDefault, expectedTypes).get(0);
+				
+				for (CaseExprContext caze : ctx.tnCases) {
+					common = common.commonType(getExprType(scope, caze.tnThen, expectedTypes).get(0));
+				}
+				
+				return Arrays.asList(common);
 			}
 		};
 		

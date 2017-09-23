@@ -534,7 +534,21 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(1, code.tni.errors.size());
 		}),new TestCase("void f() {Number x = 1 ?? 1.0;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
-		}));
+		}),new TestCase("void g<T>(T a) {} void f() {g(1);}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("void g<T : Number>(T a) {} void f() {g(1);}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("void g<T : int>(T a) {} void f() {g('c');}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("void g<T : Number>(T a, T b) {} void f() {g(1, 2);}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("void g<T : Number>(T a, T b) {} void f() {g(1, 2.0);}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("void g<T : int>(T a, T b) {} void f() {g(1, 2.0);}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		})/*,new TestCase("T g<T>(T a) {} void f() {int x = g(1);}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		})*/);
 	}
     
     private static class TestCase implements Runnable {

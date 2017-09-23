@@ -30,6 +30,7 @@ public class TestTypeInferance extends TyphonTest {
     	
     	TemplateType ta = new TemplateType(tni, "A");
     	TemplateType tb = new TemplateType(tni, "B"); tb.setBaseType(new TypeRef(p.TYPE_NUMBER));
+    	TemplateType tc = new TemplateType(tni, "C"); tb.setBaseType(new TypeRef(p.TYPE_INT));
     	
     	TypeRef listOfA = new TypeRef(p.TYPE_LIST, new TemplateArgument(ta));
     	TypeRef listOfInt = new TypeRef(p.TYPE_LIST, new TemplateArgument(p.TYPE_INT));
@@ -64,6 +65,9 @@ public class TestTypeInferance extends TyphonTest {
 					Assert.assertEquals(p.TYPE_FLOAT, map.get(ta).getType());
 					Assert.assertNotNull(map.get(tb));
 					Assert.assertEquals(p.TYPE_INT, map.get(tb).getType());
+				}),new TestCase(tni, new TypeRef[] {new TypeRef(tc), new TypeRef(tc)}, new TypeRef[] {new TypeRef(p.TYPE_INT), new TypeRef(p.TYPE_FLOAT)}, new HashMap<TemplateType, TypeRef>() {{put(tc, new TypeRef(p.TYPE_INT));}}, (map)->{
+					Assert.assertNotNull(map.get(tc));
+					Assert.assertEquals(p.TYPE_INT, map.get(tc).getType());
 				})
 		);
 	}

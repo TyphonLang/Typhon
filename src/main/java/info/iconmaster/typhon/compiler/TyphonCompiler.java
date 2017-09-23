@@ -71,6 +71,7 @@ import info.iconmaster.typhon.model.Package;
 import info.iconmaster.typhon.model.Parameter;
 import info.iconmaster.typhon.model.TemplateArgument;
 import info.iconmaster.typhon.model.TyphonModelReader;
+import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.types.TyphonTypeResolver;
@@ -778,9 +779,22 @@ public class TyphonCompiler {
 							return true;
 						}
 						
+						// calculate the function's template map
+						// TODO: add explicit specifications on top of the inferences
+						List<TypeRef> params = f.getParams().stream().filter(p->map.containsKey(p)).map(p->p.getType()).collect(Collectors.toList());
+						List<TypeRef> args2 = f.getParams().stream().filter(p->map.containsKey(p)).map(p->map.get(p).type).collect(Collectors.toList());
+						
+						Map<TemplateType, TypeRef> funcTempMap = TemplateUtils.inferTemplatesFromArguments(core.tni, params, args2, f.getFuncTemplateMap());
+						
 						// check if the types match up to the signature
 						for (Entry<Parameter, Variable> entry : map.entrySet()) {
-							if (!getExprType(scope, argmap.get(entry.getValue()), Arrays.asList(entry.getKey().getType())).get(0).canCastTo(entry.getKey().getType())) {
+							TypeRef a = getExprType(scope, argmap.get(entry.getValue()), Arrays.asList(entry.getKey().getType())).get(0);
+							TypeRef b = entry.getKey().getType();
+							
+							a = TemplateUtils.replaceTemplates(a, funcTempMap);
+							b = TemplateUtils.replaceTemplates(b, funcTempMap);
+							
+							if (!a.canCastTo(b)) {
 								return true;
 							}
 						}

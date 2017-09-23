@@ -2,7 +2,9 @@ package info.iconmaster.typhon.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import info.iconmaster.typhon.TyphonInput;
@@ -13,6 +15,7 @@ import info.iconmaster.typhon.compiler.CodeBlock;
 import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
+import info.iconmaster.typhon.types.UserType;
 import info.iconmaster.typhon.util.SourceInfo;
 
 /**
@@ -119,6 +122,7 @@ public class Function extends TyphonModelEntity implements MemberAccess {
 	 * @return The template parameters for this function.
 	 */
 	public List<TemplateType> getTemplate() {
+		getTypePackage();
 		return template;
 	}
 
@@ -262,5 +266,39 @@ public class Function extends TyphonModelEntity implements MemberAccess {
 	@Override
 	public String toString() {
 		return "Function("+retType+" "+name+params+")";
+	}
+	
+	public Map<TemplateType, TypeRef> getFuncTemplateMap() {
+		Map<TemplateType, TypeRef> result = new HashMap<>();
+		for (TemplateType t : getTemplate()) {
+			result.put(t, t.getDefaultValue() == null ? t.getBaseType() : t.getDefaultValue());
+		}
+		return result;
+	}
+	
+	private Package typePackage;
+	
+	public Package getTypePackage() {
+		if (typePackage != null) {
+			typePackage.getParent().removeSubpackage(typePackage);
+		}
+		
+		typePackage = new Package(source, null, getParent() == null ? tni.corePackage : getParent()) {
+			@Override
+			public MemberAccess getMemberParent() {
+				return Function.this;
+			}
+		};
+		
+		for (TemplateType t : template) {
+			typePackage.addType(t);
+		}
+		
+		return typePackage;
+	}
+	
+	@Override
+	public List<MemberAccess> getMembers(Map<TemplateType, TypeRef> templateMap) {
+		return getTypePackage().getMembers(templateMap);
 	}
 }

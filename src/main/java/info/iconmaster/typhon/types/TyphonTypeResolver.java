@@ -79,15 +79,19 @@ public class TyphonTypeResolver {
 		}
 		f.needsTypesResolved(false);
 		
+		for (TemplateType t : f.getTemplate()) {
+			resolve(t);
+		}
+		
 		for (TypeContext rule : f.getRawRetType()) {
-			f.getRetType().add(readType(f.tni, rule, f.getMemberParent()));
+			f.getRetType().add(readType(f.tni, rule, f));
 		}
 		
 		for (Parameter p : f.getParams()) {
-			resolve(p, f.getMemberParent());
+			resolve(p, f);
 		}
 		
-		f.getAnnots().stream().forEach((e)->resolve(e, f.getMemberParent()));
+		f.getAnnots().stream().forEach((e)->resolve(e, f));
 	}
 	
 	/**

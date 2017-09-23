@@ -22,6 +22,7 @@ constructorParam:
 
 type:
 	tnAnnots+=annotation* tnTemplate=templateDecls? '(' (tnArgTypes+=type (',' tnArgTypes+=type)*)? ')' '->' tnRetType=types	#funcType
+|	tnAnnots+=annotation* '(' tnTypes+=type '&&' (tnTypes+=type '&&')* tnTypes+=type ')'										#comboType
 |	tnAnnots+=annotation* '[' tnBaseType=type ']'																				#arrayType
 |	tnAnnots+=annotation* '{' tnKeyType=type ':' tnValueType=type '}'															#mapType
 |	tnAnnots+=annotation* 'var'																									#varType
@@ -52,7 +53,8 @@ expr:
 |	tnLhs=expr (tnOp='=='|tnOp='!='|tnOp='==='|tnOp='!==') tnRhs=expr																		#eqOpsExpr
 |	tnLhs=expr (tnOp='&&'|tnOp='||') tnRhs=expr																								#logicOpsExpr
 |	tnAnnots+=annotation* 'throw' tnArg=expr																								#throwExpr
-|	tnIf=expr '?' tnThen=expr ':' tnElse=expr																								#terneryOpExpr
+|	'if' tnIf=expr ':' tnThen=expr ('elseif' tnElseIf=expr ':' tnElseThen=expr)* 'else' ':' tnElse=expr										#terneryOpExpr
+|	'match' tnMatch=expr '{' (tnCases+=caseExpr)* ('default' ':' tnDefault=expr)? '}'														#matchExpr
 |	tnAnnots+=annotation* 'class' tnType=type																								#typeConstExpr
 |	tnAnnots+=annotation* 'null'																											#nullConstExpr
 |	tnAnnots+=annotation* 'true'																											#trueConstExpr
@@ -69,6 +71,7 @@ expr:
 ;
 exprs: tnExprs+=expr | '(' (tnExprs+=expr (',' tnExprs+=expr)*)? ')';
 memberItem: (tnOp='.'|tnOp='?.'|tnOp='..') tnAnnots+=annotation* tnName=WORD tnTemplate=templateArgs?;
+caseExpr: 'case' tnIf+=expr (',' tnIf+=expr)* ':' tnThen=expr;
 
 stat:
 	tnAnnots+=annotation* 'return' (tnValues+=expr (',' tnValues+=expr)*)? ';'																							#retStat
@@ -82,7 +85,7 @@ stat:
 |	tnAnnots+=annotation* 'try' tnTryBlock=block tnCatchBlocks+=catchBlock*																								#tryStat
 |	tnAnnots+=annotation* 'break' tnLabel=WORD? ';'																														#breakStat
 |	tnAnnots+=annotation* 'continue' tnLabel=WORD? ';'																													#contStat
-|	tnAnnots+=annotation* 'switch' tnExpr=expr (tnLabel=WORD ':')? '{' tnCaseBlocks+=caseBlock* (tnDefaultAnnots+=annotation* 'default' tnDefaultBlock=block)? '}'	#switchStat
+|	tnAnnots+=annotation* 'switch' tnExpr=expr (tnLabel=WORD ':')? '{' tnCaseBlocks+=caseBlock* (tnDefaultAnnots+=annotation* 'default' tnDefaultBlock=block)? '}'		#switchStat
 |	tnGlobalAnnot=globalAnnotation																																		#globalAnnotStat
 |	tnExpr=expr ';'																																						#exprStat
 |	tnAnnots+=annotation* tnBlock=block																																	#blockStat

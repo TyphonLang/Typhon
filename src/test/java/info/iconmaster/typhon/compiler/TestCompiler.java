@@ -548,12 +548,6 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(1, code.tni.errors.size());
 		}),new TestCase("T g<T>(T a) {} void f() {int x = g(1);}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
-		}),new TestCase("T g<T>() {} void f() {int x = g<int>();}", (code)->{
-			Assert.assertEquals(0, code.tni.errors.size());
-		}),new TestCase("T g<T>(T a) {} void f() {int x = g<Number>(1);}", (code)->{
-			Assert.assertEquals(1, code.tni.errors.size());
-		}),new TestCase("T g<T>(T a) {} void f() {Number x = g<Number>(1);}", (code)->{
-			Assert.assertEquals(0, code.tni.errors.size());
 		}));
 	}
     

@@ -20,7 +20,6 @@ import info.iconmaster.typhon.antlr.TyphonParser.BlockStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BreakStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.CastExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.CharConstExprContext;
-import info.iconmaster.typhon.antlr.TyphonParser.ComboAssignStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ContStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DefStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.EqOpsExprContext;
@@ -551,10 +550,6 @@ public class TyphonCompiler {
 	 * @return The number of variables that were filled.
 	 */
 	public static int compileExpr(Scope scope, ExprContext rule, List<Variable> insertInto) {
-		if (rule instanceof ParensExprContext) {
-			return compileExpr(scope, ((ParensExprContext) rule).tnExpr, insertInto);
-		}
-		
 		CorePackage core = scope.getCodeBlock().tni.corePackage;
 		
 		TyphonBaseVisitor<List<TypeRef>> visitor = new TyphonBaseVisitor<List<TypeRef>>() {
@@ -785,9 +780,6 @@ public class TyphonCompiler {
 						List<TypeRef> args2 = f.getParams().stream().filter(p->map.containsKey(p)).map(p->map.get(p).type).collect(Collectors.toList());
 						
 						Map<TemplateType, TypeRef> funcTempMap = TemplateUtils.inferTemplatesFromArguments(core.tni, params, args2, f.getFuncTemplateMap());
-						if (ctx.tnTemplate != null) {
-							funcTempMap.putAll(TemplateUtils.matchTemplateArgs(f.getTemplate(), TyphonTypeResolver.readTemplateArgs(core.tni, ctx.tnTemplate.tnArgs, scope)));
-						}
 						
 						// check if the types match up to the signature
 						for (Entry<Parameter, Variable> entry : map.entrySet()) {
@@ -886,9 +878,6 @@ public class TyphonCompiler {
 					List<TypeRef> args2 = f.getParams().stream().filter(p->map.containsKey(p)).map(p->map.get(p).type).collect(Collectors.toList());
 					
 					Map<TemplateType, TypeRef> funcTempMap = TemplateUtils.inferTemplatesFromArguments(core.tni, params, args2, f.getFuncTemplateMap());
-					if (ctx.tnTemplate != null) {
-						funcTempMap.putAll(TemplateUtils.matchTemplateArgs(f.getTemplate(), TyphonTypeResolver.readTemplateArgs(core.tni, ctx.tnTemplate.tnArgs, scope)));
-					}
 					
 					List<TypeRef> retType = f.getRetType().subList(0, outputVars.size()).stream().map(t->TemplateUtils.replaceTemplates(TemplateUtils.replaceTemplates(t, funcTempMap), sub.typeMap)).collect(Collectors.toList());
 					return retType;
@@ -1196,6 +1185,11 @@ public class TyphonCompiler {
 				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {label}));
 				
 				return Arrays.asList(common);
+			}
+			
+			@Override
+			public List<TypeRef> visitParensExpr(ParensExprContext ctx) {
+				return visit(ctx.tnExpr);
 			}
 		};
 		

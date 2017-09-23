@@ -39,8 +39,8 @@ typeMemberItem: tnAnnots+=annotation* tnName=WORD tnTemplate=templateArgs?;
 expr:
 	tnLhs=expr tnLookup+=memberItem* (tnOp='.'|tnOp='?.'|tnOp='..') tnAnnots+=annotation* tnValue=WORD										#memberExpr
 |	tnLhs=expr '::' tnValue=WORD tnTemplate=templateArgs? '(' (tnFuncPtrArg+=templateArg (',' tnFuncPtrArg+=templateArg)*)? ')'				#funcPtrExpr
-|	tnCallee=expr tnAnnots+=annotation* tnTemplate=templateArgs? '(' tnArgs=argsDecl ')'													#funcCallExpr
-|	tnCallee=expr tnAnnots+=annotation* tnTemplate=templateArgs? '[' tnArgs=argsDecl ']'													#indexCallExpr
+|	tnCallee=expr tnAnnots+=annotation* '(' tnArgs=argsDecl ')'																				#funcCallExpr
+|	tnCallee=expr tnAnnots+=annotation* '[' tnArgs=argsDecl ']'																				#indexCallExpr
 |	tnLhs=expr (tnOp='as'|tnOp='as?') tnRhs=type																							#castExpr
 |	tnAnnots+=annotation* 'new' tnType=type '(' tnArgs=argsDecl ')' ('{' tnDecls+=decl* '}')?												#newExpr
 |	tnAnnots+=annotation* (tnOp='-'|tnOp='+'|tnOp='!'|tnOp='~') tnArg=expr																	#unOpsExpr

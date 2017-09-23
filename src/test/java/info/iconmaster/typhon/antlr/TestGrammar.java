@@ -186,14 +186,12 @@ public class TestGrammar extends TyphonTest {
 			new CaseValid("a()", (parser)->{parser.expr();}),
 			new CaseValid("a(b)", (parser)->{parser.expr();}),
 			new CaseValid("a(b,c,d)", (parser)->{parser.expr();}),
-			new CaseValid("a<int>()", (parser)->{parser.expr();}),
 			new CaseValid("a.b()", (parser)->{parser.expr();}),
 			new CaseValid("a @a() ()", (parser)->{parser.expr();}),
 			//indexCallExpr
 			new CaseValid("a[]", (parser)->{parser.expr();}),
 			new CaseValid("a[b]", (parser)->{parser.expr();}),
 			new CaseValid("a[b,c,d]", (parser)->{parser.expr();}),
-			new CaseValid("a<int>[]", (parser)->{parser.expr();}),
 			new CaseValid("a.b[]", (parser)->{parser.expr();}),
 			new CaseValid("a @a() []", (parser)->{parser.expr();}),
 			//castExpr

@@ -769,6 +769,7 @@ public class TyphonCompiler {
 				
 				paths.removeIf((path)->{
 					MemberAccess member = path.members.get(path.members.size()-1);
+					Map<TemplateType, TypeRef> typeMap = path.lastTypeMap();
 					
 					if (member instanceof Function) {
 						Function f = (Function) member;
@@ -791,8 +792,8 @@ public class TyphonCompiler {
 							TypeRef a = getExprType(scope, argmap.get(entry.getValue()), Arrays.asList(entry.getKey().getType())).get(0);
 							TypeRef b = entry.getKey().getType();
 							
-							a = TemplateUtils.replaceTemplates(a, funcTempMap);
-							b = TemplateUtils.replaceTemplates(b, funcTempMap);
+							a = TemplateUtils.replaceTemplates(a, funcTempMap); a = TemplateUtils.replaceTemplates(a, typeMap); 
+							b = TemplateUtils.replaceTemplates(b, funcTempMap); b = TemplateUtils.replaceTemplates(b, typeMap); 
 							
 							if (!a.canCastTo(b)) {
 								return true;
@@ -878,7 +879,15 @@ public class TyphonCompiler {
 						}
 					}
 					
-					return f.getRetType().subList(0, outputVars.size());
+					// calculate the function's return type
+					// TODO: add explicit specifications on top of the inferences
+					List<TypeRef> params = f.getParams().stream().filter(p->map.containsKey(p)).map(p->p.getType()).collect(Collectors.toList());
+					List<TypeRef> args2 = f.getParams().stream().filter(p->map.containsKey(p)).map(p->map.get(p).type).collect(Collectors.toList());
+					
+					Map<TemplateType, TypeRef> funcTempMap = TemplateUtils.inferTemplatesFromArguments(core.tni, params, args2, f.getFuncTemplateMap());
+					
+					List<TypeRef> retType = f.getRetType().subList(0, outputVars.size()).stream().map(t->TemplateUtils.replaceTemplates(TemplateUtils.replaceTemplates(t, funcTempMap), sub.typeMap)).collect(Collectors.toList());
+					return retType;
 				} else {
 					// TODO: CALLFPTR
 					return Arrays.asList();

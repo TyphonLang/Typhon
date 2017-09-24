@@ -159,7 +159,7 @@ public class TyphonCompiler {
 					// error; read-only field
 					scope.getCodeBlock().tni.errors.add(new WriteOnlyError(param.source, field));
 				} else {
-					block.ops.add(new Instruction(f.tni, param.source, OpCode.CALL, new Object[] {Arrays.asList(), block.instance, setter, Arrays.asList(var)}));
+					block.ops.add(new Instruction(f.tni, param.source, OpCode.CALL, new Object[] {Arrays.asList(), block.instance, setter.getVirtualBase(fieldOf), Arrays.asList(var)}));
 				}
 				
 				param.setVar(var);
@@ -750,7 +750,7 @@ public class TyphonCompiler {
 									return Arrays.asList(f.type);
 								}
 								
-								scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {Arrays.asList(insertInto.get(0)), scope.getCodeBlock().instance, f.getGetter(), new ArrayList<>()}));
+								scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {Arrays.asList(insertInto.get(0)), scope.getCodeBlock().instance, f.getGetter().getVirtualBase(fieldOf), new ArrayList<>()}));
 								return Arrays.asList(f.type);
 							}
 						} else if (member instanceof Variable) {
@@ -1011,7 +1011,7 @@ public class TyphonCompiler {
 				}
 				
 				Function handler = handlers.get(0);
-				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnArg), OpCode.CALL, new Object[] {insertInto.isEmpty() ? Arrays.asList() : Arrays.asList(insertInto.get(0)), lhs, handler, Arrays.asList()}));
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnArg), OpCode.CALL, new Object[] {insertInto.isEmpty() ? Arrays.asList() : Arrays.asList(insertInto.get(0)), lhs, handler.getVirtualBase(handler.getFieldOf()), Arrays.asList()}));
 				
 				return handler.getRetType();
 			}
@@ -1949,7 +1949,7 @@ public class TyphonCompiler {
 									return var;
 								}
 								
-								postfix.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {Arrays.asList(), scope.getCodeBlock().instance, f.getSetter(), Arrays.asList(var)}));
+								postfix.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {Arrays.asList(), scope.getCodeBlock().instance, f.getSetter().getVirtualBase(fieldOf), Arrays.asList(var)}));
 								return var;
 							}
 						} else if (member instanceof Variable) {
@@ -2058,7 +2058,7 @@ public class TyphonCompiler {
 					if (fieldOf == null) {
 						postfix.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALLSTATIC, new Object[] {Arrays.asList(), f.getSetter(), Arrays.asList(var)}));
 					} else {
-						postfix.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {Arrays.asList(), instanceVar, f.getSetter(), Arrays.asList(var)}));
+						postfix.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {Arrays.asList(), instanceVar, f.getSetter().getVirtualBase(fieldOf), Arrays.asList(var)}));
 					}
 					
 					if (label != null) {
@@ -2178,7 +2178,7 @@ public class TyphonCompiler {
 		}
 		
 		Function handler = handlers.get(0);
-		scope.getCodeBlock().ops.add(new Instruction(core.tni, source, OpCode.CALL, new Object[] {insertInto.isEmpty() ? Arrays.asList() : Arrays.asList(insertInto.get(0)), lhs, handler, Arrays.asList(rhs)}));
+		scope.getCodeBlock().ops.add(new Instruction(core.tni, source, OpCode.CALL, new Object[] {insertInto.isEmpty() ? Arrays.asList() : Arrays.asList(insertInto.get(0)), lhs, handler.getVirtualBase(handler.getFieldOf()), Arrays.asList(rhs)}));
 		
 		return handler.getRetType();
 	}
@@ -2264,7 +2264,7 @@ public class TyphonCompiler {
 				outputVars = Arrays.asList();
 			}
 			
-			scope.getCodeBlock().ops.add(new Instruction(core.tni, source, OpCode.CALL, new Object[] {outputVars, instanceVar, f, inputVars}));
+			scope.getCodeBlock().ops.add(new Instruction(core.tni, source, OpCode.CALL, new Object[] {outputVars, instanceVar, f.getVirtualBase(fieldOf), inputVars}));
 			
 			if (sub != null && sub.infix == AccessType.DOUBLE_DOT && !insertInto.isEmpty()) {
 				scope.getCodeBlock().ops.add(new Instruction(core.tni, source, OpCode.MOV, new Object[] {instanceVar, insertInto.get(0)}));

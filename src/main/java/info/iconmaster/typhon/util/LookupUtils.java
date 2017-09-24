@@ -552,7 +552,7 @@ public class LookupUtils {
 				} else {
 					// instance
 					
-					scope.getCodeBlock().ops.add(new Instruction(scope.getCodeBlock().tni, source, OpCode.CALL, new Object[] {Arrays.asList(newVar), var, f.getGetter(), new ArrayList<>()}));
+					scope.getCodeBlock().ops.add(new Instruction(scope.getCodeBlock().tni, source, OpCode.CALL, new Object[] {Arrays.asList(newVar), var, f.getGetter().getVirtualBase(fieldOf), new ArrayList<>()}));
 				}
 				
 				var = newVar;

@@ -693,6 +693,30 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(1, code.ops.size());
 			
 			Assert.assertEquals(OpCode.MOVTYPE, code.ops.get(0).op);
+		}),new TestCase("void g(int x, [int] @vararg y) {} void f() {g(1);};}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("void g(int x, [int] @vararg y) {} void f() {g(1, 2, 3);};}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("void g(int x, [int] @vararg y) {} void f() {g(1, 'c');};}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("void g(int x, [int] @vararg y) {} void f() {g(1, 2, 'c', 3);};}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("void g(int x, {string:int} @varflag y) {} void f() {g(1);};}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("void g(int x, {string:int} @varflag y) {} void f() {g(1, a: 2, b: 3);};}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("void g(int x, {string:int} @varflag y) {} void f() {g(1, a: 'c');};}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("void g(int x, {string:int} @varflag y) {} void f() {g(1, a: 2, b: 'c', d: 3);};}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("void g([int] @vararg args, {string:int} @varflag flags) {} void f() {g();};}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("void g([int] @vararg args, {string:int} @varflag flags) {} void f() {g(1, b:2, 3);};}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("void g([int] @vararg args, {string:int} @varflag flags) {} void f() {g(1, b:2, 'c');};}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("void g([int] @vararg args, {string:int} @varflag flags) {} void f() {g(1, b:'c', 3);};}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
 		}));
 	}
     

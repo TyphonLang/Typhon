@@ -6,12 +6,15 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
 import info.iconmaster.typhon.compiler.Instruction;
 import info.iconmaster.typhon.compiler.Instruction.OpCode;
 import info.iconmaster.typhon.compiler.Label;
 import info.iconmaster.typhon.compiler.Scope;
+import info.iconmaster.typhon.compiler.TyphonCompiler;
 import info.iconmaster.typhon.compiler.Variable;
 import info.iconmaster.typhon.errors.WriteOnlyError;
 import info.iconmaster.typhon.model.Field;
@@ -19,9 +22,11 @@ import info.iconmaster.typhon.model.Function;
 import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.model.Parameter;
 import info.iconmaster.typhon.model.TemplateArgument;
+import info.iconmaster.typhon.model.libs.CorePackage;
 import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
+import info.iconmaster.typhon.util.LookupUtils.FuncArgMap;
 import info.iconmaster.typhon.util.LookupUtils.LookupElement.AccessType;
 import info.iconmaster.typhon.util.LookupUtils.LookupPath.Subject;
 
@@ -691,5 +696,67 @@ public class LookupUtils {
 		
 		// return the arg map
 		return result;
+	}
+	
+	public static boolean areFuncArgsCompatibleWith(Scope scope, Function f, List<LookupArgument> args, Map<TemplateType, TypeRef> typeMap, Map<Variable, ExprContext> argMap) {
+		CorePackage core = f.tni.corePackage;
+		
+		// check if the argumnet's number/labels all match up to the signature
+		FuncArgMap map = LookupUtils.getFuncArgMap(f, args);
+		if (map == null) {
+			return false;
+		}
+		
+		// calculate the function's template map
+		// TODO: add vararg stuff to these lists
+		List<TypeRef> params = f.getParams().stream().filter(p->map.args.containsKey(p)).map(p->p.getType()).collect(Collectors.toList());
+		List<TypeRef> args2 = f.getParams().stream().filter(p->map.args.containsKey(p)).map(p->map.args.get(p).type).collect(Collectors.toList());
+		
+		Map<TemplateType, TypeRef> funcTempMap = TemplateUtils.inferTemplatesFromArguments(core.tni, params, args2, f.getFuncTemplateMap());
+		
+		// check if the types match up to the signature
+		for (Entry<Parameter, Variable> entry : map.args.entrySet()) {
+			TypeRef a = TyphonCompiler.getExprType(scope, argMap.get(entry.getValue()), Arrays.asList(entry.getKey().getType())).get(0);
+			TypeRef b = entry.getKey().getType();
+			
+			a = TemplateUtils.replaceTemplates(TemplateUtils.replaceTemplates(a, funcTempMap), typeMap);
+			b = TemplateUtils.replaceTemplates(TemplateUtils.replaceTemplates(b, funcTempMap), typeMap);
+			
+			if (!a.canCastTo(b)) {
+				return false;
+			}
+		}
+		
+		for (Entry<Parameter, List<Variable>> entry : map.varargs.entrySet()) {
+			Parameter p = entry.getKey();
+			TypeRef elemType = TemplateUtils.matchAllTemplateArgs(p.getType()).get(core.TYPE_LIST.getTemplates().get(0));
+			elemType = TemplateUtils.replaceTemplates(TemplateUtils.replaceTemplates(elemType, funcTempMap), typeMap);
+			
+			for (Variable var : entry.getValue()) {
+				TypeRef vtype = var.type;
+				vtype = TemplateUtils.replaceTemplates(TemplateUtils.replaceTemplates(vtype, funcTempMap), typeMap);
+				
+				if (!vtype.canCastTo(elemType)) {
+					return false;
+				}
+			}
+		}
+		
+		for (Entry<Parameter, Map<String, Variable>> entry : map.varflags.entrySet()) {
+			Parameter p = entry.getKey();
+			TypeRef elemType = TemplateUtils.matchAllTemplateArgs(p.getType()).get(core.TYPE_MAP.getTemplates().get(1));
+			elemType = TemplateUtils.replaceTemplates(TemplateUtils.replaceTemplates(elemType, funcTempMap), typeMap);
+			
+			for (Variable var : entry.getValue().values()) {
+				TypeRef vtype = var.type;
+				vtype = TemplateUtils.replaceTemplates(TemplateUtils.replaceTemplates(vtype, funcTempMap), typeMap);
+				
+				if (!vtype.canCastTo(elemType)) {
+					return false;
+				}
+			}
+		}
+		
+		return true;
 	}
 }

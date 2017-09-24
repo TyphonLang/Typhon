@@ -837,14 +837,14 @@ public class TyphonCompiler {
 				List<LookupArgument> args = new ArrayList<>();
 				List<Variable> vars = new ArrayList<>();
 				
-				Map<Variable, ExprContext> argmap = new HashMap<>();
+				Map<Variable, ExprContext> argMap = new HashMap<>();
 				TyphonModelReader.readArgs(core.tni, ctx.tnArgs.tnArgs).stream().forEach((arg)->{
 					Variable var = scope.addTempVar(TypeRef.var(core.tni), arg.source);
 					vars.add(var);
 					
 					args.add(new LookupArgument(var, arg.getLabel()));
 					
-					argmap.put(var, arg.getRawValue());
+					argMap.put(var, arg.getRawValue());
 				});
 				
 				paths.removeIf((path)->{
@@ -854,29 +854,8 @@ public class TyphonCompiler {
 					if (member instanceof Function) {
 						Function f = (Function) member;
 						
-						// check if the argumnet's number/labels all match up to the signature
-						FuncArgMap map = LookupUtils.getFuncArgMap(f, args);
-						if (map == null) {
+						if (!LookupUtils.areFuncArgsCompatibleWith(scope, f, args, typeMap, argMap)) {
 							return true;
-						}
-						
-						// calculate the function's template map
-						List<TypeRef> params = f.getParams().stream().filter(p->map.args.containsKey(p)).map(p->p.getType()).collect(Collectors.toList());
-						List<TypeRef> args2 = f.getParams().stream().filter(p->map.args.containsKey(p)).map(p->map.args.get(p).type).collect(Collectors.toList());
-						
-						Map<TemplateType, TypeRef> funcTempMap = TemplateUtils.inferTemplatesFromArguments(core.tni, params, args2, f.getFuncTemplateMap());
-						
-						// check if the types match up to the signature
-						for (Entry<Parameter, Variable> entry : map.args.entrySet()) {
-							TypeRef a = getExprType(scope, argmap.get(entry.getValue()), Arrays.asList(entry.getKey().getType())).get(0);
-							TypeRef b = entry.getKey().getType();
-							
-							a = TemplateUtils.replaceTemplates(a, funcTempMap); a = TemplateUtils.replaceTemplates(a, typeMap); 
-							b = TemplateUtils.replaceTemplates(b, funcTempMap); b = TemplateUtils.replaceTemplates(b, typeMap); 
-							
-							if (!a.canCastTo(b)) {
-								return true;
-							}
 						}
 						
 						return false;
@@ -908,12 +887,30 @@ public class TyphonCompiler {
 					for (Parameter param : f.getParams()) {
 						if (map.args.containsKey(param)) {
 							inputVars.add(map.args.get(param));
-							map.args.get(param).type = getExprType(scope, argmap.get(map.args.get(param)), Arrays.asList(param.getType())).get(0);
+							map.args.get(param).type = getExprType(scope, argMap.get(map.args.get(param)), Arrays.asList(param.getType())).get(0);
 							
-							compileExpr(scope, argmap.get(map.args.get(param)), Arrays.asList(map.args.get(param)));
+							compileExpr(scope, argMap.get(map.args.get(param)), Arrays.asList(map.args.get(param)));
+						} else if (map.varargs.containsKey(param)) {
+							Variable listVar = scope.addTempVar(param.getType(), sub.source);
+							inputVars.add(listVar);
+							
+							scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.MOVLIST, new Object[] {listVar, map.varargs.get(param)}));
+						} else if (map.varflags.containsKey(param)) {
+							Variable mapVar = scope.addTempVar(param.getType(), sub.source);
+							inputVars.add(mapVar);
+							
+							Map<Variable, Variable> varmap = new HashMap<>();
+							for (Entry<String, Variable> entry : map.varflags.get(param).entrySet()) {
+								Variable strVar = scope.addTempVar(param.getType(), sub.source);
+								varmap.put(strVar, entry.getValue());
+								
+								scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.MOVSTR, new Object[] {strVar, entry.getKey()}));
+							}
+							
+							scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.MOVMAP, new Object[] {mapVar, varmap}));
 						} else {
-							Variable var = scope.addTempVar(param.getType(), new SourceInfo(ctx));
 							// TODO: assign default value to variable
+							Variable var = scope.addTempVar(param.getType(), new SourceInfo(ctx));
 							inputVars.add(var);
 						}
 					}

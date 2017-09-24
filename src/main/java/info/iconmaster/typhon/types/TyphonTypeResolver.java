@@ -217,7 +217,7 @@ public class TyphonTypeResolver {
 			if (virtualFunc == null) {
 				// error, virtual func not found
 				f.tni.errors.add(new VirtualBaseNotFoundError(override.source, f));
-			} else if (virtualFunc.getVirtualOverrides().containsKey(overrideType)) {
+			} else if (virtualFunc.getVirtualOverrides().stream().anyMatch(ff->overrideType.equals(ff.getFieldOf()))) {
 				// error, override already exists for this function
 				f.tni.errors.add(new DuplicateOverrideError(override.source, virtualFunc, f, overrideType));
 			} else {

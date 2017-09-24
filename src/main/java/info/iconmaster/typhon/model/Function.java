@@ -309,15 +309,15 @@ public class Function extends TyphonModelEntity implements MemberAccess {
 		return getFieldOf() == null;
 	}
 	
-	private Map<Type, Function> virtualBases = new HashMap<>();
+	private List<Function> virtualBases = new ArrayList<>();
 	
-	public Map<Type, Function> getVirtualBases() {
+	public List<Function> getVirtualBases() {
 		return virtualBases;
 	}
 	
-	private Map<Type, Function> virtualOverrides = new HashMap<>();
+	private List<Function> virtualOverrides = new ArrayList<>();
 	
-	public Map<Type, Function> getVirtualOverrides() {
+	public List<Function> getVirtualOverrides() {
 		if (isStatic()) {
 			return null;
 		}
@@ -326,7 +326,17 @@ public class Function extends TyphonModelEntity implements MemberAccess {
 	}
 	
 	public static void setOverride(Function virtual, Function override) {
-		virtual.getVirtualOverrides().put(override.getFieldOf(), override);
-		override.getVirtualBases().put(virtual.getFieldOf(), virtual);
+		virtual.getVirtualOverrides().add(override);
+		override.getVirtualBases().add(virtual);
+	}
+	
+	public Function getVirtualBase(Type expected) {
+		for (Function f : virtualBases) {
+			if (expected.canCastTo(new TypeRef(expected), new TypeRef(f.getFieldOf()))) {
+				return f;
+			}
+		}
+		
+		return this;
 	}
 }

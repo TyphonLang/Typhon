@@ -580,7 +580,7 @@ public class TyphonCompiler {
 						Variable caseCondVar = caseScope.addTempVar(new TypeRef(core.TYPE_BOOL), new SourceInfo(expr));
 						compileBinOp(caseScope, switchVar, caseVar, "==", Arrays.asList(caseCondVar), new SourceInfo(expr));
 						
-						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPTRUE, new Object[] {caseLabel}));
+						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPTRUE, new Object[] {caseCondVar, caseLabel}));
 					}
 					
 					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMP, new Object[] {caseScope.endScopeLabel}));
@@ -1479,7 +1479,7 @@ public class TyphonCompiler {
 						Variable caseCondVar = caseScope.addTempVar(new TypeRef(core.TYPE_BOOL), new SourceInfo(expr));
 						compileBinOp(caseScope, switchVar, caseVar, "==", Arrays.asList(caseCondVar), new SourceInfo(expr));
 						
-						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPTRUE, new Object[] {caseLabel}));
+						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPTRUE, new Object[] {caseCondVar, caseLabel}));
 					}
 					
 					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMP, new Object[] {caseScope.endScopeLabel}));

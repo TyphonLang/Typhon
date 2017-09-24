@@ -1361,8 +1361,13 @@ public class TyphonCompiler {
 				
 				// try to infer what the element type should be.
 				TypeRef elemType = new TypeRef(core.TYPE_ANY);
-				if (!insertInto.isEmpty() && insertInto.get(0).type.getType() == core.TYPE_LIST && !insertInto.get(0).type.getTemplateArgs().isEmpty()) {
-					elemType = insertInto.get(0).type.getTemplateArgs().get(0).getValue();
+				if (!insertInto.isEmpty() && insertInto.get(0).type.getType() == core.TYPE_LIST) {
+					TemplateType tempType = core.TYPE_LIST.getTemplates().get(0);
+					Map<TemplateType, TypeRef> elemTypeMap = TemplateUtils.matchTemplateArgs(insertInto.get(0).type);
+					
+					if (elemTypeMap.containsKey(tempType)) {
+						elemType = elemTypeMap.get(tempType);
+					}
 				}
 				
 				// compile the elements.
@@ -1403,9 +1408,18 @@ public class TyphonCompiler {
 				TypeRef keyType = new TypeRef(core.TYPE_ANY);
 				TypeRef valueType = new TypeRef(core.TYPE_ANY);
 				
-				if (!insertInto.isEmpty() && insertInto.get(0).type.getType() == core.TYPE_MAP && insertInto.get(0).type.getTemplateArgs().size() == 2) {
-					keyType = insertInto.get(0).type.getTemplateArgs().get(0).getValue();
-					valueType = insertInto.get(0).type.getTemplateArgs().get(1).getValue();
+				if (!insertInto.isEmpty() && insertInto.get(0).type.getType() == core.TYPE_MAP) {
+					TemplateType keyTempType = core.TYPE_MAP.getTemplates().get(0);
+					TemplateType valueTempType = core.TYPE_MAP.getTemplates().get(1);
+					
+					Map<TemplateType, TypeRef> elemTypeMap = TemplateUtils.matchTemplateArgs(insertInto.get(0).type);
+					
+					if (elemTypeMap.containsKey(keyTempType)) {
+						keyType = elemTypeMap.get(keyTempType);
+					}
+					if (elemTypeMap.containsKey(valueTempType)) {
+						valueType = elemTypeMap.get(valueTempType);
+					}
 				}
 				
 				// compile the elements.
@@ -1791,8 +1805,13 @@ public class TyphonCompiler {
 				
 				// try to infer what the element type should be.
 				TypeRef elemType = new TypeRef(core.TYPE_ANY);
-				if (!expectedTypes.isEmpty() && expectedTypes.get(0).getType() == core.TYPE_LIST && !expectedTypes.get(0).getTemplateArgs().isEmpty()) {
-					elemType = expectedTypes.get(0).getTemplateArgs().get(0).getValue();
+				if (!expectedTypes.isEmpty() && expectedTypes.get(0).getType() == core.TYPE_LIST) {
+					TemplateType tempType = core.TYPE_LIST.getTemplates().get(0);
+					Map<TemplateType, TypeRef> elemTypeMap = TemplateUtils.matchTemplateArgs(expectedTypes.get(0));
+					
+					if (elemTypeMap.containsKey(tempType)) {
+						elemType = elemTypeMap.get(tempType);
+					}
 				}
 				
 				// compile the elements.
@@ -1824,9 +1843,18 @@ public class TyphonCompiler {
 				TypeRef keyType = new TypeRef(core.TYPE_ANY);
 				TypeRef valueType = new TypeRef(core.TYPE_ANY);
 				
-				if (!expectedTypes.isEmpty() && expectedTypes.get(0).getType() == core.TYPE_MAP && expectedTypes.get(0).getTemplateArgs().size() == 2) {
-					keyType = expectedTypes.get(0).getTemplateArgs().get(0).getValue();
-					valueType = expectedTypes.get(0).getTemplateArgs().get(1).getValue();
+				if (!expectedTypes.isEmpty() && expectedTypes.get(0).getType() == core.TYPE_MAP) {
+					TemplateType keyTempType = core.TYPE_MAP.getTemplates().get(0);
+					TemplateType valueTempType = core.TYPE_MAP.getTemplates().get(1);
+					
+					Map<TemplateType, TypeRef> elemTypeMap = TemplateUtils.matchTemplateArgs(expectedTypes.get(0));
+					
+					if (elemTypeMap.containsKey(keyTempType)) {
+						keyType = elemTypeMap.get(keyTempType);
+					}
+					if (elemTypeMap.containsKey(valueTempType)) {
+						valueType = elemTypeMap.get(valueTempType);
+					}
 				}
 				
 				// compile the elements.

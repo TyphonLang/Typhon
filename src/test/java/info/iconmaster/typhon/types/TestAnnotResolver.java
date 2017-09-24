@@ -57,6 +57,36 @@ public class TestAnnotResolver extends TyphonTest {
 			Assert.assertEquals(2, p.tni.errors.size());
 		}),new TestCase("void f(int a, [int] @vararg x, {string:int} @varflag y, int b);", (p)->{
 			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("class a {void virtual() {}} class b : a {@override void virtual() {}}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("class a {void virtual(int a) {}} class b : a {@override void virtual(int a) {}}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("class a {void virtual(int a) {}} class b : a {@override void virtual(int b) {}}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("class a {void virtual(int a, int b) {}} class b : a {@override void virtual(int a, int b) {}}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("class a {int virtual() {}} class b : a {@override int virtual() {}}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("class a {(int, float) virtual() {}} class b : a {@override (int, float) virtual() {}}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("class a {void virtual(int a) {}} class b : a {@override void virtual() {}}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("class a {void virtual() {}} class b : a {@override void virtual(int a) {}}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("class a {void virtual() {}} class b : a {@override void override() {}}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("class a {int virtual() {}} class b : a {@override void virtual() {}}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("class a {void virtual() {}} class b : a {@override int virtual() {}}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("class a {int virtual() {}} class b : a {@override float virtual() {}}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("class a {void virtual(int a) {}} class b : a {@override void virtual(float a) {}}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("class a {void virtual() {}} class b : a {@override void virtual() {}} class c : b {@override void virtual() {}}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("class a {void virtual() {}} class b : a {} class c : b {@override void virtual() {}}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
 		}));
 	}
     

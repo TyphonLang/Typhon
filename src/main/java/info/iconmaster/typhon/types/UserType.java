@@ -218,30 +218,34 @@ public class UserType extends Type {
 		List<TypeRef> result = new ArrayList<>();
 		result.addAll(getParentTypes());
 		
-		boolean addedToResult = false;
+		boolean addedToResult = true;
 		while (addedToResult) {
+			if (addedToResult) {
+				addedToResult = false;
+			}
+			
 			for (TypeRef type : new ArrayList<>(result)) {
 				if (type.getType() instanceof UserType) {
 					for (TypeRef parentType : ((UserType)type.getType()).getParentTypes()) {
 						if (!result.contains(parentType)) {
 							result.add(parentType);
+							addedToResult = true;
 						}
 					}
-					addedToResult = true;
 				} else if (type.getType() instanceof SystemType) {
 					for (TypeRef parentType : ((SystemType)type.getType()).getParentTypes()) {
 						if (!result.contains(parentType)) {
 							result.add(parentType);
+							addedToResult = true;
 						}
 					}
-					addedToResult = true;
 				} else if (type.getType() instanceof ComboType) {
 					for (TypeRef parentType : ((ComboType)type.getType()).getTypes()) {
 						if (!result.contains(parentType)) {
 							result.add(parentType);
+							addedToResult = true;
 						}
 					}
-					addedToResult = true;
 				}
 			}
 		}

@@ -30,6 +30,7 @@ import info.iconmaster.typhon.errors.TypeNotFoundError;
 import info.iconmaster.typhon.errors.VirtualBaseNotFoundError;
 import info.iconmaster.typhon.model.Annotation;
 import info.iconmaster.typhon.model.AnnotationDefinition;
+import info.iconmaster.typhon.model.Constructor;
 import info.iconmaster.typhon.model.Field;
 import info.iconmaster.typhon.model.Function;
 import info.iconmaster.typhon.model.MemberAccess;
@@ -163,7 +164,7 @@ public class TyphonTypeResolver {
 				}
 			}
 			
-			Type overrideType = f.getFieldOf();
+			Type overrideType = f.getFieldOf(); resolve(overrideType);
 			Function virtualFunc = null;
 			
 			if (!(overrideType instanceof UserType)) {
@@ -174,13 +175,20 @@ public class TyphonTypeResolver {
 			UserType overrideUserType = (UserType) overrideType;
 			List<TypeRef> parents = overrideUserType.getAllParents();
 			
-			parentLoop:
 			for (TypeRef parent : parents) {
-				List<Function> fs = parent.getType().getTypePackage().getFunctions().stream().filter(ff->!ff.isStatic()).collect(Collectors.toList());
+				resolve(parent.getType());
 				
+				List<Function> fs = parent.getType().getTypePackage().getFunctions().stream().filter(ff->{
+					resolve(ff);
+					return !(ff instanceof Constructor) && !ff.isStatic() && !ff.hasAnnot(f.tni.corePackage.ANNOT_OVERRIDE);
+				}).collect(Collectors.toList());
+				
+				funcLoop:
 				for (Function memberFunc : fs) {
-					if (f.getParams().size() != memberFunc.getParams().size()) continue parentLoop;
-					if (f.getRetType().size() != memberFunc.getRetType().size()) continue parentLoop;
+					if (!memberFunc.getName().equals(f.getName())) continue funcLoop;
+					
+					if (f.getParams().size() != memberFunc.getParams().size()) continue funcLoop;
+					if (f.getRetType().size() != memberFunc.getRetType().size()) continue funcLoop;
 					
 					int i;
 					
@@ -188,7 +196,7 @@ public class TyphonTypeResolver {
 					for (Parameter a : memberFunc.getParams()) {
 						Parameter b = f.getParams().get(i);
 						
-						if (!a.getType().equals(b.getType())) continue parentLoop;
+						if (!a.getType().equals(b.getType())) continue funcLoop;
 						
 						i++;
 					}
@@ -197,7 +205,7 @@ public class TyphonTypeResolver {
 					for (TypeRef a : memberFunc.getRetType()) {
 						TypeRef b = f.getRetType().get(i);
 						
-						if (!a.equals(b)) continue parentLoop;
+						if (!a.equals(b)) continue funcLoop;
 						
 						i++;
 					}
@@ -469,6 +477,7 @@ public class TyphonTypeResolver {
 						return new TypeRef(tni.corePackage.TYPE_ANY);
 					}
 					
+					resolve(candidates.get(0).getType());
 					return candidates.get(0);
 				}
 				

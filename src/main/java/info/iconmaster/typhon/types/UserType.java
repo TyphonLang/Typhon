@@ -213,4 +213,39 @@ public class UserType extends Type {
 		}
 		return sb.toString();
 	}
+	
+	public List<TypeRef> getAllParents() {
+		List<TypeRef> result = new ArrayList<>();
+		result.addAll(getParentTypes());
+		
+		boolean addedToResult = false;
+		while (addedToResult) {
+			for (TypeRef type : new ArrayList<>(result)) {
+				if (type.getType() instanceof UserType) {
+					for (TypeRef parentType : ((UserType)type.getType()).getParentTypes()) {
+						if (!result.contains(parentType)) {
+							result.add(parentType);
+						}
+					}
+					addedToResult = true;
+				} else if (type.getType() instanceof SystemType) {
+					for (TypeRef parentType : ((SystemType)type.getType()).getParentTypes()) {
+						if (!result.contains(parentType)) {
+							result.add(parentType);
+						}
+					}
+					addedToResult = true;
+				} else if (type.getType() instanceof ComboType) {
+					for (TypeRef parentType : ((ComboType)type.getType()).getTypes()) {
+						if (!result.contains(parentType)) {
+							result.add(parentType);
+						}
+					}
+					addedToResult = true;
+				}
+			}
+		}
+		
+		return result;
+	}
 }

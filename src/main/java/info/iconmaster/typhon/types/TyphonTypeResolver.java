@@ -23,9 +23,11 @@ import info.iconmaster.typhon.errors.AmbiguousAnnotError;
 import info.iconmaster.typhon.errors.AmbiguousTypeError;
 import info.iconmaster.typhon.errors.AnnotFormatError;
 import info.iconmaster.typhon.errors.AnnotNotFoundError;
+import info.iconmaster.typhon.errors.DuplicateOverrideError;
 import info.iconmaster.typhon.errors.ParentTypeError;
 import info.iconmaster.typhon.errors.TemplateDefaultTypeError;
 import info.iconmaster.typhon.errors.TypeNotFoundError;
+import info.iconmaster.typhon.errors.VirtualBaseNotFoundError;
 import info.iconmaster.typhon.model.Annotation;
 import info.iconmaster.typhon.model.AnnotationDefinition;
 import info.iconmaster.typhon.model.Field;
@@ -96,9 +98,10 @@ public class TyphonTypeResolver {
 		f.getAnnots().stream().forEach((e)->resolve(e, f));
 		
 		// check that the annotations are valid
+		
+		// check for varvarg/varflag
 		boolean hasVararg = false, hasVarflag = false;
 		for (Parameter p : f.getParams()) {
-			// check for varvarg/varflag
 			List<Annotation> varargs = p.getAnnots(f.tni.corePackage.ANNOT_VARARG);
 			List<Annotation> varflags = p.getAnnots(f.tni.corePackage.ANNOT_VARFLAG);
 			
@@ -144,8 +147,74 @@ public class TyphonTypeResolver {
 				
 				hasVarflag = true;
 			}
+		}
+		
+		// check for overrides
+		List<Annotation> overrides = f.getAnnots(f.tni.corePackage.ANNOT_OVERRIDE);
+		for (Annotation override : overrides) {
+			if (f.isStatic()) {
+				f.tni.errors.add(new AnnotFormatError(override.source, override, "Overrides cannot be static"));
+				continue;
+			}
 			
-			// check for other parameter annots
+			for (Parameter p : f.getParams()) {
+				if (p.getRawDefaultValue() != null || p.getDefaultValue() != null) {
+					f.tni.errors.add(new AnnotFormatError(override.source, override, "Override parameters cannot have default values"));
+				}
+			}
+			
+			Type overrideType = f.getFieldOf();
+			Function virtualFunc = null;
+			
+			if (!(overrideType instanceof UserType)) {
+				f.tni.errors.add(new AnnotFormatError(override.source, override, "Overrides can only apply to user-defined types"));
+				continue;
+			}
+			
+			UserType overrideUserType = (UserType) overrideType;
+			List<TypeRef> parents = overrideUserType.getAllParents();
+			
+			parentLoop:
+			for (TypeRef parent : parents) {
+				List<Function> fs = parent.getType().getTypePackage().getFunctions().stream().filter(ff->!ff.isStatic()).collect(Collectors.toList());
+				
+				for (Function memberFunc : fs) {
+					if (f.getParams().size() != memberFunc.getParams().size()) continue parentLoop;
+					if (f.getRetType().size() != memberFunc.getRetType().size()) continue parentLoop;
+					
+					int i;
+					
+					i = 0;
+					for (Parameter a : memberFunc.getParams()) {
+						Parameter b = f.getParams().get(i);
+						
+						if (!a.getType().equals(b.getType())) continue parentLoop;
+						
+						i++;
+					}
+					
+					i = 0;
+					for (TypeRef a : memberFunc.getRetType()) {
+						TypeRef b = f.getRetType().get(i);
+						
+						if (!a.equals(b)) continue parentLoop;
+						
+						i++;
+					}
+					
+					virtualFunc = memberFunc;
+				}
+			}
+			
+			if (virtualFunc == null) {
+				// error, virtual func not found
+				f.tni.errors.add(new VirtualBaseNotFoundError(override.source, f));
+			} else if (virtualFunc.getVirtualOverrides().containsKey(overrideType)) {
+				// error, override already exists for this function
+				f.tni.errors.add(new DuplicateOverrideError(override.source, virtualFunc, f, overrideType));
+			} else {
+				Function.setOverride(virtualFunc, f);
+			}
 		}
 	}
 	

@@ -275,4 +275,8 @@ public class Field extends TyphonModelEntity implements MemberAccess {
 	public String toString() {
 		return "Field("+type+" "+name+")";
 	}
+	
+	public boolean isStatic() {
+		return getFieldOf() == null;
+	}
 }

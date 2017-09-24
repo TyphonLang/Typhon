@@ -15,7 +15,6 @@ import info.iconmaster.typhon.compiler.CodeBlock;
 import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
-import info.iconmaster.typhon.types.UserType;
 import info.iconmaster.typhon.util.SourceInfo;
 
 /**
@@ -304,5 +303,30 @@ public class Function extends TyphonModelEntity implements MemberAccess {
 	@Override
 	public List<MemberAccess> getMembers(Map<TemplateType, TypeRef> templateMap) {
 		return getTypePackage().getMembers(templateMap);
+	}
+	
+	public boolean isStatic() {
+		return getFieldOf() == null;
+	}
+	
+	private Map<Type, Function> virtualBases = new HashMap<>();
+	
+	public Map<Type, Function> getVirtualBases() {
+		return virtualBases;
+	}
+	
+	private Map<Type, Function> virtualOverrides = new HashMap<>();
+	
+	public Map<Type, Function> getVirtualOverrides() {
+		if (isStatic()) {
+			return null;
+		}
+		
+		return virtualOverrides;
+	}
+	
+	public static void setOverride(Function virtual, Function override) {
+		virtual.getVirtualOverrides().put(override.getFieldOf(), virtual);
+		override.getVirtualBases().put(virtual.getFieldOf(), override);
 	}
 }

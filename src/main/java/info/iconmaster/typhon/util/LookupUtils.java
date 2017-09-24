@@ -589,6 +589,12 @@ public class LookupUtils {
 		}
 	}
 	
+	public static class FuncArgMap {
+		public Map<Parameter, Variable> args = new HashMap<>();
+		public Map<Parameter, List<Variable>> varargs = new HashMap<>();
+		public Map<Parameter, List<Variable>> varflags = new HashMap<>();
+	}
+	
 	/**
 	 * Creates a map of parameters to arguments for a function.
 	 * 
@@ -596,8 +602,8 @@ public class LookupUtils {
 	 * @param args The arguments supplied, in the order they were supplied.
 	 * @return
 	 */
-	public static Map<Parameter, Variable> getFuncArgMap(Function f, List<LookupArgument> args) {
-		Map<Parameter, Variable> result = new HashMap<>();
+	public static FuncArgMap getFuncArgMap(Function f, List<LookupArgument> args) {
+		FuncArgMap result = new FuncArgMap();
 		
 		// populate map
 		for (LookupArgument arg : args) {
@@ -605,8 +611,8 @@ public class LookupUtils {
 				// positional argument; find the first unallocated parameter
 				boolean found = false;
 				for (Parameter param : f.getParams()) {
-					if (!result.containsKey(param)) {
-						result.put(param, arg.var);
+					if (!result.args.containsKey(param)) {
+						result.args.put(param, arg.var);
 						found = true;
 						break;
 					}
@@ -621,12 +627,12 @@ public class LookupUtils {
 				boolean found = false;
 				for (Parameter param : f.getParams()) {
 					if (param.getName().equals(arg.label)) {
-						if (result.containsKey(param)) {
+						if (result.args.containsKey(param)) {
 							// error; duplicate argument
 							return null;
 						}
 						
-						result.put(param, arg.var);
+						result.args.put(param, arg.var);
 						found = true;
 						break;
 					}
@@ -641,7 +647,7 @@ public class LookupUtils {
 		
 		// check to make sure no required parameters are left out
 		for (Parameter param : f.getParams()) {
-			if (!param.isOptional() && !result.containsKey(param)) {
+			if (!param.isOptional() && !result.args.containsKey(param)) {
 				// error; parameter required
 				return null;
 			}

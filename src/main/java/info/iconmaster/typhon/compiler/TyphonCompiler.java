@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
 
 import info.iconmaster.typhon.antlr.TyphonBaseVisitor;
 import info.iconmaster.typhon.antlr.TyphonParser.ArrayConstExprContext;
@@ -84,6 +83,7 @@ import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.types.TyphonTypeResolver;
 import info.iconmaster.typhon.util.LookupUtils;
+import info.iconmaster.typhon.util.LookupUtils.FuncArgMap;
 import info.iconmaster.typhon.util.LookupUtils.LookupArgument;
 import info.iconmaster.typhon.util.LookupUtils.LookupElement;
 import info.iconmaster.typhon.util.LookupUtils.LookupElement.AccessType;
@@ -855,19 +855,19 @@ public class TyphonCompiler {
 						Function f = (Function) member;
 						
 						// check if the argumnet's number/labels all match up to the signature
-						Map<Parameter, Variable> map = LookupUtils.getFuncArgMap(f, args);
+						FuncArgMap map = LookupUtils.getFuncArgMap(f, args);
 						if (map == null) {
 							return true;
 						}
 						
 						// calculate the function's template map
-						List<TypeRef> params = f.getParams().stream().filter(p->map.containsKey(p)).map(p->p.getType()).collect(Collectors.toList());
-						List<TypeRef> args2 = f.getParams().stream().filter(p->map.containsKey(p)).map(p->map.get(p).type).collect(Collectors.toList());
+						List<TypeRef> params = f.getParams().stream().filter(p->map.args.containsKey(p)).map(p->p.getType()).collect(Collectors.toList());
+						List<TypeRef> args2 = f.getParams().stream().filter(p->map.args.containsKey(p)).map(p->map.args.get(p).type).collect(Collectors.toList());
 						
 						Map<TemplateType, TypeRef> funcTempMap = TemplateUtils.inferTemplatesFromArguments(core.tni, params, args2, f.getFuncTemplateMap());
 						
 						// check if the types match up to the signature
-						for (Entry<Parameter, Variable> entry : map.entrySet()) {
+						for (Entry<Parameter, Variable> entry : map.args.entrySet()) {
 							TypeRef a = getExprType(scope, argmap.get(entry.getValue()), Arrays.asList(entry.getKey().getType())).get(0);
 							TypeRef b = entry.getKey().getType();
 							
@@ -903,14 +903,14 @@ public class TyphonCompiler {
 					List<Variable> outputVars = new ArrayList<>(insertInto.subList(0, Math.min(f.getRetType().size(), insertInto.size())));
 					List<Variable> inputVars = new ArrayList<>();
 					
-					Map<Parameter, Variable> map = LookupUtils.getFuncArgMap(f, args);
+					FuncArgMap map = LookupUtils.getFuncArgMap(f, args);
 					
 					for (Parameter param : f.getParams()) {
-						if (map.containsKey(param)) {
-							inputVars.add(map.get(param));
-							map.get(param).type = getExprType(scope, argmap.get(map.get(param)), Arrays.asList(param.getType())).get(0);
+						if (map.args.containsKey(param)) {
+							inputVars.add(map.args.get(param));
+							map.args.get(param).type = getExprType(scope, argmap.get(map.args.get(param)), Arrays.asList(param.getType())).get(0);
 							
-							compileExpr(scope, argmap.get(map.get(param)), Arrays.asList(map.get(param)));
+							compileExpr(scope, argmap.get(map.args.get(param)), Arrays.asList(map.args.get(param)));
 						} else {
 							Variable var = scope.addTempVar(param.getType(), new SourceInfo(ctx));
 							// TODO: assign default value to variable
@@ -959,8 +959,8 @@ public class TyphonCompiler {
 					}
 					
 					// calculate the function's return type
-					List<TypeRef> params = f.getParams().stream().filter(p->map.containsKey(p)).map(p->p.getType()).collect(Collectors.toList());
-					List<TypeRef> args2 = f.getParams().stream().filter(p->map.containsKey(p)).map(p->map.get(p).type).collect(Collectors.toList());
+					List<TypeRef> params = f.getParams().stream().filter(p->map.args.containsKey(p)).map(p->p.getType()).collect(Collectors.toList());
+					List<TypeRef> args2 = f.getParams().stream().filter(p->map.args.containsKey(p)).map(p->map.args.get(p).type).collect(Collectors.toList());
 					
 					Map<TemplateType, TypeRef> funcTempMap = TemplateUtils.inferTemplatesFromArguments(core.tni, params, args2, f.getFuncTemplateMap());
 					

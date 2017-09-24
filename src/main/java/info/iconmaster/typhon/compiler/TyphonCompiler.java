@@ -2103,6 +2103,8 @@ public class TyphonCompiler {
 	}
 	
 	private static List<TypeRef> compileCall(Scope scope, SourceInfo source, Option<Subject, Variable> subjectOrInstVar, Function f, List<LookupArgument> args, Map<Variable, ExprContext> argMap, List<Variable> insertInto) {
+		if (argMap == null) argMap = new HashMap<>();
+		
 		Variable instanceVar = null;
 		Subject sub = null;
 		
@@ -2125,9 +2127,10 @@ public class TyphonCompiler {
 		for (Parameter param : f.getParams()) {
 			if (map.args.containsKey(param)) {
 				inputVars.add(map.args.get(param));
-				map.args.get(param).type = getExprType(scope, argMap.get(map.args.get(param)), Arrays.asList(param.getType())).get(0);
+				map.args.get(param).type = argMap.containsKey(map.args.get(param)) ? getExprType(scope, argMap.get(map.args.get(param)), Arrays.asList(param.getType())).get(0) : map.args.get(param).type;
 				
-				compileExpr(scope, argMap.get(map.args.get(param)), Arrays.asList(map.args.get(param)));
+				if (argMap.containsKey(map.args.get(param)))
+					compileExpr(scope, argMap.get(map.args.get(param)), Arrays.asList(map.args.get(param)));
 			} else if (map.varargs.containsKey(param)) {
 				Variable listVar = scope.addTempVar(param.getType(), source);
 				inputVars.add(listVar);

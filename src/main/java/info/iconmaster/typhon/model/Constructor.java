@@ -1,9 +1,12 @@
 package info.iconmaster.typhon.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import info.iconmaster.typhon.TyphonInput;
+import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
+import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.util.SourceInfo;
 
 public class Constructor extends Function {
@@ -78,6 +81,6 @@ public class Constructor extends Function {
 	 * @param rawCode The ANTLR rule representing the constructor's code. See {@link Form} for details.
 	 */
 	public void setRawData(Form form, List<?> rawCode) {
-		super.setRawData(null, form, rawCode);
+		super.setRawData(Arrays.asList(), form, rawCode);
 	}
 }

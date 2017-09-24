@@ -38,6 +38,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.MapConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MatchExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MemberExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.MemberLvalueContext;
+import info.iconmaster.typhon.antlr.TyphonParser.NewExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.NullCoalesceExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.NullConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.NumConstExprContext;
@@ -58,6 +59,8 @@ import info.iconmaster.typhon.antlr.TyphonParser.VarExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.VarLvalueContext;
 import info.iconmaster.typhon.antlr.TyphonParser.WhileStatContext;
 import info.iconmaster.typhon.compiler.Instruction.OpCode;
+import info.iconmaster.typhon.errors.CannotConstructError;
+import info.iconmaster.typhon.errors.ConstructorNotFoundError;
 import info.iconmaster.typhon.errors.DuplicateVarNameError;
 import info.iconmaster.typhon.errors.LabelNotFoundError;
 import info.iconmaster.typhon.errors.NotAllowedHereError;
@@ -70,6 +73,7 @@ import info.iconmaster.typhon.errors.UndefinedOperatorError;
 import info.iconmaster.typhon.errors.UndefinedVariableError;
 import info.iconmaster.typhon.errors.WriteOnlyError;
 import info.iconmaster.typhon.model.AnnotationDefinition;
+import info.iconmaster.typhon.model.Constructor;
 import info.iconmaster.typhon.model.Field;
 import info.iconmaster.typhon.model.Function;
 import info.iconmaster.typhon.model.MemberAccess;
@@ -78,10 +82,13 @@ import info.iconmaster.typhon.model.Parameter;
 import info.iconmaster.typhon.model.TemplateArgument;
 import info.iconmaster.typhon.model.TyphonModelReader;
 import info.iconmaster.typhon.model.libs.CorePackage;
+import info.iconmaster.typhon.types.AnyType;
+import info.iconmaster.typhon.types.SystemType;
 import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.types.TyphonTypeResolver;
+import info.iconmaster.typhon.types.UserType;
 import info.iconmaster.typhon.util.LookupUtils;
 import info.iconmaster.typhon.util.LookupUtils.FuncArgMap;
 import info.iconmaster.typhon.util.LookupUtils.LookupArgument;
@@ -1453,6 +1460,59 @@ public class TyphonCompiler {
 				
 				return Arrays.asList(new TypeRef(core.LIB_REFLECT.TYPE_TYPE));
 			}
+			
+			@Override
+			public List<TypeRef> visitNewExpr(NewExprContext ctx) {
+				TypeRef type = TyphonTypeResolver.readType(core.tni, ctx.tnType, scope);
+				
+				if (!(type.getType() instanceof UserType || type.getType() instanceof SystemType || type.getType() instanceof AnyType)) {
+					// error; cannot construct
+					core.tni.errors.add(new CannotConstructError(new SourceInfo(ctx), type));
+					return Arrays.asList(type);
+				}
+				
+				List<LookupArgument> args = new ArrayList<>();
+				List<Variable> vars = new ArrayList<>();
+				
+				Map<Variable, ExprContext> argMap = new HashMap<>();
+				TyphonModelReader.readArgs(core.tni, ctx.tnArgs.tnArgs).stream().forEach((arg)->{
+					Variable var = scope.addTempVar(TypeRef.var(core.tni), arg.source);
+					vars.add(var);
+					
+					args.add(new LookupArgument(var, arg.getLabel()));
+					
+					argMap.put(var, arg.getRawValue());
+				});
+				
+				List<Function> constructors = type.getType().getTypePackage().getFunctions().stream().filter((f)->f instanceof Constructor).filter(f->{
+					if (!LookupUtils.areFuncArgsCompatibleWith(scope, f, args, type.getTemplateMap(new HashMap<>()), argMap)) {
+						return false;
+					}
+					
+					return true;
+				}).collect(Collectors.toList());
+				
+				if (constructors.isEmpty()) {
+					// error, no constructor found
+					core.tni.errors.add(new ConstructorNotFoundError(new SourceInfo(ctx), type));
+					return Arrays.asList(type);
+				}
+				
+				Constructor f = (Constructor) constructors.get(0);
+				
+				Variable out;
+				if (insertInto.isEmpty()) {
+					out = scope.addTempVar(type, new SourceInfo(ctx));
+				} else {
+					out = insertInto.get(0);
+				}
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.ALLOC, new Object[] {out, type}));
+				
+				compileCall(scope, new SourceInfo(ctx), new Option<>(out, Option.IS_B), f, args, argMap, Arrays.asList());
+				
+				return Arrays.asList(type);
+			}
 		};
 		
 		List<TypeRef> a = visitor.visit(rule);
@@ -1818,6 +1878,11 @@ public class TyphonCompiler {
 			@Override
 			public List<TypeRef> visitTypeConstExpr(TypeConstExprContext ctx) {
 				return Arrays.asList(new TypeRef(core.LIB_REFLECT.TYPE_TYPE));
+			}
+			
+			@Override
+			public List<TypeRef> visitNewExpr(NewExprContext ctx) {
+				return Arrays.asList(TyphonTypeResolver.readType(core.tni, ctx.tnType, scope));
 			}
 		};
 		

@@ -140,7 +140,7 @@ public class TestFunctionReader extends TyphonTest {
 			Assert.assertEquals("new", f.getName());
 			Assert.assertEquals(0, f.getParams().size());
 			Assert.assertEquals(0, f.getTemplate().size());
-			Assert.assertNull(f.getRawRetType());
+			Assert.assertEquals(0, f.getRawRetType().size());
 			
 			Assert.assertEquals(Function.Form.BLOCK, f.getForm());
 			Assert.assertEquals(0, f.getRawCode().size());
@@ -148,7 +148,7 @@ public class TestFunctionReader extends TyphonTest {
 			Assert.assertEquals("new", f.getName());
 			Assert.assertEquals(1, f.getParams().size());
 			Assert.assertEquals(0, f.getTemplate().size());
-			Assert.assertNull(f.getRawRetType());
+			Assert.assertEquals(0, f.getRawRetType().size());
 			
 			Assert.assertEquals(Function.Form.BLOCK, f.getForm());
 			Assert.assertEquals(0, f.getRawCode().size());
@@ -160,7 +160,7 @@ public class TestFunctionReader extends TyphonTest {
 			Assert.assertEquals("new", f.getName());
 			Assert.assertEquals(1, f.getParams().size());
 			Assert.assertEquals(0, f.getTemplate().size());
-			Assert.assertNull(f.getRawRetType());
+			Assert.assertEquals(0, f.getRawRetType().size());
 			
 			Assert.assertEquals(Function.Form.BLOCK, f.getForm());
 			Assert.assertEquals(0, f.getRawCode().size());
@@ -172,7 +172,7 @@ public class TestFunctionReader extends TyphonTest {
 			Assert.assertEquals("new", f.getName());
 			Assert.assertEquals(3, f.getParams().size());
 			Assert.assertEquals(0, f.getTemplate().size());
-			Assert.assertNull(f.getRawRetType());
+			Assert.assertEquals(0, f.getRawRetType().size());
 			
 			Assert.assertEquals(Function.Form.BLOCK, f.getForm());
 			Assert.assertEquals(0, f.getRawCode().size());
@@ -194,7 +194,7 @@ public class TestFunctionReader extends TyphonTest {
 			Assert.assertEquals("new", f.getName());
 			Assert.assertEquals(3, f.getParams().size());
 			Assert.assertEquals(0, f.getTemplate().size());
-			Assert.assertNull(f.getRawRetType());
+			Assert.assertEquals(0, f.getRawRetType().size());
 			
 			Assert.assertEquals(Function.Form.BLOCK, f.getForm());
 			Assert.assertEquals(0, f.getRawCode().size());

@@ -717,6 +717,40 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(1, code.tni.errors.size());
 		}),new TestCase("void g([int] @vararg args, {string:int} @varflag flags) {} void f() {g(1, b:'c', 3);};}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("class a {new() {}} void f() {a a = new a();}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(2, code.ops.size());
+			
+			Assert.assertEquals(OpCode.ALLOC, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.CALL, code.ops.get(1).op);
+		}),new TestCase("class a {new(int x) {}} void f() {a a = new a(1);}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(3, code.ops.size());
+			
+			Assert.assertEquals(OpCode.ALLOC, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.CALL, code.ops.get(2).op);
+		}),new TestCase("class a {new(int x, double y) {}} void f() {a a = new a(1, 2);}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(4, code.ops.size());
+			
+			Assert.assertEquals(OpCode.ALLOC, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.MOVDOUBLE, code.ops.get(2).op);
+			Assert.assertEquals(OpCode.CALL, code.ops.get(3).op);
+		}),new TestCase("class a {new(int x) {}} void f() {a a = new a();}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("class a {new(int x) {}} void f() {a a = new a(1, 2);}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("class a {new(int x) {}} void f() {a a = new a(2.0);}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("void f() {var a = new (int && float)();}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("void f() {var a = new (int)->int();}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
 		}));
 	}
     

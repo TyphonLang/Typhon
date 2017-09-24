@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import info.iconmaster.typhon.TyphonInput;
-import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
+import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.util.SourceInfo;
 
@@ -45,6 +45,24 @@ public class Constructor extends Function {
 			p.markAsLibrary();
 			p.setName(name);
 			p.setType(type);
+			
+			return p;
+		}
+		
+		/**
+		 * Create a library constructor parameter that's not a field.
+		 * 
+		 * @param name
+		 * @param type
+		 * @return
+		 */
+		public static ConstructorParameter nonFieldParam(String name, Type type) {
+			ConstructorParameter p = new ConstructorParameter(type.tni);
+			
+			p.isField = false;
+			p.markAsLibrary();
+			p.setName(name);
+			p.setType(new TypeRef(type));
 			
 			return p;
 		}
@@ -117,5 +135,18 @@ public class Constructor extends Function {
 	 */
 	public void setRawData(Form form, List<?> rawCode) {
 		super.setRawData(Arrays.asList(), form, rawCode);
+	}
+	
+	/**
+	 * Creates a library constructor.
+	 * 
+	 * @param input
+	 * @param params
+	 */
+	public Constructor(Type t, ConstructorParameter... params) {
+		super(t.tni, "new");
+		markAsLibrary();
+		
+		getConstParams().addAll(Arrays.asList(params));
 	}
 }

@@ -242,7 +242,7 @@ public class Field extends TyphonModelEntity implements MemberAccess {
 	public Function getSetter() {
 		if (!hasSetter) return null;
 		
-		return setter == null ? defaultGetter() : setter;
+		return setter == null ? defaultSetter() : setter;
 	}
 	
 	/**

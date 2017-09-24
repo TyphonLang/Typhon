@@ -326,7 +326,7 @@ public class Function extends TyphonModelEntity implements MemberAccess {
 	}
 	
 	public static void setOverride(Function virtual, Function override) {
-		virtual.getVirtualOverrides().put(override.getFieldOf(), virtual);
-		override.getVirtualBases().put(virtual.getFieldOf(), override);
+		virtual.getVirtualOverrides().put(override.getFieldOf(), override);
+		override.getVirtualBases().put(virtual.getFieldOf(), virtual);
 	}
 }

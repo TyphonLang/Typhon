@@ -1485,11 +1485,8 @@ public class TyphonCompiler {
 				});
 				
 				List<Function> constructors = type.getType().getTypePackage().getFunctions().stream().filter((f)->f instanceof Constructor && f.getFieldOf() == type.getType()).filter(f->{
-					if (!LookupUtils.areFuncArgsCompatibleWith(scope, f, args, type.getTemplateMap(new HashMap<>()), argMap)) {
-						return false;
-					}
-					
-					return true;
+					boolean b = LookupUtils.areFuncArgsCompatibleWith(scope, f, args, type.getTemplateMap(new HashMap<>()), argMap);
+					return b;
 				}).collect(Collectors.toList());
 				
 				if (constructors.isEmpty()) {
@@ -1551,6 +1548,7 @@ public class TyphonCompiler {
 				TypeRef var = expectedTypes.isEmpty() ? null : expectedTypes.get(0);
 				
 				String text = ctx.tnValue.getText();
+				
 				if (var == null) {
 					if (text.contains(".") || text.contains("e")) {
 						return Arrays.asList(new TypeRef(core.TYPE_DOUBLE));
@@ -1558,21 +1556,23 @@ public class TyphonCompiler {
 						return Arrays.asList(new TypeRef(core.TYPE_INT));
 					}
 				} else {
-					if (var.getType() == core.TYPE_BYTE || var.getType() == core.TYPE_UBYTE) {
-						return Arrays.asList(var);
-					} else if (var.getType() == core.TYPE_DOUBLE || var.getType() == core.TYPE_REAL) {
-						return Arrays.asList(var);
-					} else if (var.getType() == core.TYPE_FLOAT) {
-						return Arrays.asList(var);
-					} else if (var.getType() == core.TYPE_LONG || var.getType() == core.TYPE_ULONG) {
-						return Arrays.asList(var);
-					} else if (var.getType() == core.TYPE_SHORT || var.getType() == core.TYPE_USHORT) {
-						return Arrays.asList(var);
-					} else if (var.getType() == core.TYPE_UINT) {
-						return Arrays.asList(var);
-					} else {
-						if (text.contains(".") || text.contains("e")) {
+					if (text.contains(".") || text.contains("e")) {
+						if (var.getType() == core.TYPE_DOUBLE) {
+							return Arrays.asList(var);
+						} else if (var.getType() == core.TYPE_FLOAT) {
+							return Arrays.asList(var);
+						} else {
 							return Arrays.asList(new TypeRef(core.TYPE_DOUBLE));
+						}
+					} else {
+						if (var.getType() == core.TYPE_BYTE || var.getType() == core.TYPE_UBYTE) {
+							return Arrays.asList(var);
+						} else if (var.getType() == core.TYPE_LONG || var.getType() == core.TYPE_ULONG) {
+							return Arrays.asList(var);
+						} else if (var.getType() == core.TYPE_SHORT || var.getType() == core.TYPE_USHORT) {
+							return Arrays.asList(var);
+						} else if (var.getType() == core.TYPE_UINT) {
+							return Arrays.asList(var);
 						} else {
 							return Arrays.asList(new TypeRef(core.TYPE_INT));
 						}

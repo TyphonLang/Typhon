@@ -265,7 +265,7 @@ public class Function extends TyphonModelEntity implements MemberAccess {
 	
 	@Override
 	public String toString() {
-		return "Function("+retType+" "+name+params+")";
+		return "Function("+getRetType()+" "+name+getParams()+")";
 	}
 	
 	public Map<TemplateType, TypeRef> getFuncTemplateMap() {

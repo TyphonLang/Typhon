@@ -39,6 +39,28 @@ public class Annotation extends TyphonModelEntity {
 	}
 	
 	/**
+	 * Create a library annotation.
+	 * @param source
+	 * @param annot
+	 */
+	public Annotation(SourceInfo source, AnnotationDefinition annot) {
+		super(annot.tni, source);
+		this.definition = annot;
+		markAsLibrary();
+	}
+	
+	/**
+	 * Create a library annotation.
+	 * @param source
+	 * @param annot
+	 */
+	public Annotation(AnnotationDefinition annot) {
+		super(annot.tni);
+		this.definition = annot;
+		markAsLibrary();
+	}
+	
+	/**
 	 * @return The annotation this is an instance of.
 	 */
 	public AnnotationDefinition getDefinition() {

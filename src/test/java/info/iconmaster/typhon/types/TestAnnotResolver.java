@@ -87,6 +87,50 @@ public class TestAnnotResolver extends TyphonTest {
 			Assert.assertEquals(0, p.tni.errors.size());
 		}),new TestCase("class a {void virtual() {}} class b : a {} class c : b {@override void virtual() {}}", (p)->{
 			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("int x; @getter int x() {}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("class a {int x; @getter int x() {}}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("@getter int x() {}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("class a {@getter int x() {}}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("int x; @setter void x(int arg) {}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("class a{int x; @setter void x(int arg) {}}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("@setter void x(int arg) {}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("class a{@setter void x(int arg) {}}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("int x; @getter float x() {}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("int x; @getter int x(Any arg) {}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("int x; @getter (int,int) x() {}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("int x; @getter void x() {}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("class a {int @static x; @getter int x() {}}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("class a {int x; @static @getter int x() {}}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("class a {@static @getter int x() {}}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("int x; @setter void x(float arg) {}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("int x; @setter Any x(int arg) {}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("int x; @setter void x(int a, int b) {}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("int x; @setter void x() {}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("class a {int @static x; @setter x(int arg) {}}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("class a {int x; @static @setter x(int arg) {}}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("class a {@static @setter void x(int arg) {}}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
 		}));
 	}
     

@@ -792,6 +792,8 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(OpCode.CALL, code.ops.get(0).op);
 			
 			Assert.assertTrue(!((Function)code.ops.get(0).args[2]).getVirtualOverrides().isEmpty());
+		}),new TestCase("@getter int x() {} void f() {int y = x}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
 		}));
 	}
     

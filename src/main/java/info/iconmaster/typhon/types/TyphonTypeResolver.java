@@ -224,6 +224,82 @@ public class TyphonTypeResolver {
 				Function.setOverride(virtualFunc, f);
 			}
 		}
+		
+		// check for getter
+		List<Annotation> getters = f.getAnnots(f.tni.corePackage.ANNOT_GETTER);
+		
+		if (getters.size() > 1) {
+			f.tni.errors.add(new AnnotFormatError(getters.get(1).source, getters.get(1), "cannot be annotated multiple times"));
+		}
+		
+		if (!getters.isEmpty()) {
+			Annotation annot = getters.get(0);
+			
+			Field field = f.getParent().getField(f.getName());
+			
+			if (field == null) {
+				field = new Field(f.getName(), f.getRetType().isEmpty() ? new TypeRef(f.tni.corePackage.TYPE_ANY) : f.getRetType().get(0));
+				f.getParent().addField(field);
+				if (f.isStatic()) field.getAnnots().add(new Annotation(annot.source, f.tni.corePackage.ANNOT_STATIC));
+			}
+			resolve(field);
+			
+			if (!field.isActualField() && field.getGetter() != null) {
+				f.tni.errors.add(new AnnotFormatError(annot.source, annot, "field already has a getter"));
+			}
+			
+			if (f.isStatic() != field.isStatic()) {
+				f.tni.errors.add(new AnnotFormatError(annot.source, annot, "the field and the getter function must either be both static members or both instance members"));
+			}
+			
+			if (f.getRetType().size() != 1 || !f.getRetType().get(0).canCastTo(field.getType())) {
+				f.tni.errors.add(new AnnotFormatError(annot.source, annot, "the getter function must return one value of type "+field.getType().getName()));
+			}
+			
+			if (f.getParams().size() != 0) {
+				f.tni.errors.add(new AnnotFormatError(annot.source, annot, "the getter function must have no parameters"));
+			}
+			
+			field.setGetter(f);
+		}
+		
+		// check for setter
+		List<Annotation> setters = f.getAnnots(f.tni.corePackage.ANNOT_SETTER);
+		
+		if (setters.size() > 1) {
+			f.tni.errors.add(new AnnotFormatError(setters.get(1).source, setters.get(1), "cannot be annotated multiple times"));
+		}
+		
+		if (!setters.isEmpty()) {
+			Annotation annot = setters.get(0);
+			
+			Field field = f.getParent().getField(f.getName());
+			
+			if (field == null) {
+				field = new Field(f.getName(), f.getParams().isEmpty() ? new TypeRef(f.tni.corePackage.TYPE_ANY) : f.getParams().get(0).getType());
+				f.getParent().addField(field);
+				if (f.isStatic()) field.getAnnots().add(new Annotation(annot.source, f.tni.corePackage.ANNOT_STATIC));
+			}
+			resolve(field);
+			
+			if (!field.isActualField() && field.getSetter() != null) {
+				f.tni.errors.add(new AnnotFormatError(annot.source, annot, "field already has a setter"));
+			}
+			
+			if (f.isStatic() != field.isStatic()) {
+				f.tni.errors.add(new AnnotFormatError(annot.source, annot, "the field and the setter function must either be both static members or both instance members"));
+			}
+			
+			if (f.getParams().size() != 1 || !f.getParams().get(0).getType().canCastTo(field.getType())) {
+				f.tni.errors.add(new AnnotFormatError(annot.source, annot, "the setter function must have one parameter of type "+field.getType().getName()));
+			}
+			
+			if (f.getRetType().size() != 0) {
+				f.tni.errors.add(new AnnotFormatError(annot.source, annot, "the setter function must have no return values"));
+			}
+			
+			field.setSetter(f);
+		}
 	}
 	
 	/**

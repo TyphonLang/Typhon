@@ -305,6 +305,9 @@ public class Function extends TyphonModelEntity implements MemberAccess {
 		return getTypePackage().getMembers(templateMap);
 	}
 	
+	/**
+	 * @return True if this field is static. False if it belongs to an instance of some type.
+	 */
 	public boolean isStatic() {
 		return getFieldOf() == null;
 	}

@@ -47,7 +47,7 @@ public class CorePackage extends Package {
 	/**
 	 * Constants for annotations.
 	 */
-	public AnnotationDefinition ANNOT_MAIN, ANNOT_VARARG, ANNOT_VARFLAG, ANNOT_STATIC, ANNOT_OVERRIDE;
+	public AnnotationDefinition ANNOT_MAIN, ANNOT_VARARG, ANNOT_VARFLAG, ANNOT_STATIC, ANNOT_OVERRIDE, ANNOT_GETTER, ANNOT_SETTER;
 	
 	/**
 	 * Constants for functions.
@@ -145,6 +145,8 @@ public class CorePackage extends Package {
 		ANNOT_VARFLAG = makeAnnotDef("varflag", new Parameter[] {});
 		ANNOT_STATIC = makeAnnotDef("static", new Parameter[] {});
 		ANNOT_OVERRIDE = makeAnnotDef("override", new Parameter[] {});
+		ANNOT_GETTER = makeAnnotDef("getter", new Parameter[] {});
+		ANNOT_SETTER = makeAnnotDef("setter", new Parameter[] {});
 		
 		// add any members of any types that depend on this type tree
 		

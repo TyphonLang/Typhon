@@ -59,6 +59,20 @@ public class Field extends TyphonModelEntity implements MemberAccess {
 	}
 	
 	/**
+	 * Create a library field.
+	 * 
+	 * @param name
+	 * @param type
+	 */
+	public Field(String name, TypeRef type) {
+		super(type.tni);
+		this.name = name;
+		this.type = type;
+		
+		markAsLibrary();
+	}
+	
+	/**
 	 * @return The name of this field.
 	 */
 	public String getName() {
@@ -188,6 +202,9 @@ public class Field extends TyphonModelEntity implements MemberAccess {
 	public void setGetter(Function f) {
 		getter = f;
 		hasGetter = (f != null);
+		if (setter == null) {
+			hasSetter = false;
+		}
 	}
 	
 	/**
@@ -233,6 +250,9 @@ public class Field extends TyphonModelEntity implements MemberAccess {
 	public void setSetter(Function f) {
 		setter = f;
 		hasSetter = (f != null);
+		if (getter == null) {
+			hasGetter = false;
+		}
 	}
 	
 	/**
@@ -276,7 +296,18 @@ public class Field extends TyphonModelEntity implements MemberAccess {
 		return "Field("+type+" "+name+")";
 	}
 	
+	/**
+	 * @return True if this field is static. False if it belongs to an instance of some type.
+	 */
 	public boolean isStatic() {
 		return getFieldOf() == null;
+	}
+	
+	/**
+	 * @return True if this field is real; that is, it takes up storage space in whatever this compiles to.
+	 * False if this field is defined by getters and/or setters, or is otherwise nonexistent in reality.
+	 */
+	public boolean isActualField() {
+		return getter == null && setter == null;
 	}
 }

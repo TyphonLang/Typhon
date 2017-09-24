@@ -700,6 +700,7 @@ public class LookupUtils {
 	
 	public static boolean areFuncArgsCompatibleWith(Scope scope, Function f, List<LookupArgument> args, Map<TemplateType, TypeRef> typeMap, Map<Variable, ExprContext> argMap) {
 		CorePackage core = f.tni.corePackage;
+		if (argMap == null) argMap = new HashMap<>();
 		
 		// check if the argumnet's number/labels all match up to the signature
 		FuncArgMap map = LookupUtils.getFuncArgMap(f, args);
@@ -716,7 +717,7 @@ public class LookupUtils {
 		
 		// check if the types match up to the signature
 		for (Entry<Parameter, Variable> entry : map.args.entrySet()) {
-			TypeRef a = TyphonCompiler.getExprType(scope, argMap.get(entry.getValue()), Arrays.asList(entry.getKey().getType())).get(0);
+			TypeRef a = argMap.containsKey(entry.getValue()) ? TyphonCompiler.getExprType(scope, argMap.get(entry.getValue()), Arrays.asList(entry.getKey().getType())).get(0) : entry.getValue().type;
 			TypeRef b = entry.getKey().getType();
 			
 			a = TemplateUtils.replaceTemplates(TemplateUtils.replaceTemplates(a, funcTempMap), typeMap);

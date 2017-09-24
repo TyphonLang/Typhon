@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 
 import info.iconmaster.typhon.antlr.TyphonBaseVisitor;
 import info.iconmaster.typhon.antlr.TyphonParser.ArrayConstExprContext;
@@ -141,23 +142,27 @@ public class TyphonCompiler {
 		for (Parameter param : f.getParams()) {
 			param.setVar(scope.addVar(param.getName(), param.getType(), param.source));
 		}
-		for (TypeRef retType : f.getRetType()) {
-			block.returnVars.add(scope.addTempVar(retType, null));
-		}
 		
 		if (f.getForm() == Function.Form.BLOCK) {
 			// block form
 			for (StatContext stat : (List<StatContext>) f.getRawCode()) {
 				compileStat(scope, stat, f.getRetType());
 			}
+			
+			// TODO: if we don't return void, check if all paths end in a RET
 		} else {
 			// expr form
-			List<Variable> vars = new ArrayList<>(block.returnVars);
+			List<Variable> vars = new ArrayList<>();
+			for (TypeRef retType : f.getRetType()) {
+				vars.add(scope.addTempVar(retType, new SourceInfo((List) f.getRawCode())));
+			}
 			
 			for (ExprContext expr : (List<ExprContext>) f.getRawCode()) {
 				int used = compileExpr(scope, expr, vars);
 				vars = vars.subList(used, vars.size());
 			}
+			
+			block.ops.add(new Instruction(f.tni, new SourceInfo((List) f.getRawCode()), OpCode.RET, new Object[] {vars}));
 		}
 	}
 	

@@ -6,7 +6,6 @@ import java.util.List;
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.model.TyphonModelEntity;
-import info.iconmaster.typhon.types.TypeRef;
 import info.iconmaster.typhon.util.SourceInfo;
 
 /**
@@ -25,16 +24,6 @@ public class CodeBlock extends TyphonModelEntity {
 	 * The instructions that compose this block.
 	 */
 	public List<Instruction> ops = new ArrayList<>();
-	
-	/**
-	 * The types that this code block returns.
-	 */
-	public List<TypeRef> returnType = new ArrayList<>();
-	
-	/**
-	 * The slots in which this block places its return values.
-	 */
-	public List<Variable> returnVars = new ArrayList<>();
 	
 	/**
 	 * The local variables present in this code block.
@@ -78,7 +67,7 @@ public class CodeBlock extends TyphonModelEntity {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder("CodeBlock(this = ");
-		sb.append(instance).append(", returns ").append(returnType).append(") {\n");
+		sb.append(instance).append(") {\n");
 		for (Instruction i : ops) {
 			sb.append('\t').append(i).append('\n');
 		}

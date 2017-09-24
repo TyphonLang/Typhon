@@ -193,11 +193,17 @@ public class LookupUtils {
 			public TypeRef type;
 			
 			/**
+			 * The path this subject is from.
+			 */
+			public LookupPath path;
+			
+			/**
 			 * The type map this subject returns, suitable for the methods in {@link MemberAccess} or {@link TemplateUtils}.
 			 */
 			public Map<TemplateType, TypeRef> typeMap = new HashMap<>();
 			
-			public Subject(int loc, MemberAccess member) {
+			public Subject(LookupPath path, int loc, MemberAccess member) {
+				this.path = path;
 				this.loc = loc;
 				this.member = member;
 			}
@@ -266,7 +272,7 @@ public class LookupUtils {
 			this.members.add(member);
 			
 			if (member instanceof Field || member instanceof Variable || member instanceof Function) {
-				Subject sub = new Subject(members.size()-1, member);
+				Subject sub = new Subject(this, members.size()-1, member);
 				if (name != null) sub.source = name.source;
 				
 				if (!subjects.isEmpty()) {

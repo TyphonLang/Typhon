@@ -89,6 +89,7 @@ import info.iconmaster.typhon.util.LookupUtils.LookupElement;
 import info.iconmaster.typhon.util.LookupUtils.LookupElement.AccessType;
 import info.iconmaster.typhon.util.LookupUtils.LookupPath;
 import info.iconmaster.typhon.util.LookupUtils.LookupPath.Subject;
+import info.iconmaster.typhon.util.Option;
 import info.iconmaster.typhon.util.SourceInfo;
 import info.iconmaster.typhon.util.StringUtils;
 import info.iconmaster.typhon.util.TemplateUtils;
@@ -877,92 +878,7 @@ public class TyphonCompiler {
 				
 				if (sub.member instanceof Function) {
 					Function f = (Function) sub.member;
-					Type fieldOf = f.getFieldOf();
-					
-					List<Variable> outputVars = new ArrayList<>(insertInto.subList(0, Math.min(f.getRetType().size(), insertInto.size())));
-					List<Variable> inputVars = new ArrayList<>();
-					
-					FuncArgMap map = LookupUtils.getFuncArgMap(f, args);
-					
-					for (Parameter param : f.getParams()) {
-						if (map.args.containsKey(param)) {
-							inputVars.add(map.args.get(param));
-							map.args.get(param).type = getExprType(scope, argMap.get(map.args.get(param)), Arrays.asList(param.getType())).get(0);
-							
-							compileExpr(scope, argMap.get(map.args.get(param)), Arrays.asList(map.args.get(param)));
-						} else if (map.varargs.containsKey(param)) {
-							Variable listVar = scope.addTempVar(param.getType(), sub.source);
-							inputVars.add(listVar);
-							
-							scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.MOVLIST, new Object[] {listVar, map.varargs.get(param)}));
-						} else if (map.varflags.containsKey(param)) {
-							Variable mapVar = scope.addTempVar(param.getType(), sub.source);
-							inputVars.add(mapVar);
-							
-							Map<Variable, Variable> varmap = new HashMap<>();
-							for (Entry<String, Variable> entry : map.varflags.get(param).entrySet()) {
-								Variable strVar = scope.addTempVar(param.getType(), sub.source);
-								varmap.put(strVar, entry.getValue());
-								
-								scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.MOVSTR, new Object[] {strVar, entry.getKey()}));
-							}
-							
-							scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.MOVMAP, new Object[] {mapVar, varmap}));
-						} else {
-							// TODO: assign default value to variable
-							Variable var = scope.addTempVar(param.getType(), new SourceInfo(ctx));
-							inputVars.add(var);
-						}
-					}
-					
-					Variable instanceVar = LookupUtils.getSubjectOfPath(scope, path);
-					
-					if (fieldOf == null) {
-						// CALLSTATIC
-						if (sub.infix == AccessType.NULLABLE_DOT || sub.infix == AccessType.DOUBLE_DOT) {
-							// error; dots only apply in non-static context
-							core.tni.errors.add(new NotAllowedHereError(new SourceInfo(ctx), "special dot operators"));
-						}
-						
-						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALLSTATIC, new Object[] {outputVars, f, inputVars}));
-					} else {
-						// CALL
-						Label label = null;
-						if (sub.infix == AccessType.NULLABLE_DOT) {
-							label = scope.addTempLabel();
-							
-							Variable tempVar = scope.addTempVar(new TypeRef(core.TYPE_BOOL), sub.source);
-							scope.getCodeBlock().ops.add(new Instruction(core.tni, sub.source, OpCode.ISNULL, new Object[] {tempVar, instanceVar}));
-							scope.getCodeBlock().ops.add(new Instruction(core.tni, sub.source, OpCode.JUMPTRUE, new Object[] {tempVar, label}));
-						}
-						
-						if (sub.infix == AccessType.DOUBLE_DOT) {
-							outputVars = Arrays.asList();
-						}
-						
-						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALL, new Object[] {outputVars, instanceVar, f, inputVars}));
-						
-						if (sub.infix == AccessType.DOUBLE_DOT && !insertInto.isEmpty()) {
-							scope.getCodeBlock().ops.add(new Instruction(core.tni, sub.source, OpCode.MOV, new Object[] {instanceVar, insertInto.get(0)}));
-						}
-						
-						if (label != null) {
-							scope.getCodeBlock().ops.add(new Instruction(scope.getCodeBlock().tni, sub.source, OpCode.LABEL, new Object[] {label}));
-						}
-						
-						if (sub.infix == AccessType.DOUBLE_DOT) {
-							return Arrays.asList(instanceVar.type);
-						}
-					}
-					
-					// calculate the function's return type
-					List<TypeRef> params = f.getParams().stream().filter(p->map.args.containsKey(p)).map(p->p.getType()).collect(Collectors.toList());
-					List<TypeRef> args2 = f.getParams().stream().filter(p->map.args.containsKey(p)).map(p->map.args.get(p).type).collect(Collectors.toList());
-					
-					Map<TemplateType, TypeRef> funcTempMap = TemplateUtils.inferTemplatesFromArguments(core.tni, params, args2, f.getFuncTemplateMap());
-					
-					List<TypeRef> retType = f.getRetType().subList(0, outputVars.size()).stream().map(t->TemplateUtils.replaceTemplates(TemplateUtils.replaceTemplates(t, funcTempMap), sub.typeMap)).collect(Collectors.toList());
-					return retType;
+					return compileCall(scope, sub.source, new Option<>(sub, Option.IS_A), f, args, argMap, insertInto);
 				} else {
 					// TODO: CALLFPTR
 					return Arrays.asList();
@@ -2184,5 +2100,109 @@ public class TyphonCompiler {
 		scope.getCodeBlock().ops.add(new Instruction(core.tni, source, OpCode.CALL, new Object[] {insertInto.isEmpty() ? Arrays.asList() : Arrays.asList(insertInto.get(0)), lhs, handler, Arrays.asList(rhs)}));
 		
 		return handler.getRetType();
+	}
+	
+	private static List<TypeRef> compileCall(Scope scope, SourceInfo source, Option<Subject, Variable> subjectOrInstVar, Function f, List<LookupArgument> args, Map<Variable, ExprContext> argMap, List<Variable> insertInto) {
+		Variable instanceVar = null;
+		Subject sub = null;
+		
+		if (subjectOrInstVar != null) {
+			if (subjectOrInstVar.isA()) {
+				sub = subjectOrInstVar.getA();
+			} else {
+				instanceVar = subjectOrInstVar.getB();
+			}
+		}
+		
+		CorePackage core = f.tni.corePackage;
+		Type fieldOf = f.getFieldOf();
+		
+		List<Variable> outputVars = new ArrayList<>(insertInto.subList(0, Math.min(f.getRetType().size(), insertInto.size())));
+		List<Variable> inputVars = new ArrayList<>();
+		
+		FuncArgMap map = LookupUtils.getFuncArgMap(f, args);
+		
+		for (Parameter param : f.getParams()) {
+			if (map.args.containsKey(param)) {
+				inputVars.add(map.args.get(param));
+				map.args.get(param).type = getExprType(scope, argMap.get(map.args.get(param)), Arrays.asList(param.getType())).get(0);
+				
+				compileExpr(scope, argMap.get(map.args.get(param)), Arrays.asList(map.args.get(param)));
+			} else if (map.varargs.containsKey(param)) {
+				Variable listVar = scope.addTempVar(param.getType(), source);
+				inputVars.add(listVar);
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, source, OpCode.MOVLIST, new Object[] {listVar, map.varargs.get(param)}));
+			} else if (map.varflags.containsKey(param)) {
+				Variable mapVar = scope.addTempVar(param.getType(), source);
+				inputVars.add(mapVar);
+				
+				Map<Variable, Variable> varmap = new HashMap<>();
+				for (Entry<String, Variable> entry : map.varflags.get(param).entrySet()) {
+					Variable strVar = scope.addTempVar(param.getType(), source);
+					varmap.put(strVar, entry.getValue());
+					
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, source, OpCode.MOVSTR, new Object[] {strVar, entry.getKey()}));
+				}
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, source, OpCode.MOVMAP, new Object[] {mapVar, varmap}));
+			} else {
+				// TODO: assign default value to variable
+				Variable var = scope.addTempVar(param.getType(), source);
+				inputVars.add(var);
+			}
+		}
+		
+		if (fieldOf == null) {
+			// CALLSTATIC
+			if (sub != null && (sub.infix == AccessType.NULLABLE_DOT || sub.infix == AccessType.DOUBLE_DOT)) {
+				// error; dots only apply in non-static context
+				core.tni.errors.add(new NotAllowedHereError(source, "special dot operators"));
+			}
+			
+			scope.getCodeBlock().ops.add(new Instruction(core.tni, source, OpCode.CALLSTATIC, new Object[] {outputVars, f, inputVars}));
+		} else {
+			// CALL
+			if (instanceVar == null) {
+				instanceVar = LookupUtils.getSubjectOfPath(scope, sub.path);
+			}
+			
+			Label label = null;
+			if (sub != null && sub.infix == AccessType.NULLABLE_DOT) {
+				label = scope.addTempLabel();
+				
+				Variable tempVar = scope.addTempVar(new TypeRef(core.TYPE_BOOL), source);
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, source, OpCode.ISNULL, new Object[] {tempVar, instanceVar}));
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, source, OpCode.JUMPTRUE, new Object[] {tempVar, label}));
+			}
+			
+			if (sub != null && sub.infix == AccessType.DOUBLE_DOT) {
+				outputVars = Arrays.asList();
+			}
+			
+			scope.getCodeBlock().ops.add(new Instruction(core.tni, source, OpCode.CALL, new Object[] {outputVars, instanceVar, f, inputVars}));
+			
+			if (sub != null && sub.infix == AccessType.DOUBLE_DOT && !insertInto.isEmpty()) {
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, source, OpCode.MOV, new Object[] {instanceVar, insertInto.get(0)}));
+			}
+			
+			if (label != null) {
+				scope.getCodeBlock().ops.add(new Instruction(scope.getCodeBlock().tni, source, OpCode.LABEL, new Object[] {label}));
+			}
+			
+			if (sub != null && sub.infix == AccessType.DOUBLE_DOT) {
+				return Arrays.asList(instanceVar.type);
+			}
+		}
+		
+		// calculate the function's return type
+		List<TypeRef> params = f.getParams().stream().filter(p->map.args.containsKey(p)).map(p->p.getType()).collect(Collectors.toList());
+		List<TypeRef> args2 = f.getParams().stream().filter(p->map.args.containsKey(p)).map(p->map.args.get(p).type).collect(Collectors.toList());
+		
+		Map<TemplateType, TypeRef> funcTempMap = TemplateUtils.inferTemplatesFromArguments(core.tni, params, args2, f.getFuncTemplateMap());
+		
+		Subject finalSub = sub;
+		List<TypeRef> retType = f.getRetType().subList(0, outputVars.size()).stream().map(t->TemplateUtils.replaceTemplates(TemplateUtils.replaceTemplates(t, funcTempMap), finalSub == null ? new HashMap<>() : finalSub.typeMap)).collect(Collectors.toList());
+		return retType;
 	}
 }

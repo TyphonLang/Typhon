@@ -497,6 +497,7 @@ public class TyphonModelReader {
 		if (!t.getTypePackage().getFunctions().stream().anyMatch(f->f instanceof Constructor && f.getFieldOf() == t)) {
 			// add a default constructor
 			Constructor c = new Constructor(tni);
+			c.markAsLibrary();
 			t.getTypePackage().addFunction(c);
 			PluginLoader.runHook(TyphonPlugin.OnInitDefaultConstructor.class, c);
 		}

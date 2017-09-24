@@ -592,7 +592,7 @@ public class LookupUtils {
 	public static class FuncArgMap {
 		public Map<Parameter, Variable> args = new HashMap<>();
 		public Map<Parameter, List<Variable>> varargs = new HashMap<>();
-		public Map<Parameter, List<Variable>> varflags = new HashMap<>();
+		public Map<Parameter, Map<String, Variable>> varflags = new HashMap<>();
 	}
 	
 	/**
@@ -604,6 +604,20 @@ public class LookupUtils {
 	 */
 	public static FuncArgMap getFuncArgMap(Function f, List<LookupArgument> args) {
 		FuncArgMap result = new FuncArgMap();
+		
+		// find the vararg or varflag param if they exist
+		Parameter varargParam = null, varflagParam = null;
+		for (Parameter param : f.getParams()) {
+			if (param.hasAnnot(f.tni.corePackage.ANNOT_VARARG)) {
+				varargParam = param;
+				result.args.put(param, null);
+				result.varargs.put(param, new ArrayList<>());
+			} else if (param.hasAnnot(f.tni.corePackage.ANNOT_VARFLAG)) {
+				varflagParam = param;
+				result.args.put(param, null);
+				result.varflags.put(param, new HashMap<>());
+			}
+		}
 		
 		// populate map
 		for (LookupArgument arg : args) {
@@ -619,8 +633,13 @@ public class LookupUtils {
 				}
 				
 				if (!found) {
-					// error; too many arguments
-					return null;
+					if (varargParam != null) {
+						// put it in the vararg
+						result.varargs.get(varargParam).add(arg.var);
+					} else {
+						// error; too many arguments
+						return null;
+					}
 				}
 			} else {
 				// keyword argument; find the corresponding parameter
@@ -639,8 +658,18 @@ public class LookupUtils {
 				}
 				
 				if (!found) {
-					// error; too many arguments
-					return null;
+					if (varflagParam != null) {
+						if (!result.varflags.get(varflagParam).containsKey(arg.label)) {
+							// add it to the varflags
+							result.varflags.get(varflagParam).put(arg.label, arg.var);
+						} else {
+							// error; duplicate argument
+							return null;
+						}
+					} else {
+						// error; no argument with that key
+						return null;
+					}
 				}
 			}
 		}
@@ -653,6 +682,14 @@ public class LookupUtils {
 			}
 		}
 		
+		// remove placeholder nulls from the arg map
+		for (Parameter key : new ArrayList<>(result.args.keySet())) {
+			if (result.args.get(key) == null) {
+				result.args.remove(key);
+			}
+		}
+		
+		// return the arg map
 		return result;
 	}
 }

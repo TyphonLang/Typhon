@@ -43,7 +43,7 @@ public class CorePackage extends Package {
 	/**
 	 * Constants for annotations.
 	 */
-	public AnnotationDefinition ANNOT_MAIN;
+	public AnnotationDefinition ANNOT_MAIN, ANNOT_VARARG, ANNOT_VARFLAG;
 	
 	/**
 	 * Constants for functions.
@@ -136,6 +136,8 @@ public class CorePackage extends Package {
 		
 		// add the annotations
 		ANNOT_MAIN = makeAnnotDef("main", new Parameter[] {});
+		ANNOT_VARARG = makeAnnotDef("vararg", new Parameter[] {});
+		ANNOT_VARFLAG = makeAnnotDef("varflag", new Parameter[] {});
 		
 		// add any core libraries
 		addSubpackage(LIB_MATH = new CoreLibraryMath(tni));

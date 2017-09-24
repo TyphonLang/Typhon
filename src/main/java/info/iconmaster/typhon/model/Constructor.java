@@ -30,6 +30,41 @@ public class Constructor extends Function {
 		public ConstructorParameter(TyphonInput input, SourceInfo source) {
 			super(input, source);
 		}
+		
+		/**
+		 * Create a library constructor parameter that's not a field.
+		 * 
+		 * @param name
+		 * @param type
+		 * @return
+		 */
+		public static ConstructorParameter nonFieldParam(String name, TypeRef type) {
+			ConstructorParameter p = new ConstructorParameter(type.tni);
+			
+			p.isField = false;
+			p.markAsLibrary();
+			p.setName(name);
+			p.setType(type);
+			
+			return p;
+		}
+		
+		/**
+		 * Create a library constructor parameter that's a field.
+		 * 
+		 * @param name
+		 * @param type
+		 * @return
+		 */
+		public static ConstructorParameter fieldParam(Field f) {
+			ConstructorParameter p = new ConstructorParameter(f.tni);
+			
+			p.isField = true;
+			p.markAsLibrary();
+			p.setName(f.getName());
+			
+			return p;
+		}
 
 		/**
 		 * @return True if this is a field rather than a local variable.

@@ -37,8 +37,12 @@ public class CorePackage extends Package {
 	/**
 	 * Constants for built-in types.
 	 */
-	public SystemType TYPE_BYTE, TYPE_SHORT, TYPE_INT, TYPE_LONG, TYPE_UBYTE, TYPE_USHORT, TYPE_UINT, TYPE_ULONG, TYPE_FLOAT, TYPE_DOUBLE,
-	TYPE_BOOL, TYPE_CHAR, TYPE_STRING;
+	public CoreTypeNumber TYPE_BYTE, TYPE_SHORT, TYPE_INT, TYPE_LONG, TYPE_UBYTE, TYPE_USHORT, TYPE_UINT, TYPE_ULONG, TYPE_FLOAT, TYPE_DOUBLE;
+	
+	/**
+	 * Constants for built-in types.
+	 */
+	public SystemType TYPE_BOOL, TYPE_STRING, TYPE_CHAR;
 	
 	/**
 	 * Constants for annotations.
@@ -96,17 +100,18 @@ public class CorePackage extends Package {
 		TYPE_INTEGER = makeUserType("Integer", TYPE_NUMBER);
 		TYPE_REAL = makeUserType("Real", TYPE_NUMBER);
 		
-		TYPE_BYTE = makeSystemType("byte", TYPE_INTEGER);
-		TYPE_SHORT = makeSystemType("short", TYPE_INTEGER);
-		TYPE_INT = makeSystemType("int", TYPE_INTEGER);
-		TYPE_LONG = makeSystemType("long", TYPE_INTEGER);
-		TYPE_UBYTE = makeSystemType("ubyte", TYPE_INTEGER);
-		TYPE_USHORT = makeSystemType("ushort", TYPE_INTEGER);
-		TYPE_UINT = makeSystemType("uint", TYPE_INTEGER);
-		TYPE_ULONG = makeSystemType("ulong", TYPE_INTEGER);
+		addType(TYPE_BYTE = new CoreTypeNumber(tni, "byte", TYPE_INTEGER));
+		addType(TYPE_SHORT = new CoreTypeNumber(tni, "short", TYPE_INTEGER));
+		addType(TYPE_INT = new CoreTypeNumber(tni, "int", TYPE_INTEGER));
+		addType(TYPE_LONG = new CoreTypeNumber(tni, "long", TYPE_INTEGER));
+		addType(TYPE_UBYTE = new CoreTypeNumber(tni, "ubyte", TYPE_INTEGER));
+		addType(TYPE_USHORT = new CoreTypeNumber(tni, "ushort", TYPE_INTEGER));
+		addType(TYPE_UINT = new CoreTypeNumber(tni, "uint", TYPE_INTEGER));
+		addType(TYPE_ULONG = new CoreTypeNumber(tni, "ulong", TYPE_INTEGER));
+		addType(TYPE_FLOAT = new CoreTypeNumber(tni, "float", TYPE_REAL));
+		addType(TYPE_DOUBLE = new CoreTypeNumber(tni, "double", TYPE_REAL));
+		
 		TYPE_CHAR = makeSystemType("char", TYPE_INTEGER);
-		TYPE_FLOAT = makeSystemType("float", TYPE_REAL);
-		TYPE_DOUBLE = makeSystemType("double", TYPE_REAL);
 		TYPE_STRING = makeSystemType("string", TYPE_ANY);
 		TYPE_BOOL = makeSystemType("bool", TYPE_ANY);
 		
@@ -138,6 +143,18 @@ public class CorePackage extends Package {
 		ANNOT_MAIN = makeAnnotDef("main", new Parameter[] {});
 		ANNOT_VARARG = makeAnnotDef("vararg", new Parameter[] {});
 		ANNOT_VARFLAG = makeAnnotDef("varflag", new Parameter[] {});
+		
+		// any registrations that depend on other things in core
+		TYPE_BYTE.addMembers();
+		TYPE_SHORT.addMembers();
+		TYPE_INT.addMembers();
+		TYPE_LONG.addMembers();
+		TYPE_UBYTE.addMembers();
+		TYPE_USHORT.addMembers();
+		TYPE_UINT.addMembers();
+		TYPE_ULONG.addMembers();
+		TYPE_FLOAT.addMembers();
+		TYPE_DOUBLE.addMembers();
 		
 		// add any core libraries
 		addSubpackage(LIB_MATH = new CoreLibraryMath(tni));

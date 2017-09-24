@@ -12,7 +12,13 @@ public class CoreTypeNumber extends SystemType {
 	
 	public CoreTypeNumber(TyphonInput input, String name, Type parent) {
 		super(name, parent);
-		
+	}
+	
+	/**
+	 * Called by CorePackage.
+	 * This is done because all the types need to be made before these can be made.
+	 */
+	public void addMembers() {
 		getTypePackage().addFunction(FUNC_NEW_FROM_NUM = new Constructor(this, ConstructorParameter.nonFieldParam("n", tni.corePackage.TYPE_NUMBER)));
 		getTypePackage().addFunction(FUNC_NEW_FROM_STRING = new Constructor(this, ConstructorParameter.nonFieldParam("s", tni.corePackage.TYPE_STRING)));
 	}

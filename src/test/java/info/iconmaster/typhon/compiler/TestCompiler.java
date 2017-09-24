@@ -770,6 +770,18 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(OpCode.ALLOC, code.ops.get(0).op);
 			Assert.assertEquals(OpCode.MOVDOUBLE, code.ops.get(1).op);
 			Assert.assertEquals(OpCode.CALL, code.ops.get(2).op);
+		}),new TestCase("class a {int x; new(this.x) {}} void f() {a a = new a(2);}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(3, code.ops.size());
+			
+			Assert.assertEquals(OpCode.ALLOC, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.CALL, code.ops.get(2).op);
+			
+			CodeBlock code2 = ((Package) code.lookup.getMemberParent()).getType("a").getTypePackage().getFunctionsWithName("new").get(0).getCode();
+			Assert.assertEquals(1, code2.ops.size());
+			Assert.assertEquals(OpCode.CALL, code2.ops.get(0).op);
 		}));
 	}
     

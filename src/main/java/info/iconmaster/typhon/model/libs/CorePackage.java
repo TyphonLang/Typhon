@@ -144,6 +144,19 @@ public class CorePackage extends Package {
 		ANNOT_VARARG = makeAnnotDef("vararg", new Parameter[] {});
 		ANNOT_VARFLAG = makeAnnotDef("varflag", new Parameter[] {});
 		
+		// add any members of any types that depend on this type tree
+		
+		TYPE_BYTE.addMembers();
+		TYPE_SHORT.addMembers();
+		TYPE_INT.addMembers();
+		TYPE_LONG.addMembers();
+		TYPE_UBYTE.addMembers();
+		TYPE_USHORT.addMembers();
+		TYPE_UINT.addMembers();
+		TYPE_ULONG.addMembers();
+		TYPE_FLOAT.addMembers();
+		TYPE_DOUBLE.addMembers();
+		
 		// add any core libraries
 		addSubpackage(LIB_MATH = new CoreLibraryMath(tni));
 		addSubpackage(LIB_OPS = new CoreLibraryOperators(tni));

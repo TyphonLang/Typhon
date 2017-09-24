@@ -74,6 +74,7 @@ import info.iconmaster.typhon.errors.UndefinedVariableError;
 import info.iconmaster.typhon.errors.WriteOnlyError;
 import info.iconmaster.typhon.model.AnnotationDefinition;
 import info.iconmaster.typhon.model.Constructor;
+import info.iconmaster.typhon.model.Constructor.ConstructorParameter;
 import info.iconmaster.typhon.model.Field;
 import info.iconmaster.typhon.model.Function;
 import info.iconmaster.typhon.model.MemberAccess;
@@ -148,7 +149,23 @@ public class TyphonCompiler {
 		}
 		
 		for (Parameter param : f.getParams()) {
-			param.setVar(scope.addVar(param.getName(), param.getType(), param.source));
+			if (param instanceof ConstructorParameter && ((ConstructorParameter) param).isField()) {
+				Variable var = scope.addTempVar(param.getType(), param.source);
+				
+				Field field = ((ConstructorParameter) param).getField(fieldOf);
+				Function setter = field.getSetter();
+				
+				if (setter == null) {
+					// error; read-only field
+					scope.getCodeBlock().tni.errors.add(new WriteOnlyError(param.source, field));
+				} else {
+					block.ops.add(new Instruction(f.tni, param.source, OpCode.CALL, new Object[] {Arrays.asList(), block.instance, setter, Arrays.asList(var)}));
+				}
+				
+				param.setVar(var);
+			} else {
+				param.setVar(scope.addVar(param.getName(), param.getType(), param.source));
+			}
 		}
 		
 		if (f.getForm() == Function.Form.BLOCK) {

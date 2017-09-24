@@ -97,6 +97,20 @@ public class Constructor extends Function {
 		public void isField(boolean isField) {
 			this.isField = isField;
 		}
+		
+		/**
+		 * Gets the field this param corresponds to.
+		 * 
+		 * @param thisType What type this param is a part of.
+		 * @return the field this param corresponds to.
+		 */
+		public Field getField(Type thisType) {
+			if (!isField) {
+				return null;
+			} else {
+				return thisType.getTypePackage().getField(getName());
+			}
+		}
 	}
 	
 	/**

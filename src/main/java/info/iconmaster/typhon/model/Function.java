@@ -253,6 +253,10 @@ public class Function extends TyphonModelEntity implements MemberAccess {
 	 * @return If this is an instance function: The type this function is part of. If this is a static function: Null.
 	 */
 	public Type getFieldOf() {
+		if (hasAnnot(tni.corePackage.ANNOT_STATIC)) {
+			return null;
+		}
+		
 		MemberAccess access = this;
 		while (access != null) {
 			if (access instanceof Type) {

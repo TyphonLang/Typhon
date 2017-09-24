@@ -338,6 +338,10 @@ public class LookupUtils {
 					TypeRef type = sub.previous == null ? null : sub.previous.type;
 					Map<TemplateType, TypeRef> typeMap = sub.previous == null ? new HashMap<>() : sub.previous.typeMap;
 					
+					if (fieldOf == null && type != null) {
+						return false;
+					}
+					
 					if (fieldOf != null && (type == null || !type.canCastTo(TemplateUtils.replaceTemplates(new TypeRef(null, fieldOf), typeMap)))) {
 						return false;
 					}

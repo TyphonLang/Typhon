@@ -252,6 +252,10 @@ public class Field extends TyphonModelEntity implements MemberAccess {
 	 * @return If this is an instance field: The type this field is part of. If this is a static field: Null.
 	 */
 	public Type getFieldOf() {
+		if (hasAnnot(tni.corePackage.ANNOT_STATIC)) {
+			return null;
+		}
+		
 		MemberAccess access = this;
 		while (access != null) {
 			if (access instanceof Type) {

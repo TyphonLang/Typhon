@@ -21,6 +21,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.TypeMemberItemContext;
 import info.iconmaster.typhon.antlr.TyphonParser.VarTypeContext;
 import info.iconmaster.typhon.errors.AmbiguousAnnotError;
 import info.iconmaster.typhon.errors.AmbiguousTypeError;
+import info.iconmaster.typhon.errors.AnnotFormatError;
 import info.iconmaster.typhon.errors.AnnotNotFoundError;
 import info.iconmaster.typhon.errors.ParentTypeError;
 import info.iconmaster.typhon.errors.TemplateDefaultTypeError;
@@ -79,6 +80,7 @@ public class TyphonTypeResolver {
 		}
 		f.needsTypesResolved(false);
 		
+		// do type resolution
 		for (TemplateType t : f.getTemplate()) {
 			resolve(t);
 		}
@@ -92,6 +94,59 @@ public class TyphonTypeResolver {
 		}
 		
 		f.getAnnots().stream().forEach((e)->resolve(e, f));
+		
+		// check that the annotations are valid
+		boolean hasVararg = false, hasVarflag = false;
+		for (Parameter p : f.getParams()) {
+			// check for varvarg/varflag
+			List<Annotation> varargs = p.getAnnots(f.tni.corePackage.ANNOT_VARARG);
+			List<Annotation> varflags = p.getAnnots(f.tni.corePackage.ANNOT_VARFLAG);
+			
+			if (varargs.size() > 1 || varflags.size() > 1) {
+				f.tni.errors.add(new AnnotFormatError(p.source, varargs.size() <= 1 ? varflags.get(0) : varargs.get(0), "Cannot be annotated multiple times"));
+			}
+			
+			if (!varargs.isEmpty()) {
+				if (hasVararg) {
+					f.tni.errors.add(new AnnotFormatError(p.source, varargs.get(0), "Only 1 parameter may have this annotation"));
+				}
+				
+				if (p.isOptional()) {
+					f.tni.errors.add(new AnnotFormatError(p.source, varargs.get(0), "Parameter cannot be optional"));
+				}
+				
+				if (p.getType().getType() != f.tni.corePackage.TYPE_LIST) {
+					f.tni.errors.add(new AnnotFormatError(p.source, varargs.get(0), "Type of parameter must be List"));
+				}
+				
+				hasVararg = true;
+			}
+			
+			if (!varflags.isEmpty()) {
+				if (hasVarflag) {
+					f.tni.errors.add(new AnnotFormatError(p.source, varflags.get(0), "Only 1 parameter may have this annotation"));
+				}
+				
+				if (p.isOptional()) {
+					f.tni.errors.add(new AnnotFormatError(p.source, varflags.get(0), "Parameter cannot be optional"));
+				}
+				
+				if (p.getType().getType() != f.tni.corePackage.TYPE_MAP) {
+					f.tni.errors.add(new AnnotFormatError(p.source, varflags.get(0), "Type of parameter must be Map"));
+				} else {
+					TemplateType keyTemp = f.tni.corePackage.TYPE_MAP.getTemplates().get(0);
+					Map<TemplateType, TypeRef> tempMap = TemplateUtils.matchAllTemplateArgs(p.getType());
+					
+					if (!tempMap.containsKey(keyTemp) || tempMap.get(keyTemp).getType() != f.tni.corePackage.TYPE_STRING) {
+						f.tni.errors.add(new AnnotFormatError(p.source, varflags.get(0), "Key type of parameter must be String"));
+					}
+				}
+				
+				hasVarflag = true;
+			}
+			
+			// check for other parameter annots
+		}
 	}
 	
 	/**

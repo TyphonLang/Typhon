@@ -52,6 +52,8 @@ import info.iconmaster.typhon.errors.SyntaxError;
 import info.iconmaster.typhon.model.Constructor.ConstructorParameter;
 import info.iconmaster.typhon.model.Import.PackageImport;
 import info.iconmaster.typhon.model.Import.RawImport;
+import info.iconmaster.typhon.plugins.PluginLoader;
+import info.iconmaster.typhon.plugins.TyphonPlugin;
 import info.iconmaster.typhon.types.EnumType;
 import info.iconmaster.typhon.types.EnumType.EnumChoice;
 import info.iconmaster.typhon.types.TemplateType;
@@ -494,7 +496,9 @@ public class TyphonModelReader {
 		
 		if (!t.getTypePackage().getFunctions().stream().anyMatch(f->f instanceof Constructor && f.getFieldOf() == t)) {
 			// add a default constructor
-			t.getTypePackage().addFunction(new Constructor(tni));
+			Constructor c = new Constructor(tni);
+			t.getTypePackage().addFunction(c);
+			PluginLoader.runHook(TyphonPlugin.OnInitDefaultConstructor.class, c);
 		}
 		
 		return t;

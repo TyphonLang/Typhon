@@ -492,6 +492,11 @@ public class TyphonModelReader {
 		
 		readPackage(t.getTypePackage(), rule.tnDecls);
 		
+		if (!t.getTypePackage().getFunctions().stream().anyMatch(f->f instanceof Constructor && f.getFieldOf() == t)) {
+			// add a default constructor
+			t.getTypePackage().addFunction(new Constructor(tni));
+		}
+		
 		return t;
 	}
 	

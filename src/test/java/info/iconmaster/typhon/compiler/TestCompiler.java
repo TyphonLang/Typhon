@@ -751,6 +751,17 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(1, code.tni.errors.size());
 		}),new TestCase("void f() {var a = new (int)->int();}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("class a {} void f() {a a = new a();}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(2, code.ops.size());
+			
+			Assert.assertEquals(OpCode.ALLOC, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.CALL, code.ops.get(1).op);
+		}),new TestCase("class a {} void f() {a a = new a(1, 2);}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("class a : b {new() {}} class b {new(int x) {}} void f() {a a = new a(1);}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
 		}));
 	}
     

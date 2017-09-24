@@ -1484,7 +1484,7 @@ public class TyphonCompiler {
 					argMap.put(var, arg.getRawValue());
 				});
 				
-				List<Function> constructors = type.getType().getTypePackage().getFunctions().stream().filter((f)->f instanceof Constructor).filter(f->{
+				List<Function> constructors = type.getType().getTypePackage().getFunctions().stream().filter((f)->f instanceof Constructor && f.getFieldOf() == type.getType()).filter(f->{
 					if (!LookupUtils.areFuncArgsCompatibleWith(scope, f, args, type.getTemplateMap(new HashMap<>()), argMap)) {
 						return false;
 					}

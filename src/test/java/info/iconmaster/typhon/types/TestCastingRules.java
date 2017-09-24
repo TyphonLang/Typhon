@@ -8,8 +8,8 @@ import org.junit.runners.Parameterized;
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.TyphonTest;
 import info.iconmaster.typhon.linker.TyphonLinker;
-import info.iconmaster.typhon.model.CorePackage;
 import info.iconmaster.typhon.model.TemplateArgument;
+import info.iconmaster.typhon.model.libs.CorePackage;
 
 /**
  * Tests <tt>{@link TyphonLinker}</tt>.

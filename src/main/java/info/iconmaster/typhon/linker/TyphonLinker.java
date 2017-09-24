@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import info.iconmaster.typhon.errors.UnresolvedImportError;
-import info.iconmaster.typhon.model.CorePackage;
 import info.iconmaster.typhon.model.Import;
 import info.iconmaster.typhon.model.Package;
 import info.iconmaster.typhon.model.TyphonModelReader;
 import info.iconmaster.typhon.model.Import.PackageImport;
 import info.iconmaster.typhon.model.Import.RawImport;
+import info.iconmaster.typhon.model.libs.CorePackage;
 
 /**
  * This class contains methods for resolving imports in Typhon code.

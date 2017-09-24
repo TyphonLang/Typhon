@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import info.iconmaster.typhon.errors.TyphonError;
-import info.iconmaster.typhon.model.CorePackage;
 import info.iconmaster.typhon.model.Package;
+import info.iconmaster.typhon.model.libs.CorePackage;
 import info.iconmaster.typhon.plugins.PluginLoader;
 import info.iconmaster.typhon.plugins.TyphonPlugin;
 

@@ -1,12 +1,13 @@
-package info.iconmaster.typhon.model;
+package info.iconmaster.typhon.model.libs;
 
 import java.util.Arrays;
 import java.util.List;
 
 import info.iconmaster.typhon.TyphonInput;
-import info.iconmaster.typhon.model.libs.CoreLibraryMath;
-import info.iconmaster.typhon.model.libs.CoreLibraryOperators;
-import info.iconmaster.typhon.model.libs.CoreLibraryReflection;
+import info.iconmaster.typhon.model.AnnotationDefinition;
+import info.iconmaster.typhon.model.Function;
+import info.iconmaster.typhon.model.Package;
+import info.iconmaster.typhon.model.Parameter;
 import info.iconmaster.typhon.types.AnyType;
 import info.iconmaster.typhon.types.SystemType;
 import info.iconmaster.typhon.types.TemplateType;

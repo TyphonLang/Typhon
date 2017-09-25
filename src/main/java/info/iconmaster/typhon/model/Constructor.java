@@ -71,7 +71,7 @@ public class Constructor extends Function {
 		 * Create a library constructor parameter that's a field.
 		 * 
 		 * @param name
-		 * @param type
+		 * @param t
 		 * @return
 		 */
 		public static ConstructorParameter fieldParam(Field f) {

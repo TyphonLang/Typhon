@@ -19,6 +19,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.TemplateArgContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeMemberItemContext;
 import info.iconmaster.typhon.antlr.TyphonParser.VarTypeContext;
+import info.iconmaster.typhon.errors.AbstractFunctionError;
 import info.iconmaster.typhon.errors.AmbiguousAnnotError;
 import info.iconmaster.typhon.errors.AmbiguousTypeError;
 import info.iconmaster.typhon.errors.AnnotFormatError;
@@ -33,6 +34,7 @@ import info.iconmaster.typhon.model.AnnotationDefinition;
 import info.iconmaster.typhon.model.Constructor;
 import info.iconmaster.typhon.model.Field;
 import info.iconmaster.typhon.model.Function;
+import info.iconmaster.typhon.model.Function.Form;
 import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.model.Package;
 import info.iconmaster.typhon.model.Parameter;
@@ -311,8 +313,7 @@ public class TyphonTypeResolver {
 		if (f.hasAnnot(f.tni.corePackage.LIB_OPS.ANNOT_EQ)) {
 			Annotation annot = f.getAnnots(f.tni.corePackage.LIB_OPS.ANNOT_EQ).get(0);
 			
-			Type fieldOf = f.getFieldOf();
-			if (fieldOf == null) {
+			if (f.isStatic()) {
 				f.tni.errors.add(new AnnotFormatError(annot.source, annot, "function cannot be static"));
 			}
 			
@@ -355,6 +356,28 @@ public class TyphonTypeResolver {
 				f.tni.errors.add(new AnnotFormatError(annot.source, annot, "function must return at least one value"));
 			}
 		}
+		
+		// check for abstract
+		if (f.hasAnnot(f.tni.corePackage.ANNOT_ABSTRACT)) {
+			Annotation annot = f.getAnnots(f.tni.corePackage.ANNOT_ABSTRACT).get(0);
+			
+			if (f.isStatic()) {
+				f.tni.errors.add(new AnnotFormatError(annot.source, annot, "function cannot be static"));
+			} else {
+				resolve(f.getFieldOf());
+				if (!f.getFieldOf().hasAnnot(f.tni.corePackage.ANNOT_ABSTRACT)) {
+					f.tni.errors.add(new AnnotFormatError(annot.source, annot, "function is not a member of an abstract class"));
+				}
+			}
+			
+			if (f.getForm() != Form.STUB) {
+				f.tni.errors.add(new AnnotFormatError(annot.source, annot, "function cannot have an implementation"));
+			}
+			
+			if (f.hasAnnot(f.tni.corePackage.ANNOT_OVERRIDE)) {
+				f.tni.errors.add(new AnnotFormatError(annot.source, annot, "function cannot be an override"));
+			}
+		}
 	}
 	
 	/**
@@ -385,6 +408,8 @@ public class TyphonTypeResolver {
 		}
 		t.needsTypesResolved(false);
 		
+		t.getAnnots().stream().forEach((e)->resolve(e, t));
+		
 		if (t instanceof UserType) {
 			UserType userType = (UserType) t;
 
@@ -399,6 +424,39 @@ public class TyphonTypeResolver {
 			
 			if (userType.getParentTypes().isEmpty()) {
 				userType.getParentTypes().add(new TypeRef(t.tni.corePackage.TYPE_ANY));
+			}
+			
+			// if this type isn't abstract, check to make sure all abstract methods are implemented
+			if (!t.hasAnnot(t.tni.corePackage.ANNOT_ABSTRACT)) {
+				List<TypeRef> parents = userType.getAllParents();
+				List<Function> abstracts = new ArrayList<>();
+				
+				for (TypeRef parent : parents) {
+					resolve(parent.getType());
+				}
+				
+				// find the abstract functions
+				for (TypeRef parent : parents) {
+					abstracts.addAll(parent.getType().getTypePackage().getFunctions().stream().filter(ff->
+						ff.hasAnnot(t.tni.corePackage.ANNOT_ABSTRACT)
+					).collect(Collectors.toList()));
+				}
+				
+				// remove the abstract functions that were implemented
+				for (TypeRef parent : parents) {
+					parent.getType().getTypePackage().getFunctions().stream().filter(ff->
+						!ff.hasAnnot(t.tni.corePackage.ANNOT_ABSTRACT) && abstracts.contains(ff.getVirtualBase(parent.getType()))
+					).forEach(ff->{
+						abstracts.remove(ff.getVirtualBase(parent.getType()));
+					});
+				}
+				
+				if (!abstracts.isEmpty()) {
+					// error; not all abstract methods implemented
+					for (Function ff : abstracts) {
+						t.tni.errors.add(new AbstractFunctionError(t.source, t, ff));
+					}
+				}
 			}
 		} else if (t instanceof TemplateType) {
 			TemplateType tempType = (TemplateType) t;
@@ -422,8 +480,6 @@ public class TyphonTypeResolver {
 		}
 		
 		resolve(t.getTypePackage());
-		
-		t.getAnnots().stream().forEach((e)->resolve(e, t));
 	}
 	
 	/**

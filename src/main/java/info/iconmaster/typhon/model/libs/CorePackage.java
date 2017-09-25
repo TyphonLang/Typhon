@@ -62,7 +62,7 @@ public class CorePackage extends Package {
 	/**
 	 * Constants for annotations.
 	 */
-	public AnnotationDefinition ANNOT_MAIN, ANNOT_VARARG, ANNOT_VARFLAG, ANNOT_STATIC, ANNOT_OVERRIDE, ANNOT_GETTER, ANNOT_SETTER;
+	public AnnotationDefinition ANNOT_MAIN, ANNOT_VARARG, ANNOT_VARFLAG, ANNOT_STATIC, ANNOT_OVERRIDE, ANNOT_GETTER, ANNOT_SETTER, ANNOT_ABSTRACT;
 	
 	/**
 	 * Constants for functions.
@@ -166,6 +166,7 @@ public class CorePackage extends Package {
 		ANNOT_OVERRIDE = makeAnnotDef("override", new Parameter[] {});
 		ANNOT_GETTER = makeAnnotDef("getter", new Parameter[] {});
 		ANNOT_SETTER = makeAnnotDef("setter", new Parameter[] {});
+		ANNOT_ABSTRACT = makeAnnotDef("abstract", new Parameter[] {});
 		
 		// add any core libraries
 		addSubpackage(LIB_MATH = new CoreLibraryMath(tni));

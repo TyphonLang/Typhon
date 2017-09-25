@@ -82,7 +82,7 @@ stat:
 |	tnAnnots+=annotation* 'for' tnLvals+=forLvalue (',' tnLvals+=forLvalue)* ':' tnExpr=expr tnBlock=block																#forStat
 |	tnAnnots+=annotation* 'while' tnExpr=expr tnBlock=block																												#whileStat
 |	tnAnnots+=annotation* 'repeat' tnBlock=block 'until' tnExpr=expr ';'																								#repeatStat
-|	tnAnnots+=annotation* 'try' tnTryBlock=block tnCatchBlocks+=catchBlock*																								#tryStat
+|	tnAnnots+=annotation* 'try' tnTryBlock=block tnCatchBlocks+=catchBlock+																								#tryStat
 |	tnAnnots+=annotation* 'break' tnLabel=WORD? ';'																														#breakStat
 |	tnAnnots+=annotation* 'continue' tnLabel=WORD? ';'																													#contStat
 |	tnAnnots+=annotation* 'switch' tnExpr=expr (tnLabel=WORD ':')? '{' tnCaseBlocks+=caseBlock* (tnDefaultAnnots+=annotation* 'default' tnDefaultBlock=block)? '}'		#switchStat

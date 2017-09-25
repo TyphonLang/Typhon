@@ -426,9 +426,9 @@ public class TestGrammar extends TyphonTest {
 			new CaseInvalid("repeat {} until true", (parser)->{parser.stat();}),
 			new CaseInvalid("repeat until true;", (parser)->{parser.stat();}),
 			//tryStat
-			new CaseValid("try {}", (parser)->{parser.stat();}),
 			new CaseValid("try {} catch var x {}", (parser)->{parser.stat();}),
 			new CaseValid("try {} catch var x {} catch var y {}", (parser)->{parser.stat();}),
+			new CaseInvalid("try {}", (parser)->{parser.stat();}),
 			new CaseInvalid("catch {}", (parser)->{parser.stat();}),
 			//breakStat
 			new CaseValid("break;", (parser)->{parser.stat();}),

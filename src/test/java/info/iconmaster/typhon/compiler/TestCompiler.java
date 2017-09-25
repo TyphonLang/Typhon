@@ -802,6 +802,42 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(1, code.tni.errors.size());
 		}),new TestCase("void f() {error e; var x = throw e;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("void f() {try {} catch error e {}}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(9, code.ops.size());
+			
+			Assert.assertEquals(OpCode.TRY, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(2).op);
+			Assert.assertEquals(OpCode.ENDTRY, code.ops.get(3).op);
+			Assert.assertEquals(OpCode.JUMP, code.ops.get(4).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(5).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(6).op);
+			Assert.assertEquals(OpCode.JUMP, code.ops.get(7).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(8).op);
+		}),new TestCase("void f() {try {println();} catch error e {println();}}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(11, code.ops.size());
+			
+			Assert.assertEquals(OpCode.TRY, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(2).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(3).op);
+			Assert.assertEquals(OpCode.ENDTRY, code.ops.get(4).op);
+			Assert.assertEquals(OpCode.JUMP, code.ops.get(5).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(6).op);
+			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(7).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(8).op);
+			Assert.assertEquals(OpCode.JUMP, code.ops.get(9).op);
+			Assert.assertEquals(OpCode.LABEL, code.ops.get(10).op);
+		}),new TestCase("void f() {try {} catch int e {}}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("error f() {try {} catch error e {return e;}}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("error f() {try {} catch error e {} return e;}", (code)->{
+			Assert.assertEquals(2, code.tni.errors.size());
 		}));
 	}
     

@@ -22,6 +22,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.BreakStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.CaseBlockContext;
 import info.iconmaster.typhon.antlr.TyphonParser.CaseExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.CastExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.CatchBlockContext;
 import info.iconmaster.typhon.antlr.TyphonParser.CharConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ContStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.DefStatContext;
@@ -54,6 +55,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.TerneryOpExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ThisConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ThrowExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TrueConstExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.TryStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.UnOpsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.VarExprContext;
@@ -644,6 +646,72 @@ public class TyphonCompiler {
 				}
 				
 				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {newScope.endScopeLabel}));
+				return null;
+			}
+			
+			@Override
+			public Void visitTryStat(TryStatContext ctx) {
+				List<CatchInfo> catches = new ArrayList<>();
+				List<Scope> scopes = new ArrayList<>();
+				Label endLabel = scope.addTempLabel();
+				Label tryId = scope.addTempLabel();
+				
+				for (CatchBlockContext catcher : ctx.tnCatchBlocks) {
+					Scope newScope = new Scope(scope.getCodeBlock(), scope);
+					TypeRef type = TyphonTypeResolver.readType(core.tni, catcher.tnType, scope);
+					
+					if (!type.canCastTo(new TypeRef(core.TYPE_ERROR))) {
+						// error; can only catch errors
+						core.tni.errors.add(new TypeError(new SourceInfo(catcher.tnType), type, new TypeRef(core.TYPE_ERROR)));
+					}
+					
+					Label beginLabel;
+					if (catcher.tnBlock.tnLabel == null) {
+						beginLabel = newScope.beginScopeLabel = newScope.addTempLabel();
+						newScope.endScopeLabel = newScope.addTempLabel();
+					} else {
+						beginLabel = newScope.beginScopeLabel = newScope.addLabel(catcher.tnBlock.tnLabel.getText()+":begin");
+						newScope.endScopeLabel = newScope.addLabel(catcher.tnBlock.tnLabel.getText()+":end");
+					}
+					
+					catches.add(new CatchInfo(newScope.addVar(catcher.tnName.getText(), type, new SourceInfo(catcher.tnName)), type, beginLabel));
+					scopes.add(newScope);
+				}
+				
+				Scope tryScope = new Scope(scope.getCodeBlock(), scope);
+				if (ctx.tnTryBlock.tnLabel == null) {
+					tryScope.beginScopeLabel = tryScope.addTempLabel();
+					tryScope.endScopeLabel = tryScope.addTempLabel();
+				} else {
+					tryScope.beginScopeLabel = tryScope.addLabel(ctx.tnTryBlock.tnLabel.getText()+":begin");
+					tryScope.endScopeLabel = tryScope.addLabel(ctx.tnTryBlock.tnLabel.getText()+":end");
+				}
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.TRY, new Object[] {tryId, catches}));
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {tryScope.beginScopeLabel}));
+				for (StatContext stat : ctx.tnTryBlock.tnBlock) {
+					compileStat(tryScope, stat, expectedType);
+				}
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {tryScope.endScopeLabel}));
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.ENDTRY, new Object[] {tryId}));
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMP, new Object[] {endLabel}));
+				
+				int i = 0;
+				for (CatchBlockContext catcher : ctx.tnCatchBlocks) {
+					Scope catchScope = scopes.get(i);
+					
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {catchScope.beginScopeLabel}));
+					for (StatContext stat : catcher.tnBlock.tnBlock) {
+						compileStat(catchScope, stat, expectedType);
+					}
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {catchScope.endScopeLabel}));
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMP, new Object[] {endLabel}));
+					
+					i++;
+				}
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {endLabel}));
+				
 				return null;
 			}
 		};

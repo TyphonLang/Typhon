@@ -805,6 +805,12 @@ public class TyphonCompiler {
 				}
 				
 				List<LookupPath> paths = LookupUtils.findPaths(scope, base, names);
+				
+				paths.removeIf(path->{
+					Subject sub = path.returnedSubject();
+					return !(sub.member instanceof Field || sub.member instanceof Variable);
+				});
+				
 				if (paths.isEmpty()) {
 					// error, no path found
 					core.tni.errors.add(new UndefinedVariableError(new SourceInfo(ctx), ctx.tnValue.getText()));
@@ -1652,6 +1658,12 @@ public class TyphonCompiler {
 				}
 				
 				List<LookupPath> paths = LookupUtils.findPaths(scope, base, names);
+				
+				paths.removeIf(path->{
+					Subject sub = path.returnedSubject();
+					return !(sub.member instanceof Field || sub.member instanceof Variable);
+				});
+				
 				if (paths.isEmpty()) {
 					// error, no path found
 					return Arrays.asList(TypeRef.var(core.tni));

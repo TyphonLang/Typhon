@@ -42,6 +42,11 @@ public class CorePackage extends Package {
 	/**
 	 * Constants for built-in types.
 	 */
+	public CoreTypeError TYPE_ERROR_INTERNAL, TYPE_ERROR_CAST, TYPE_ERROR_ARGUMENT, TYPE_ERROR_NULL;
+	
+	/**
+	 * Constants for built-in types.
+	 */
 	public CoreTypeIterable TYPE_ITERABLE;
 	
 	/**
@@ -141,6 +146,11 @@ public class CorePackage extends Package {
 		TYPE_MAP.getTemplates().add(new TemplateType(tni, "K"));
 		TYPE_MAP.getTemplates().add(new TemplateType(tni, "V"));
 		
+		addType(TYPE_ERROR_INTERNAL = new CoreTypeError(tni, "InternalError"));
+		addType(TYPE_ERROR_CAST = new CoreTypeError(tni, "ClassCastError"));
+		addType(TYPE_ERROR_ARGUMENT = new CoreTypeError(tni, "ArgumentError"));
+		addType(TYPE_ERROR_NULL = new CoreTypeError(tni, "NullValueError"));
+		
 		// add the functions
 		addFunction(FUNC_PRINT = new Function(tni, "print", new TemplateType[] {
 				
@@ -188,6 +198,11 @@ public class CorePackage extends Package {
 		TYPE_ERROR.addMembers();
 		TYPE_ITERABLE.addMembers();
 		TYPE_ITERATOR.addMembers();
+		
+		TYPE_ERROR_INTERNAL.addMembers();
+		TYPE_ERROR_CAST.addMembers();
+		TYPE_ERROR_ARGUMENT.addMembers();
+		TYPE_ERROR_NULL.addMembers();
 	}
 	
 	/**

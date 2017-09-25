@@ -841,17 +841,17 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(2, code.tni.errors.size());
 		}),new TestCase("Error f() {try {throw new Error();} catch Error e {return e;}}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
-		}),new TestCase("class a : Iterable<int> {} void f() {a a = new a(); for int x : a {}}", (code)->{
+		}),new TestCase("class a : Iterable<int> {@override Iterator<int> iterator() {} } void f() {a a = new a(); for int x : a {}}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
-		}),new TestCase("class a : Iterable<int> {} void f() {a a = new a(); for int x : a.iterator() {}}", (code)->{
+		}),new TestCase("class a : Iterable<int> {@override Iterator<int> iterator() {} } void f() {a a = new a(); for int x : a.iterator() {}}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
-		}),new TestCase("import operator; class a : Iterable<int> {@loop (int,int) g(Iterator<int> iter) {}} void f() {a a = new a(); for int x, int y : a {}}", (code)->{
+		}),new TestCase("import operator; class a : Iterable<int> {@override Iterator<int> iterator() {} @loop (int,int) g(Iterator<int> iter) {}} void f() {a a = new a(); for int x, int y : a {}}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
-		}),new TestCase("import operator; class a : Iterable<int> {@loop (int,int) g(Iterator<int> iter) {}} void f() {a a = new a(); for int x, int y, int z : a {}}", (code)->{
+		}),new TestCase("import operator; class a : Iterable<int> {@override Iterator<int> iterator() {} @loop (int,int) g(Iterator<int> iter) {}} void f() {a a = new a(); for int x, int y, int z : a {}}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
-		}),new TestCase("class a : Iterable<int> {} void f() {a a = new a(); for int x, int y : a {}}", (code)->{
+		}),new TestCase("class a : Iterable<int> {} void f() {@override Iterator<int> iterator() {} a a = new a(); for int x, int y : a {}}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
-		}),new TestCase("import operator; class a : Iterable<int> {@loop (int,int) g(Iterator<int> iter) {}} void f() {a a = new a(); for int x, float y : a {}}", (code)->{
+		}),new TestCase("import operator; class a : Iterable<int> {@override Iterator<int> iterator() {} @loop (int,int) g(Iterator<int> iter) {}} void f() {a a = new a(); for int x, float y : a {}}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
 		}));
 	}

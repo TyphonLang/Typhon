@@ -1,6 +1,7 @@
 package info.iconmaster.typhon.model.libs;
 
 import info.iconmaster.typhon.TyphonInput;
+import info.iconmaster.typhon.model.Annotation;
 import info.iconmaster.typhon.model.Function;
 import info.iconmaster.typhon.model.Parameter;
 import info.iconmaster.typhon.model.TemplateArgument;
@@ -27,6 +28,8 @@ public class CoreTypeIterator extends UserType {
 	 * This is done because all the types need to be made before these can be made.
 	 */
 	public void addMembers() {
+		getAnnots().add(new Annotation(tni.corePackage.ANNOT_ABSTRACT));
+		
 		getTypePackage().addFunction(FUNC_NEXT = new Function(tni, "next", new TemplateType[] {
 				
 		}, new Parameter[] {
@@ -34,6 +37,7 @@ public class CoreTypeIterator extends UserType {
 		}, new Type[] {
 				T
 		}));
+		FUNC_NEXT.getAnnots().add(new Annotation(tni.corePackage.ANNOT_ABSTRACT));
 		
 		getTypePackage().addFunction(FUNC_DONE = new Function(tni, "done", new TemplateType[] {
 				
@@ -42,6 +46,7 @@ public class CoreTypeIterator extends UserType {
 		}, new Type[] {
 				tni.corePackage.TYPE_BOOL
 		}));
+		FUNC_DONE.getAnnots().add(new Annotation(tni.corePackage.ANNOT_ABSTRACT));
 		
 		getTypePackage().addFunction(FUNC_ITERATOR = new Function(tni, "iterator", new TemplateType[] {
 				

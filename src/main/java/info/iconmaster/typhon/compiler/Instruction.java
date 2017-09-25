@@ -61,7 +61,6 @@ public class Instruction extends TyphonModelEntity {
 		ISNULL,
 		LAMBDA,
 		TRY,
-		CATCH,
 		THROW,
 	}
 	

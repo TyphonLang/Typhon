@@ -840,6 +840,10 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(2, code.tni.errors.size());
 		}),new TestCase("Error f() {try {throw new Error();} catch Error e {return e;}}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("class a : Iterable<int> {} void f() {a a = new a(); for (int x : a) {}}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("class a : Iterable<int> {} void f() {a a = new a(); for (int x : a.iterator()) {}}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
 		}));
 	}
     

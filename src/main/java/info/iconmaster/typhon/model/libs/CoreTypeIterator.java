@@ -48,7 +48,7 @@ public class CoreTypeIterator extends UserType {
 		}, new Parameter[] {
 				
 		}, new TypeRef[] {
-				new TypeRef(tni.corePackage.TYPE_ITERATOR, new TemplateArgument(tni.corePackage.TYPE_ITERABLE.T))
+				new TypeRef(tni.corePackage.TYPE_ITERATOR, new TemplateArgument(T))
 		}));
 		Function.setOverride(tni.corePackage.TYPE_ITERABLE.FUNC_ITERATOR, FUNC_ITERATOR);
 	}

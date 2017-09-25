@@ -167,8 +167,12 @@ public class CorePackage extends Package {
 		ANNOT_GETTER = makeAnnotDef("getter", new Parameter[] {});
 		ANNOT_SETTER = makeAnnotDef("setter", new Parameter[] {});
 		
-		// add any members of any types that depend on this type tree
+		// add any core libraries
+		addSubpackage(LIB_MATH = new CoreLibraryMath(tni));
+		addSubpackage(LIB_OPS = new CoreLibraryOperators(tni));
+		addSubpackage(LIB_REFLECT = new CoreLibraryReflection(tni));
 		
+		// add any members of any types that depend on this type tree
 		TYPE_BYTE.addMembers();
 		TYPE_SHORT.addMembers();
 		TYPE_INT.addMembers();
@@ -183,11 +187,6 @@ public class CorePackage extends Package {
 		TYPE_ERROR.addMembers();
 		TYPE_ITERABLE.addMembers();
 		TYPE_ITERATOR.addMembers();
-		
-		// add any core libraries
-		addSubpackage(LIB_MATH = new CoreLibraryMath(tni));
-		addSubpackage(LIB_OPS = new CoreLibraryOperators(tni));
-		addSubpackage(LIB_REFLECT = new CoreLibraryReflection(tni));
 	}
 	
 	/**

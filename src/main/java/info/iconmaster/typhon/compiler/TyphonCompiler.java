@@ -30,6 +30,8 @@ import info.iconmaster.typhon.antlr.TyphonParser.EqOpsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.FalseConstExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.ForLvalueContext;
+import info.iconmaster.typhon.antlr.TyphonParser.ForStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.FuncCallExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.IfStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.IsExprContext;
@@ -65,6 +67,7 @@ import info.iconmaster.typhon.compiler.Instruction.OpCode;
 import info.iconmaster.typhon.errors.CannotConstructError;
 import info.iconmaster.typhon.errors.ConstructorNotFoundError;
 import info.iconmaster.typhon.errors.DuplicateVarNameError;
+import info.iconmaster.typhon.errors.ForLoopVariableCountError;
 import info.iconmaster.typhon.errors.LabelNotFoundError;
 import info.iconmaster.typhon.errors.NotAllowedHereError;
 import info.iconmaster.typhon.errors.ReadOnlyError;
@@ -711,6 +714,88 @@ public class TyphonCompiler {
 				}
 				
 				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {endLabel}));
+				
+				return null;
+			}
+			
+			@Override
+			public Void visitForStat(ForStatContext ctx) {
+				Scope newScope = new Scope(scope.getCodeBlock(), scope);
+				if (ctx.tnBlock.tnLabel == null) {
+					newScope.beginScopeLabel = newScope.addTempLabel();
+					newScope.endScopeLabel = newScope.addTempLabel();
+				} else {
+					newScope.beginScopeLabel = newScope.addLabel(ctx.tnBlock.tnLabel.getText()+":begin");
+					newScope.endScopeLabel = newScope.addLabel(ctx.tnBlock.tnLabel.getText()+":end");
+				}
+				
+				Variable iterableVar = newScope.addTempVar(TypeRef.var(new TypeRef(core.TYPE_ITERABLE)), new SourceInfo(ctx.tnExpr));
+				compileExpr(newScope, ctx.tnExpr, Arrays.asList(iterableVar));
+				
+				if (!iterableVar.type.canCastTo(new TypeRef(core.TYPE_ITERABLE))) {
+					// error; iterator must be iterable
+					core.tni.errors.add(new TypeError(new SourceInfo(ctx.tnExpr), iterableVar.type, new TypeRef(core.TYPE_ITERABLE)));
+				}
+				
+				Variable iteratorVar = newScope.addTempVar(new TypeRef(core.TYPE_ITERATOR), new SourceInfo(ctx.tnExpr));
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnExpr), OpCode.CALL, new Object[] {Arrays.asList(iteratorVar), iterableVar, core.TYPE_ITERABLE.FUNC_ITERATOR, Arrays.asList()}));
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {newScope.beginScopeLabel}));
+				
+				Variable condVar = newScope.addTempVar(new TypeRef(core.TYPE_BOOL), new SourceInfo(ctx.tnExpr));
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnExpr), OpCode.CALL, new Object[] {Arrays.asList(condVar), iteratorVar, core.TYPE_ITERATOR.FUNC_DONE, Arrays.asList()}));
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPTRUE, new Object[] {condVar, newScope.endScopeLabel}));
+				
+				List<Function> loopHandlers = iterableVar.type.getType().getOperatorHandlers(core.LIB_OPS.ANNOT_LOOP);
+				if (loopHandlers.isEmpty()) {
+					if (ctx.tnLvals.size() > 1) {
+						// error; too many loop variables
+						core.tni.errors.add(new ForLoopVariableCountError(new SourceInfo(ctx.tnLvals), 1, ctx.tnLvals.size()));
+					}
+					
+					ForLvalueContext lval = ctx.tnLvals.get(0);
+					Variable loopVar = newScope.addVar(lval.tnName.getText(), TyphonTypeResolver.readType(core.tni, lval.tnType, newScope), new SourceInfo(lval.tnName));
+					
+					if (loopVar.type.isVar()) {
+						loopVar.type.isVar(false);
+						
+						Map<TemplateType, TypeRef> map = iteratorVar.type.getTemplateMap(new HashMap<>());
+						loopVar.type = map.get(core.TYPE_ITERATOR.T);
+					}
+					
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnExpr), OpCode.CALL, new Object[] {Arrays.asList(loopVar), iteratorVar, core.TYPE_ITERATOR.FUNC_NEXT, Arrays.asList()}));
+				} else {
+					Function loopHandler = loopHandlers.get(0);
+					
+					if (ctx.tnLvals.size() > loopHandler.getRetType().size()) {
+						// error; too many loop variables
+						core.tni.errors.add(new ForLoopVariableCountError(new SourceInfo(ctx.tnLvals), loopHandler.getRetType().size(), ctx.tnLvals.size()));
+					}
+					
+					List<Variable> loopVars = new ArrayList<>();
+					
+					int i = 0;
+					for (ForLvalueContext lval : ctx.tnLvals) {
+						if (i >= loopHandler.getRetType().size()) break;
+						
+						Variable loopVar = newScope.addVar(lval.tnName.getText(), TyphonTypeResolver.readType(core.tni, lval.tnType, newScope), new SourceInfo(lval.tnName));
+						loopVars.add(loopVar);
+						
+						if (loopVar.type.isVar()) {
+							loopVar.type.isVar(false);
+							loopVar.type = loopHandler.getRetType().get(i);
+						}
+					}
+					
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnExpr), OpCode.CALL, new Object[] {loopVars, iterableVar, loopHandler, Arrays.asList(iteratorVar)}));
+				}
+				
+				for (StatContext stat : ctx.tnBlock.tnBlock) {
+					compileStat(newScope, stat, expectedType);
+				}
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMP, new Object[] {newScope.beginScopeLabel}));
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {newScope.endScopeLabel}));
 				
 				return null;
 			}

@@ -52,6 +52,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.StringConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.SwitchStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TerneryOpExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ThisConstExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.ThrowExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TrueConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.UnOpsExprContext;
@@ -1532,6 +1533,21 @@ public class TyphonCompiler {
 				
 				return Arrays.asList(type);
 			}
+			
+			@Override
+			public List<TypeRef> visitThrowExpr(ThrowExprContext ctx) {
+				Variable errorVar = scope.addTempVar(TypeRef.var(core.tni), new SourceInfo(ctx));
+				compileExpr(scope, ctx.tnArg, Arrays.asList(errorVar));
+				
+				if (!errorVar.type.canCastTo(new TypeRef(core.TYPE_ERROR))) {
+					// error; must only throw errors
+					core.tni.errors.add(new TypeError(new SourceInfo(ctx.tnArg), errorVar.type, new TypeRef(core.TYPE_ERROR)));
+				}
+				
+				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.THROW, new Object[] {errorVar}));
+				
+				return Arrays.asList(TypeRef.var(core.tni));
+			}
 		};
 		
 		List<TypeRef> a = visitor.visit(rule);
@@ -1911,6 +1927,11 @@ public class TyphonCompiler {
 			@Override
 			public List<TypeRef> visitNewExpr(NewExprContext ctx) {
 				return Arrays.asList(TyphonTypeResolver.readType(core.tni, ctx.tnType, scope));
+			}
+			
+			@Override
+			public List<TypeRef> visitThrowExpr(ThrowExprContext ctx) {
+				return Arrays.asList(TypeRef.var(core.tni));
 			}
 		};
 		

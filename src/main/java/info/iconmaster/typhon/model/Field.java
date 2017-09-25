@@ -215,6 +215,7 @@ public class Field extends TyphonModelEntity implements MemberAccess {
 			// make the default getter function
 			defaultGetter = new Function(tni, getName(), new TemplateType[0], new Parameter[0], new TypeRef[] {type});
 			defaultGetter.markAsLibrary();
+			if (getParent() != null) getParent().addFunction(defaultGetter);
 			PluginLoader.runHook(TyphonPlugin.OnInitGetter.class, this);
 		}
 		
@@ -264,6 +265,7 @@ public class Field extends TyphonModelEntity implements MemberAccess {
 			// make the default setter function
 			defaultSetter = new Function(tni, getName(), new TemplateType[0], new Parameter[] {new Parameter(tni, name, type, false)}, new TypeRef[0]);
 			defaultSetter.markAsLibrary();
+			if (getParent() != null) getParent().addFunction(defaultSetter);
 			PluginLoader.runHook(TyphonPlugin.OnInitSetter.class, this);
 		}
 		

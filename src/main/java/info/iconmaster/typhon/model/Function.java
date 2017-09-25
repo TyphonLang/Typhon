@@ -331,6 +331,10 @@ public class Function extends TyphonModelEntity implements MemberAccess {
 	public static void setOverride(Function virtual, Function override) {
 		virtual.getVirtualOverrides().add(override);
 		override.getVirtualBases().add(virtual);
+		
+		if (!override.hasAnnot(override.tni.corePackage.ANNOT_OVERRIDE)) {
+			override.getAnnots().add(new Annotation(override.tni.corePackage.ANNOT_OVERRIDE));
+		}
 	}
 	
 	public Function getVirtualBase(Type expected) {

@@ -29,7 +29,7 @@ public class CoreLibraryOperators extends Package {
 	ANNOT_BAND, ANNOT_BOR, ANNOT_XOR, ANNOT_SHL, ANNOT_SHR,
 	ANNOT_LT, ANNOT_LE, ANNOT_GT, ANNOT_GE,
 	ANNOT_NEG, ANNOT_POS, ANNOT_BNOT,
-	ANNOT_EQ;
+	ANNOT_EQ, ANNOT_LOOP;
 	
 	/**
 	 * A list of various operator functions.
@@ -203,6 +203,7 @@ public class CoreLibraryOperators extends Package {
 		ANNOT_BNOT = makeAnnotDef("bnot");
 		
 		ANNOT_EQ = makeAnnotDef("eq");
+		ANNOT_LOOP = makeAnnotDef("loop");
 		
 		// add the operator functions
 		addBinOpFunc(ANNOT_ADD);

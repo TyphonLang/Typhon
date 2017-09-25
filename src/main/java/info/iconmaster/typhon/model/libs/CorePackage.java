@@ -42,6 +42,16 @@ public class CorePackage extends Package {
 	/**
 	 * Constants for built-in types.
 	 */
+	public CoreTypeIterable TYPE_ITERABLE;
+	
+	/**
+	 * Constants for built-in types.
+	 */
+	public CoreTypeIterator TYPE_ITERATOR;
+	
+	/**
+	 * Constants for built-in types.
+	 */
 	public CoreTypeNumber TYPE_BYTE, TYPE_SHORT, TYPE_INT, TYPE_LONG, TYPE_UBYTE, TYPE_USHORT, TYPE_UINT, TYPE_ULONG, TYPE_FLOAT, TYPE_DOUBLE;
 	
 	/**
@@ -121,6 +131,8 @@ public class CorePackage extends Package {
 		TYPE_BOOL = makeSystemType("bool", TYPE_ANY);
 		
 		addType(TYPE_ERROR = new CoreTypeErrorBase(tni));
+		addType(TYPE_ITERABLE = new CoreTypeIterable(tni));
+		addType(TYPE_ITERATOR = new CoreTypeIterator(tni));
 		
 		TYPE_LIST = makeUserType("List", TYPE_ANY);
 		TYPE_LIST.getTemplates().add(new TemplateType(tni, "T"));
@@ -169,6 +181,8 @@ public class CorePackage extends Package {
 		TYPE_DOUBLE.addMembers();
 		
 		TYPE_ERROR.addMembers();
+		TYPE_ITERABLE.addMembers();
+		TYPE_ITERATOR.addMembers();
 		
 		// add any core libraries
 		addSubpackage(LIB_MATH = new CoreLibraryMath(tni));

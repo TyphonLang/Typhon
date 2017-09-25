@@ -32,7 +32,12 @@ public class CorePackage extends Package {
 	/**
 	 * Constants for built-in types.
 	 */
-	public UserType TYPE_NUMBER, TYPE_INTEGER, TYPE_REAL, TYPE_LIST, TYPE_MAP, TYPE_ERROR;
+	public UserType TYPE_NUMBER, TYPE_INTEGER, TYPE_REAL, TYPE_LIST, TYPE_MAP;
+	
+	/**
+	 * Constants for built-in types.
+	 */
+	public CoreTypeErrorBase TYPE_ERROR;
 	
 	/**
 	 * Constants for built-in types.
@@ -115,7 +120,7 @@ public class CorePackage extends Package {
 		TYPE_STRING = makeSystemType("string", TYPE_ANY);
 		TYPE_BOOL = makeSystemType("bool", TYPE_ANY);
 		
-		TYPE_ERROR = makeUserType("error", TYPE_ANY);
+		addType(TYPE_ERROR = new CoreTypeErrorBase(tni));
 		
 		TYPE_LIST = makeUserType("List", TYPE_ANY);
 		TYPE_LIST.getTemplates().add(new TemplateType(tni, "T"));
@@ -162,6 +167,8 @@ public class CorePackage extends Package {
 		TYPE_ULONG.addMembers();
 		TYPE_FLOAT.addMembers();
 		TYPE_DOUBLE.addMembers();
+		
+		TYPE_ERROR.addMembers();
 		
 		// add any core libraries
 		addSubpackage(LIB_MATH = new CoreLibraryMath(tni));

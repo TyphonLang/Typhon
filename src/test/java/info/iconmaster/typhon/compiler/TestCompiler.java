@@ -796,13 +796,13 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(0, code.tni.errors.size());
 		}),new TestCase("class a {int x;} void f() {a a = new a(); a.x = 5; print(a.x);}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
-		}),new TestCase("void f() {error e; throw e;}", (code)->{
+		}),new TestCase("void f() {Error e; throw e;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 		}),new TestCase("void f() {throw 1;}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
-		}),new TestCase("void f() {error e; var x = throw e;}", (code)->{
+		}),new TestCase("void f() {Error e; var x = throw e;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
-		}),new TestCase("void f() {try {} catch error e {}}", (code)->{
+		}),new TestCase("void f() {try {} catch Error e {}}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
 			Assert.assertEquals(9, code.ops.size());
@@ -816,7 +816,7 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(OpCode.LABEL, code.ops.get(6).op);
 			Assert.assertEquals(OpCode.JUMP, code.ops.get(7).op);
 			Assert.assertEquals(OpCode.LABEL, code.ops.get(8).op);
-		}),new TestCase("void f() {try {println();} catch error e {println();}}", (code)->{
+		}),new TestCase("void f() {try {println();} catch Error e {println();}}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
 			Assert.assertEquals(11, code.ops.size());
@@ -834,10 +834,12 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(OpCode.LABEL, code.ops.get(10).op);
 		}),new TestCase("void f() {try {} catch int e {}}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
-		}),new TestCase("error f() {try {} catch error e {return e;}}", (code)->{
+		}),new TestCase("Error f() {try {} catch Error e {return e;}}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
-		}),new TestCase("error f() {try {} catch error e {} return e;}", (code)->{
+		}),new TestCase("Error f() {try {} catch Error e {} return e;}", (code)->{
 			Assert.assertEquals(2, code.tni.errors.size());
+		}),new TestCase("Error f() {try {throw new Error();} catch Error e {return e;}}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
 		}));
 	}
     

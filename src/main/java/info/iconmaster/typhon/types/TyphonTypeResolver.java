@@ -196,7 +196,10 @@ public class TyphonTypeResolver {
 					for (Parameter a : memberFunc.getParams()) {
 						Parameter b = f.getParams().get(i);
 						
-						if (!a.getType().equals(b.getType())) continue funcLoop;
+						TypeRef ta = TemplateUtils.replaceTemplates(a.getType(), parent.getTemplateMap(new HashMap<>()));
+						TypeRef tb = TemplateUtils.replaceTemplates(b.getType(), parent.getTemplateMap(new HashMap<>()));
+						
+						if (!ta.equals(tb)) continue funcLoop;
 						
 						i++;
 					}
@@ -205,7 +208,10 @@ public class TyphonTypeResolver {
 					for (TypeRef a : memberFunc.getRetType()) {
 						TypeRef b = f.getRetType().get(i);
 						
-						if (!a.equals(b)) continue funcLoop;
+						TypeRef ta = TemplateUtils.replaceTemplates(a, parent.getTemplateMap(new HashMap<>()));
+						TypeRef tb = TemplateUtils.replaceTemplates(b, parent.getTemplateMap(new HashMap<>()));
+						
+						if (!ta.equals(tb)) continue funcLoop;
 						
 						i++;
 					}

@@ -306,6 +306,55 @@ public class TyphonTypeResolver {
 			
 			field.setSetter(f);
 		}
+		
+		// check for equality operator
+		if (f.hasAnnot(f.tni.corePackage.LIB_OPS.ANNOT_EQ)) {
+			Annotation annot = f.getAnnots(f.tni.corePackage.LIB_OPS.ANNOT_EQ).get(0);
+			
+			Type fieldOf = f.getFieldOf();
+			if (fieldOf == null) {
+				f.tni.errors.add(new AnnotFormatError(annot.source, annot, "function cannot be static"));
+			}
+			
+			if (f.getRetType().isEmpty()) {
+				f.tni.errors.add(new AnnotFormatError(annot.source, annot, "function must return at least one value"));
+			} else {
+				TypeRef t = f.getRetType().get(0);
+				if (t.getType() != f.tni.corePackage.TYPE_BOOL) {
+					f.tni.errors.add(new AnnotFormatError(annot.source, annot, "function must return a bool"));
+				}
+			}
+		}
+		
+		// check for loop operator
+		if (f.hasAnnot(f.tni.corePackage.LIB_OPS.ANNOT_LOOP)) {
+			Annotation annot = f.getAnnots(f.tni.corePackage.LIB_OPS.ANNOT_LOOP).get(0);
+			
+			Type fieldOf = f.getFieldOf();
+			
+			if (fieldOf == null) {
+				f.tni.errors.add(new AnnotFormatError(annot.source, annot, "function cannot be static"));
+			} else {
+				resolve(fieldOf);
+				
+				if (!fieldOf.canCastTo(new TypeRef(fieldOf), new TypeRef(f.tni.corePackage.TYPE_ITERABLE))) {
+					f.tni.errors.add(new AnnotFormatError(annot.source, annot, "function must be an instance function of type Iterable"));
+				}
+			}
+			
+			if (f.getParams().size() != 1) {
+				f.tni.errors.add(new AnnotFormatError(annot.source, annot, "function must take in exactly 1 argument"));
+			} else {
+				TypeRef t = f.getParams().get(0).getType();
+				if (!t.canCastTo(new TypeRef(f.tni.corePackage.TYPE_ITERATOR))) {
+					f.tni.errors.add(new AnnotFormatError(annot.source, annot, "function must take in a parameter of type Iterator"));
+				}
+			}
+			
+			if (f.getRetType().isEmpty()) {
+				f.tni.errors.add(new AnnotFormatError(annot.source, annot, "function must return at least one value"));
+			}
+		}
 	}
 	
 	/**

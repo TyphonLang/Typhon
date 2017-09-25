@@ -787,7 +787,7 @@ public class TyphonCompiler {
 						}
 					}
 					
-					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnExpr), OpCode.CALL, new Object[] {loopVars, iterableVar, loopHandler, Arrays.asList(iteratorVar)}));
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnExpr), OpCode.CALL, new Object[] {loopVars, iterableVar, loopHandler.getVirtualBase(iterableVar.type.getType()), Arrays.asList(iteratorVar)}));
 				}
 				
 				for (StatContext stat : ctx.tnBlock.tnBlock) {

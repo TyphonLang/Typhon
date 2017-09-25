@@ -139,6 +139,18 @@ public class TestAnnotResolver extends TyphonTest {
 			Assert.assertEquals(1, p.tni.errors.size());
 		}),new TestCase("class a<T> {T virtual() {}} class b<T> : a<T> {@override T virtual() {}}", (p)->{
 			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("import operator; class a : Iterable<int> {@loop int f(Iterator<int> iter) {}}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("import operator; class a {@loop int f(Iterator<int> iter) {}}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("import operator; class a : Iterable<int> {@loop int f() {}}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("import operator; class a : Iterable<int> {@loop int f(Iterator<int> iter, int b) {}}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("import operator; class a : Iterable<int> {@loop void f(Iterator<int> iter) {}}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("import operator; @loop int f(Iterator<int> iter) {}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
 		}));
 	}
     

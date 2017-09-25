@@ -853,6 +853,8 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(1, code.tni.errors.size());
 		}),new TestCase("import operator; class a : Iterable<int> {@override Iterator<int> iterator() {} @loop (int,int) g(Iterator<int> iter) {}} void f() {a a = new a(); for int x, float y : a {}}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("void f() {Iterator i = new Iterator();}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
 		}));
 	}
     

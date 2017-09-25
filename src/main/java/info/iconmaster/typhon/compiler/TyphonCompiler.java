@@ -1646,7 +1646,7 @@ public class TyphonCompiler {
 			public List<TypeRef> visitNewExpr(NewExprContext ctx) {
 				TypeRef type = TyphonTypeResolver.readType(core.tni, ctx.tnType, scope);
 				
-				if (!(type.getType() instanceof UserType || type.getType() instanceof SystemType || type.getType() instanceof AnyType)) {
+				if (!(type.getType() instanceof UserType || type.getType() instanceof SystemType || type.getType() instanceof AnyType) || type.getType().hasAnnot(core.ANNOT_ABSTRACT)) {
 					// error; cannot construct
 					core.tni.errors.add(new CannotConstructError(new SourceInfo(ctx), type));
 					return Arrays.asList(type);

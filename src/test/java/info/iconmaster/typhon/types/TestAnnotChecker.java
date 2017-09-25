@@ -18,7 +18,7 @@ import info.iconmaster.typhon.model.TyphonModelReader;
  * @author iconmaster
  *
  */
-public class TestAnnotResolver extends TyphonTest {
+public class TestAnnotChecker extends TyphonTest {
 	@Parameterized.Parameters
     public static Collection<Object[]> data() {
 		return TyphonTest.makeData(new TestCase("int @main x;", (p)->{
@@ -183,6 +183,7 @@ public class TestAnnotResolver extends TyphonTest {
 			Package p = TyphonModelReader.parseString(tni, input);
 			TyphonLinker.link(p);
 			TyphonTypeResolver.resolve(p);
+			TyphonAnnotChecker.check(p);
 			test.accept(p);
 		}
     }

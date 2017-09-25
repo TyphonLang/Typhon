@@ -74,6 +74,7 @@ public class TyphonModelEntity {
 	public void setRawData() {
 		this.needsCompiled = true;
 		this.needsTypesResolved = true;
+		this.needsAnnotsChecked = true;
 	}
 	
 	/**
@@ -128,5 +129,24 @@ public class TyphonModelEntity {
 	 */
 	public boolean hasAnnot(AnnotationDefinition def) {
 		return getAnnots().stream().anyMatch((a)->def.equals(a.getDefinition()));
+	}
+	
+	/**
+	 * True if we have raw data, and need our annotations checked.
+	 */
+	private boolean needsAnnotsChecked = false;
+	
+	/**
+	 * @return True if we have raw data, and need our our annotations checked.
+	 */
+	public boolean needsAnnotsChecked() {
+		return needsAnnotsChecked;
+	}
+
+	/**
+	 * @param needsTypesResolved True if we have raw data, and need our our annotations checked.
+	 */
+	public void needsAnnotsChecked(boolean needsTypesResolved) {
+		this.needsAnnotsChecked = needsTypesResolved;
 	}
 }

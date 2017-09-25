@@ -14,6 +14,7 @@ import info.iconmaster.typhon.linker.TyphonLinker;
 import info.iconmaster.typhon.model.Function;
 import info.iconmaster.typhon.model.Package;
 import info.iconmaster.typhon.model.TyphonModelReader;
+import info.iconmaster.typhon.types.TyphonAnnotChecker;
 import info.iconmaster.typhon.types.TyphonTypeResolver;
 
 /**
@@ -870,6 +871,7 @@ public class TestCompiler extends TyphonTest {
 			Package p = TyphonModelReader.parseString(tni, input);
 			TyphonLinker.link(p);
 			TyphonTypeResolver.resolve(p);
+			TyphonAnnotChecker.check(p);
 			TyphonCompiler.compile(p);
 			
 			// the test is based on a function called 'f', in this package or a subpackage.

@@ -11,6 +11,7 @@ import info.iconmaster.typhon.model.Package;
 import info.iconmaster.typhon.model.TyphonModelReader;
 import info.iconmaster.typhon.plugins.PluginLoader;
 import info.iconmaster.typhon.plugins.TyphonPlugin;
+import info.iconmaster.typhon.types.TyphonAnnotChecker;
 import info.iconmaster.typhon.types.TyphonTypeResolver;
 import info.iconmaster.typhon.util.CommandLineHelper;
 import info.iconmaster.typhon.util.CommandLineHelper.Result;
@@ -134,6 +135,14 @@ public class Typhon {
 			}
 			for (Package p : tni.inputPackages) {
 				TyphonTypeResolver.resolve(p);
+			}
+			
+			// check annots
+			for (Package p : tni.libraryPackages) {
+				TyphonAnnotChecker.check(p);
+			}
+			for (Package p : tni.inputPackages) {
+				TyphonAnnotChecker.check(p);
 			}
 			
 			// compile

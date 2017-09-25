@@ -756,11 +756,15 @@ public class TyphonCompiler {
 					ForLvalueContext lval = ctx.tnLvals.get(0);
 					Variable loopVar = newScope.addVar(lval.tnName.getText(), TyphonTypeResolver.readType(core.tni, lval.tnType, newScope), new SourceInfo(lval.tnName));
 					
+					// TODO: find the actual type map, so this works correctly
+					Map<TemplateType, TypeRef> map = iteratorVar.type.getTemplateMap(new HashMap<>());
+					TypeRef retType = map.get(core.TYPE_ITERATOR.T);
 					if (loopVar.type.isVar()) {
 						loopVar.type.isVar(false);
 						
-						Map<TemplateType, TypeRef> map = iteratorVar.type.getTemplateMap(new HashMap<>());
-						loopVar.type = map.get(core.TYPE_ITERATOR.T);
+						loopVar.type = retType;
+					} else if (!loopVar.type.canCastTo(retType)) {
+						core.tni.errors.add(new TypeError(loopVar.declaredAt, loopVar.type, retType));
 					}
 					
 					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnExpr), OpCode.CALL, new Object[] {Arrays.asList(loopVar), iteratorVar, core.TYPE_ITERATOR.FUNC_NEXT, Arrays.asList()}));
@@ -784,6 +788,8 @@ public class TyphonCompiler {
 						if (loopVar.type.isVar()) {
 							loopVar.type.isVar(false);
 							loopVar.type = loopHandler.getRetType().get(i);
+						} else if (!loopVar.type.canCastTo(loopHandler.getRetType().get(i))) {
+							core.tni.errors.add(new TypeError(loopVar.declaredAt, loopVar.type, loopHandler.getRetType().get(i)));
 						}
 					}
 					

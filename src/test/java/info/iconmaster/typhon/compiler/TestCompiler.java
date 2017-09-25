@@ -844,6 +844,14 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(0, code.tni.errors.size());
 		}),new TestCase("class a : Iterable<int> {} void f() {a a = new a(); for int x : a.iterator() {}}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("import operator; class a : Iterable<int> {@loop (int,int) g(Iterator<int> iter) {}} void f() {a a = new a(); for int x, int y : a {}}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("import operator; class a : Iterable<int> {@loop (int,int) g(Iterator<int> iter) {}} void f() {a a = new a(); for int x, int y, int z : a {}}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("class a : Iterable<int> {} void f() {a a = new a(); for int x, int y : a {}}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("import operator; class a : Iterable<int> {@loop (int,int) g(Iterator<int> iter) {}} void f() {a a = new a(); for int x, float y : a {}}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
 		}));
 	}
     

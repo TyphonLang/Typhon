@@ -159,6 +159,12 @@ public class TestAnnotResolver extends TyphonTest {
 			Assert.assertEquals(1, p.tni.errors.size());
 		}),new TestCase("class b {void f() {}} @abstract class a : b {@abstract @override void f();}", (p)->{
 			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("@abstract class a {@abstract void f();} @abstract class b : a {}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
+		}),new TestCase("@abstract class a {@abstract void f();} class b : a {}", (p)->{
+			Assert.assertEquals(1, p.tni.errors.size());
+		}),new TestCase("@abstract class a {@abstract void f();} class b : a {@override void f() {}}", (p)->{
+			Assert.assertEquals(0, p.tni.errors.size());
 		}));
 	}
     

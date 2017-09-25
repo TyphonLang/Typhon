@@ -443,6 +443,13 @@ public class TyphonTypeResolver {
 				}
 				
 				// remove the abstract functions that were implemented
+				resolve(t.getTypePackage());
+				t.getTypePackage().getFunctions().stream().filter(ff->
+					!ff.hasAnnot(t.tni.corePackage.ANNOT_ABSTRACT) && abstracts.contains(ff.getVirtualBase(t))
+				).forEach(ff->{
+					abstracts.remove(ff.getVirtualBase(t));
+				});
+				
 				for (TypeRef parent : parents) {
 					parent.getType().getTypePackage().getFunctions().stream().filter(ff->
 						!ff.hasAnnot(t.tni.corePackage.ANNOT_ABSTRACT) && abstracts.contains(ff.getVirtualBase(parent.getType()))

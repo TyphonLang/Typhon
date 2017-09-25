@@ -59,6 +59,10 @@ public class Instruction extends TyphonModelEntity {
 		NOT,
 		INSTANCEOF,
 		ISNULL,
+		LAMBDA,
+		TRY,
+		CATCH,
+		THROW,
 	}
 	
 	/**

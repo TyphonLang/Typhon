@@ -346,4 +346,15 @@ public class Function extends TyphonModelEntity implements MemberAccess {
 		
 		return this;
 	}
+	
+	public Function getVirtualOverride(Type expected) {
+		for (int i = virtualOverrides.size()-1; i >= 0; i--) {
+			Function f = virtualOverrides.get(i);
+			if (expected.canCastTo(new TypeRef(expected), new TypeRef(f.getFieldOf()))) {
+				return f;
+			}
+		}
+		
+		return this;
+	}
 }

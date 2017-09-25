@@ -32,7 +32,7 @@ public class CorePackage extends Package {
 	/**
 	 * Constants for built-in types.
 	 */
-	public UserType TYPE_NUMBER, TYPE_INTEGER, TYPE_REAL, TYPE_LIST, TYPE_MAP;
+	public UserType TYPE_NUMBER, TYPE_INTEGER, TYPE_REAL, TYPE_LIST, TYPE_MAP, TYPE_ERROR;
 	
 	/**
 	 * Constants for built-in types.
@@ -114,6 +114,8 @@ public class CorePackage extends Package {
 		TYPE_CHAR = makeSystemType("char", TYPE_INTEGER);
 		TYPE_STRING = makeSystemType("string", TYPE_ANY);
 		TYPE_BOOL = makeSystemType("bool", TYPE_ANY);
+		
+		TYPE_ERROR = makeUserType("error", TYPE_ANY);
 		
 		TYPE_LIST = makeUserType("List", TYPE_ANY);
 		TYPE_LIST.getTemplates().add(new TemplateType(tni, "T"));

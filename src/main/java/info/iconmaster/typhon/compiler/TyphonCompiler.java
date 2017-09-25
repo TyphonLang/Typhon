@@ -613,7 +613,7 @@ public class TyphonCompiler {
 						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPTRUE, new Object[] {caseCondVar, caseLabel}));
 					}
 					
-					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMP, new Object[] {caseScope.endScopeLabel}));
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMP, new Object[] {caseScope.beginScopeLabel}));
 					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {caseLabel}));
 					
 					for (StatContext stat : caze.tnBlock.tnBlock) {
@@ -1438,7 +1438,7 @@ public class TyphonCompiler {
 						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMPTRUE, new Object[] {caseCondVar, caseLabel}));
 					}
 					
-					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMP, new Object[] {caseScope.endScopeLabel}));
+					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.JUMP, new Object[] {caseScope.beginScopeLabel}));
 					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LABEL, new Object[] {caseLabel}));
 					
 					TypeRef old = out.type; out.type = TypeRef.var(core.tni);

@@ -26,7 +26,7 @@ import info.iconmaster.typhon.types.TyphonTypeResolver;
 public class TestCompiler extends TyphonTest {
 	@Parameterized.Parameters
     public static Collection<Object[]> data() {
-		return TyphonTest.makeData(/*new TestCase("void f() {}", (code)->{
+		return TyphonTest.makeData(new TestCase("void f() {}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 		}),new TestCase("void f() {var x = 1;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
@@ -702,9 +702,9 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(OpCode.MOVTYPE, code.ops.get(0).op);
 		}),new TestCase("void g(int x, [int] @vararg y) {} void f() {g(1);}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
-		}),*/new TestCase("void g(int x, [int] @vararg y) {} void f() {g(1, 2, 3);}", (code)->{
+		}),new TestCase("void g(int x, [int] @vararg y) {} void f() {g(1, 2, 3);}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
-		})/*,new TestCase("void g(int x, [int] @vararg y) {} void f() {g(1, 'c');}", (code)->{
+		}),new TestCase("void g(int x, [int] @vararg y) {} void f() {g(1, 'c');}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
 		}),new TestCase("void g(int x, [int] @vararg y) {} void f() {g(1, 2, 'c', 3);}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
@@ -886,7 +886,7 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(2).op);
 			Assert.assertEquals(OpCode.MOV, code.ops.get(3).op);
 			Assert.assertEquals(OpCode.CALL, code.ops.get(4).op);
-		})*/);
+		}));
 	}
     
     private static class TestCase implements Runnable {

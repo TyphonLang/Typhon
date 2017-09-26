@@ -241,7 +241,21 @@ public class TyphonCompiler {
 		}
 		b.needsCompiled(false);
 		
-		// TODO
+		List<StatContext> stats = b.getRawCode();
+		if (stats != null) {
+			CodeBlock block = new CodeBlock(b.tni, b.source, b.getParent());
+			b.setCode(block);
+			Scope scope = new Scope(block);
+			
+			Type fieldOf = b.getFieldOf();
+			if (fieldOf != null) {
+				block.instance = scope.addTempVar(new TypeRef(fieldOf), null);
+			}
+			
+			for (StatContext stat : stats) {
+				compileStat(scope, stat, Arrays.asList());
+			}
+		}
 	}
 	
 	/**

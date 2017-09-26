@@ -5,6 +5,7 @@ import java.util.List;
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.antlr.TyphonParser.StatContext;
 import info.iconmaster.typhon.compiler.CodeBlock;
+import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.util.SourceInfo;
 
 /**
@@ -97,5 +98,30 @@ public class StaticInitBlock extends TyphonModelEntity {
 		sb.append(".(static init block)");
 		
 		return sb.toString();
+	}
+	
+	/**
+	 * @return If this is an instance function: The type this function is part of. If this is a static function: Null.
+	 */
+	public Type getFieldOf() {
+		if (hasAnnot(tni.corePackage.ANNOT_STATIC)) {
+			return null;
+		}
+		
+		MemberAccess access = this.getParent();
+		while (access != null) {
+			if (access instanceof Type) {
+				return (Type) access;
+			}
+			access = access.getMemberParent();
+		}
+		return null;
+	}
+	
+	/**
+	 * @return True if this field is static. False if it belongs to an instance of some type.
+	 */
+	public boolean isStatic() {
+		return getFieldOf() == null;
 	}
 }

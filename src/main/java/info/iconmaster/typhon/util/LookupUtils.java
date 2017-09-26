@@ -331,12 +331,23 @@ public class LookupUtils {
 			if (subjects.isEmpty() || subjects.get(subjects.size()-1).loc != names.size()-1) return false;
 			
 			for (Subject sub : subjects) {
+				TypeRef type = sub.previous == null ? null : sub.previous.type;
+				Map<TemplateType, TypeRef> typeMap = sub.previous == null ? new HashMap<>() : sub.previous.typeMap;
+				
 				if (sub.member instanceof Field) {
 					Field f = (Field) sub.member;
 					Type fieldOf = f.getFieldOf();
 					
-					TypeRef type = sub.previous == null ? null : sub.previous.type;
-					Map<TemplateType, TypeRef> typeMap = sub.previous == null ? new HashMap<>() : sub.previous.typeMap;
+					if (fieldOf == null && type != null) {
+						return false;
+					}
+					
+					if (fieldOf != null && (type == null || !type.canCastTo(TemplateUtils.replaceTemplates(new TypeRef(null, fieldOf), typeMap)))) {
+						return false;
+					}
+				} else if (sub.member instanceof Function) {
+					Function f = (Function) sub.member;
+					Type fieldOf = f.getFieldOf();
 					
 					if (fieldOf == null && type != null) {
 						return false;

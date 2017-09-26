@@ -892,6 +892,14 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(0, code.tni.errors.size());
 		}),new TestCase("void f() {{int:string} m; for Map.Entry<int,string> e : m {m[e.key] = e.value;}}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("int x = 1; void f() {}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("int x = true; void f() {}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("class a {int x = 1;} void f() {}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+		}),new TestCase("class a {int x = true;} void f() {}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
 		}));
 	}
     

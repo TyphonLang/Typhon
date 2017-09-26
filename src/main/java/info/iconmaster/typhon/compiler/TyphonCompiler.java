@@ -88,6 +88,7 @@ import info.iconmaster.typhon.model.Function;
 import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.model.Package;
 import info.iconmaster.typhon.model.Parameter;
+import info.iconmaster.typhon.model.StaticInitBlock;
 import info.iconmaster.typhon.model.TemplateArgument;
 import info.iconmaster.typhon.model.TyphonModelReader;
 import info.iconmaster.typhon.model.libs.CorePackage;
@@ -132,6 +133,7 @@ public class TyphonCompiler {
 		
 		p.getFunctions().stream().forEach((f)->compile(f));
 		p.getFields().stream().forEach((f)->compile(f));
+		p.getStaticInitBlocks().stream().forEach((f)->compile(f));
 		
 		p.getSubpackges().stream().forEach((f)->compile(f));
 	}
@@ -209,6 +211,35 @@ public class TyphonCompiler {
 			return;
 		}
 		f.needsCompiled(false);
+		
+		ExprContext expr = f.getRawValue();
+		if (expr != null) {
+			CodeBlock block = new CodeBlock(f.tni, f.source, f);
+			f.setValue(block);
+			Scope scope = new Scope(block);
+			
+			Type fieldOf = f.getFieldOf();
+			if (fieldOf != null) {
+				block.instance = scope.addTempVar(new TypeRef(fieldOf), null);
+			}
+			
+			Variable retVal = scope.addTempVar(f.getType(), f.source);
+			compileExpr(scope, expr, Arrays.asList(retVal));
+			
+			block.ops.add(new Instruction(f.tni, f.source, OpCode.RET, new Object[] {Arrays.asList(retVal)}));
+		}
+	}
+	
+	/**
+	 * Compiles a static init block. Updates the contents of the argument.
+	 * 
+	 * @param b
+	 */
+	public static void compile(StaticInitBlock b) {
+		if (!b.needsCompiled()) {
+			return;
+		}
+		b.needsCompiled(false);
 		
 		// TODO
 	}

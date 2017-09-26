@@ -22,6 +22,6 @@ public class CannotConstructError extends TyphonError {
 	
 	@Override
 	public String getMessage() {
-		return "Cannot construct new objects of type "+type.getName();
+		return "Cannot construct new objects of type "+type.prettyPrint();
 	}
 }

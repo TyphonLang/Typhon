@@ -22,6 +22,6 @@ public class ReadOnlyError extends TyphonError {
 	
 	@Override
 	public String getMessage() {
-		return "field "+field.getName()+" is read-only";
+		return "field "+field.prettyPrint()+" is read-only";
 	}
 }

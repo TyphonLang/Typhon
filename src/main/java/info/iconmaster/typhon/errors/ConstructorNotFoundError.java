@@ -22,6 +22,6 @@ public class ConstructorNotFoundError extends TyphonError {
 	
 	@Override
 	public String getMessage() {
-		return "Cannot find constructor for "+type+" with given arguments";
+		return "Cannot find constructor for "+type.prettyPrint()+" with given arguments";
 	}
 }

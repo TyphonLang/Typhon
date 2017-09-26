@@ -22,6 +22,6 @@ public class WriteOnlyError extends TyphonError {
 	
 	@Override
 	public String getMessage() {
-		return "field "+field.getName()+" is write-only";
+		return "field "+field.prettyPrint()+" is write-only";
 	}
 }

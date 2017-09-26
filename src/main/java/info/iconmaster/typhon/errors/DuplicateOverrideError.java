@@ -24,6 +24,6 @@ public class DuplicateOverrideError extends TyphonError {
 	
 	@Override
 	public String getMessage() {
-		return virtual.getName()+" already has a override for type "+overrideType.getName();
+		return virtual.prettyPrint()+" already has a override for type "+overrideType.prettyPrint();
 	}
 }

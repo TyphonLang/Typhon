@@ -19,6 +19,6 @@ public class VirtualBaseNotFoundError extends TyphonError {
 	
 	@Override
 	public String getMessage() {
-		return "Could not find a virtual base for override function "+f.getName();
+		return "Could not find a virtual base for override function "+f.prettyPrint();
 	}
 }

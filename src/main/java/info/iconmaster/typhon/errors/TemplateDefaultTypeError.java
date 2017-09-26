@@ -19,6 +19,6 @@ public class TemplateDefaultTypeError extends TyphonError {
 	
 	@Override
 	public String getMessage() {
-		return "template " + arg.getName() + " cannot cast default type " + arg.getDefaultValue().getName() + " to base type " + arg.getBaseType().getName();
+		return "template " + arg.prettyPrint() + " cannot cast default type " + arg.getDefaultValue().prettyPrint() + " to base type " + arg.getBaseType().prettyPrint();
 	}
 }

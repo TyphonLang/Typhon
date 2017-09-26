@@ -68,7 +68,7 @@ public class TemplateUtils {
 	 * @param typeToMap The type you're checking.
 	 */
 	public static void checkTemplateArgs(TypeRef typeToMap) {
-		checkTemplateArgs(typeToMap, typeToMap.getName(), typeToMap.getMemberTemplate(), typeToMap.getTemplateArgs());
+		checkTemplateArgs(typeToMap, typeToMap.getMemberTemplate(), typeToMap.getTemplateArgs());
 	}
 	
 	/**
@@ -224,7 +224,7 @@ public class TemplateUtils {
 	 * @param params The list of template parameters.
 	 * @param args The list of template arguments.
 	 */
-	public static void checkTemplateArgs(TyphonModelEntity toMap, String toMapDesc, List<TemplateType> params, List<TemplateArgument> args) {
+	public static void checkTemplateArgs(TyphonModelEntity toMap, List<TemplateType> params, List<TemplateArgument> args) {
 		Map<TemplateType, TypeRef> result = new HashMap<>();
 		
 		// insert all the named arguments
@@ -242,7 +242,7 @@ public class TemplateUtils {
 				
 				if (found == null) {
 					// no position for the argument; error
-					toMap.tni.errors.add(new TemplateLabelNotFoundError(toMap, toMapDesc, arg));
+					toMap.tni.errors.add(new TemplateLabelNotFoundError(toMap, arg));
 				}
 			}
 		}
@@ -256,7 +256,7 @@ public class TemplateUtils {
 					if (!result.containsKey(type)) {
 						if (!arg.getValue().canCastTo(new TypeRef(type))) {
 							// Cannot cast to next logical template in the sequence; error
-							toMap.tni.errors.add(new TemplateTypeError(toMap, toMapDesc, type, arg.getValue()));
+							toMap.tni.errors.add(new TemplateTypeError(toMap, type, arg.getValue()));
 						}
 						
 						found = type;
@@ -267,14 +267,14 @@ public class TemplateUtils {
 				
 				if (found == null) {
 					// too many template arguments; error
-					toMap.tni.errors.add(new TemplateNumberError(toMap, toMapDesc));
+					toMap.tni.errors.add(new TemplateNumberError(toMap));
 				}
 			}
 		}
 		
 		// recursively check subtemplates
 		for (TemplateArgument arg : args) {
-			checkTemplateArgs(arg.getValue(), arg.getValue().getName(), arg.getValue().getMemberTemplate(), arg.getValue().getTemplateArgs());
+			checkTemplateArgs(arg.getValue(), arg.getValue().getMemberTemplate(), arg.getValue().getTemplateArgs());
 		}
 	}
 }

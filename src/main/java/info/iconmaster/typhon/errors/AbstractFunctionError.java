@@ -23,6 +23,6 @@ public class AbstractFunctionError extends TyphonError {
 	
 	@Override
 	public String getMessage() {
-		return "non-abstract class "+t.getName()+" must implement abstract function "+f.getName();
+		return "non-abstract class "+t.prettyPrint()+" must implement abstract function "+f.prettyPrint();
 	}
 }

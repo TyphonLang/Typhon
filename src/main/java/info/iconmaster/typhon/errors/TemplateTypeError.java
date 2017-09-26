@@ -14,19 +14,17 @@ import info.iconmaster.typhon.util.TemplateUtils;
 public class TemplateTypeError extends TyphonError {
 	public TemplateType arg;
 	public TyphonModelEntity toMap;
-	public String toMapDesc;
 	public TypeRef badType;
 	
-	public TemplateTypeError(TyphonModelEntity toMap, String toMapDesc, TemplateType arg, TypeRef badType) {
+	public TemplateTypeError(TyphonModelEntity toMap, TemplateType arg, TypeRef badType) {
 		super(toMap.source);
 		this.toMap = toMap;
-		this.toMapDesc = toMapDesc;
 		this.arg = arg;
 		this.badType = badType;
 	}
 	
 	@Override
 	public String getMessage() {
-		return "incorrect template arguments to "+toMapDesc+": Template " + arg.getName() + " expects argument castable to " + arg.getBaseType().getName() + "; got type " + badType.getName();
+		return "incorrect template arguments to "+toMap.prettyPrint()+": Template " + arg.prettyPrint() + " expects argument castable to " + arg.getBaseType().prettyPrint() + "; got type " + badType.prettyPrint();
 	}
 }

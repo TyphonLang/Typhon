@@ -22,6 +22,6 @@ public class ParentTypeError extends TyphonError {
 	
 	@Override
 	public String getMessage() {
-		return type.getName()+" cannot have a parent type of type "+badParent.getName();
+		return type.prettyPrint()+" cannot have a parent type of type "+badParent.prettyPrint();
 	}
 }

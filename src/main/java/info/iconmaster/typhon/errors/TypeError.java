@@ -23,6 +23,6 @@ public class TypeError extends TyphonError {
 	
 	@Override
 	public String getMessage() {
-		return "Expression of type "+a.getName()+" must be castable to type "+b.getName();
+		return "Expression of type "+a.prettyPrint()+" must be castable to type "+b.prettyPrint();
 	}
 }

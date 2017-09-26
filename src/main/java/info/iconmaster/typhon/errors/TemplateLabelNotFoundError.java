@@ -13,17 +13,15 @@ import info.iconmaster.typhon.util.TemplateUtils;
 public class TemplateLabelNotFoundError extends TyphonError {
 	public TemplateArgument arg;
 	public TyphonModelEntity toMap;
-	public String toMapDesc;
 	
-	public TemplateLabelNotFoundError(TyphonModelEntity toMap, String toMapDesc, TemplateArgument arg) {
+	public TemplateLabelNotFoundError(TyphonModelEntity toMap, TemplateArgument arg) {
 		super(toMap.source);
 		this.toMap = toMap;
-		this.toMapDesc = toMapDesc;
 		this.arg = arg;
 	}
 	
 	@Override
 	public String getMessage() {
-		return "incorrect template arguments to "+toMapDesc+": template parameter with name "+arg.getLabel()+" not found";
+		return "incorrect template arguments to "+toMap.prettyPrint()+": template parameter with name "+arg.getLabel()+" not found";
 	}
 }

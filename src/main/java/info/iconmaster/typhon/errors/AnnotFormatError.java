@@ -21,6 +21,6 @@ public class AnnotFormatError extends TyphonError {
 	
 	@Override
 	public String getMessage() {
-		return "Invalid use of @"+a.getDefinition().getName()+": "+s;
+		return "Invalid use of "+a.getDefinition().prettyPrint()+": "+s;
 	}
 }

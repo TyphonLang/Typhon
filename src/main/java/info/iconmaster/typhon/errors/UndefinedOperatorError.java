@@ -29,6 +29,6 @@ public class UndefinedOperatorError extends TyphonError {
 	
 	@Override
 	public String getMessage() {
-		return "Operator "+op+" undefined between types "+a.getName()+" and "+b.getName();
+		return "Operator "+op+" undefined between types "+a.prettyPrint()+" and "+b.prettyPrint();
 	}
 }

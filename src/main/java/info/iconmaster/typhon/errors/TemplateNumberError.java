@@ -11,16 +11,14 @@ import info.iconmaster.typhon.util.TemplateUtils;
  */
 public class TemplateNumberError extends TyphonError {
 	public TyphonModelEntity toMap;
-	public String toMapDesc;
 	
-	public TemplateNumberError(TyphonModelEntity toMap, String toMapDesc) {
+	public TemplateNumberError(TyphonModelEntity toMap) {
 		super(toMap.source);
 		this.toMap = toMap;
-		this.toMapDesc = toMapDesc;
 	}
 	
 	@Override
 	public String getMessage() {
-		return "incorrect template arguments to "+toMapDesc+": too many template arguments";
+		return "incorrect template arguments to "+toMap.prettyPrint()+": too many template arguments";
 	}
 }

@@ -195,7 +195,7 @@ public class TyphonAnnotChecker {
 			}
 			
 			if (f.getRetType().size() != 1 || !f.getRetType().get(0).canCastTo(field.getType())) {
-				f.tni.errors.add(new AnnotFormatError(annot.source, annot, "the getter function must return one value of type "+field.getType().getName()));
+				f.tni.errors.add(new AnnotFormatError(annot.source, annot, "the getter function must return one value of type "+field.getType().prettyPrint()));
 			}
 			
 			if (f.getParams().size() != 0) {
@@ -232,7 +232,7 @@ public class TyphonAnnotChecker {
 			}
 			
 			if (f.getParams().size() != 1 || !f.getParams().get(0).getType().canCastTo(field.getType())) {
-				f.tni.errors.add(new AnnotFormatError(annot.source, annot, "the setter function must have one parameter of type "+field.getType().getName()));
+				f.tni.errors.add(new AnnotFormatError(annot.source, annot, "the setter function must have one parameter of type "+field.getType().prettyPrint()));
 			}
 			
 			if (f.getRetType().size() != 0) {

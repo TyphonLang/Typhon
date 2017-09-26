@@ -636,11 +636,9 @@ public class LookupUtils {
 		for (Parameter param : f.getParams()) {
 			if (param.hasAnnot(f.tni.corePackage.ANNOT_VARARG)) {
 				varargParam = param;
-				result.args.put(param, null);
 				result.varargs.put(param, new ArrayList<>());
 			} else if (param.hasAnnot(f.tni.corePackage.ANNOT_VARFLAG)) {
 				varflagParam = param;
-				result.args.put(param, null);
 				result.varflags.put(param, new HashMap<>());
 			}
 		}
@@ -651,6 +649,8 @@ public class LookupUtils {
 				// positional argument; find the first unallocated parameter
 				boolean found = false;
 				for (Parameter param : f.getParams()) {
+					if (result.varargs.containsKey(param) || result.varflags.containsKey(param)) continue;
+					
 					if (!result.args.containsKey(param)) {
 						result.args.put(param, arg.var);
 						found = true;
@@ -702,16 +702,11 @@ public class LookupUtils {
 		
 		// check to make sure no required parameters are left out
 		for (Parameter param : f.getParams()) {
+			if (result.varargs.containsKey(param) || result.varflags.containsKey(param)) continue;
+			
 			if (!param.isOptional() && !result.args.containsKey(param)) {
 				// error; parameter required
 				return null;
-			}
-		}
-		
-		// remove placeholder nulls from the arg map
-		for (Parameter key : new ArrayList<>(result.args.keySet())) {
-			if (result.args.get(key) == null) {
-				result.args.remove(key);
 			}
 		}
 		
@@ -755,7 +750,7 @@ public class LookupUtils {
 			elemType = TemplateUtils.replaceTemplates(TemplateUtils.replaceTemplates(elemType, funcTempMap), typeMap);
 			
 			for (Variable var : entry.getValue()) {
-				TypeRef vtype = var.type;
+				TypeRef vtype = argMap.containsKey(var) ? TyphonCompiler.getExprType(scope, argMap.get(var), Arrays.asList(entry.getKey().getType())).get(0) : var.type;
 				vtype = TemplateUtils.replaceTemplates(TemplateUtils.replaceTemplates(vtype, funcTempMap), typeMap);
 				
 				if (!vtype.canCastTo(elemType)) {
@@ -770,7 +765,7 @@ public class LookupUtils {
 			elemType = TemplateUtils.replaceTemplates(TemplateUtils.replaceTemplates(elemType, funcTempMap), typeMap);
 			
 			for (Variable var : entry.getValue().values()) {
-				TypeRef vtype = var.type;
+				TypeRef vtype = argMap.containsKey(var) ? TyphonCompiler.getExprType(scope, argMap.get(var), Arrays.asList(entry.getKey().getType())).get(0) : var.type;
 				vtype = TemplateUtils.replaceTemplates(TemplateUtils.replaceTemplates(vtype, funcTempMap), typeMap);
 				
 				if (!vtype.canCastTo(elemType)) {

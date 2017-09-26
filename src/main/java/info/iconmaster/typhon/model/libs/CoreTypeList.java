@@ -53,7 +53,7 @@ public class CoreTypeList extends UserType {
 		FUNC_SET.getAnnots().add(new Annotation(tni.corePackage.ANNOT_ABSTRACT));
 		FUNC_SET.getAnnots().add(new Annotation(tni.corePackage.LIB_OPS.ANNOT_INDEX_SET));
 		
-		getTypePackage().addField(FIELD_SIZE = new Field("size", new TypeRef(tni.corePackage.TYPE_INT)));
+		getTypePackage().addField(FIELD_SIZE = new Field("size", tni.corePackage.TYPE_INT));
 		
 		getTypePackage().addFunction(FUNC_SIZE = new Function(tni, "size", new TemplateType[] {
 				
@@ -64,5 +64,8 @@ public class CoreTypeList extends UserType {
 		}));
 		FUNC_SIZE.getAnnots().add(new Annotation(tni.corePackage.ANNOT_ABSTRACT));
 		FIELD_SIZE.setGetter(FUNC_SIZE);
+		
+		// add concrete methods
+		// TODO
 	}
 }

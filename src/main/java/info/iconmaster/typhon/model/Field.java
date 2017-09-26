@@ -73,6 +73,20 @@ public class Field extends TyphonModelEntity implements MemberAccess {
 	}
 	
 	/**
+	 * Create a library field.
+	 * 
+	 * @param name
+	 * @param type
+	 */
+	public Field(String name, Type type) {
+		super(type.tni);
+		this.name = name;
+		this.type = new TypeRef(type);
+		
+		markAsLibrary();
+	}
+	
+	/**
 	 * @return The name of this field.
 	 */
 	public String getName() {

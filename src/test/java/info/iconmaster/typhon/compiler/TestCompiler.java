@@ -855,7 +855,7 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(1, code.tni.errors.size());
 		}),new TestCase("void f() {Iterator i = new Iterator();}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
-		}),new TestCase("import operator; class a {@index.get getty(int x) {}} void f() {a a = new a(); a[0];}", (code)->{
+		}),new TestCase("import operator; class a {@index.get int getty(int x) {}} void f() {a a = new a(); a[0];}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
 			Assert.assertEquals(4, code.ops.size());
@@ -864,12 +864,22 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(OpCode.CALL, code.ops.get(1).op);
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(2).op);
 			Assert.assertEquals(OpCode.CALL, code.ops.get(3).op);
-		}),new TestCase("import operator; class a {@index.get getty(int x) {}} void f() {a a = new a(); a[];}", (code)->{
+		}),new TestCase("import operator; class a {@index.get int getty(int x) {}} void f() {a a = new a(); a[];}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
-		}),new TestCase("import operator; class a {@index.get getty(int x) {}} void f() {a a = new a(); a[1,2];}", (code)->{
+		}),new TestCase("import operator; class a {@index.get int getty(int x) {}} void f() {a a = new a(); a[1,2];}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
-		}),new TestCase("import operator; class a {@index.get getty(int x) {}} void f() {a a = new a(); a['c'];}", (code)->{
+		}),new TestCase("import operator; class a {@index.get int getty(int x) {}} void f() {a a = new a(); a['c'];}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("import operator; class a {@index.set void setty(int x) {}} void f() {a a = new a(); a[] = 1;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(5, code.ops.size());
+			
+			Assert.assertEquals(OpCode.ALLOC, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.CALL, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(2).op);
+			Assert.assertEquals(OpCode.MOV, code.ops.get(3).op);
+			Assert.assertEquals(OpCode.CALL, code.ops.get(4).op);
 		}));
 	}
     
@@ -893,14 +903,21 @@ public class TestCompiler extends TyphonTest {
 			
 			// the test is based on a function called 'f', in this package or a subpackage.
 			
+			boolean testAccepted = false;
 			if (p.getFunctionsWithName("f").isEmpty()) {
 				for (Package pp : p.getSubpackges()) {
 					if (!pp.getFunctionsWithName("f").isEmpty()) {
 						test.accept(pp.getFunctionsWithName("f").get(0).getCode());
+						testAccepted = true;
 					}
 				}
 			} else {
 				test.accept(p.getFunctionsWithName("f").get(0).getCode());
+				testAccepted = true;
+			}
+			
+			if (!testAccepted) {
+				Assert.fail("test '"+input+"' failed to generate code: "+tni.errors);
 			}
 		}
     }

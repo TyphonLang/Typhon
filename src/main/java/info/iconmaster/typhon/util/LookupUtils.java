@@ -548,7 +548,7 @@ public class LookupUtils {
 			if (sub.member instanceof Field) {
 				Field f = (Field) sub.member;
 				Type fieldOf = f.getFieldOf();
-				Variable newVar = scope.addTempVar(f.type, source);
+				Variable newVar = scope.addTempVar(TemplateUtils.replaceTemplates(f.type, sub.previous == null ? sub.typeMap : sub.previous.typeMap), source);
 				
 				if (f.getGetter() == null) {
 					// error; field is write-only

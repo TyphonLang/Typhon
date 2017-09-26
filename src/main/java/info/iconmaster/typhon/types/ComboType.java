@@ -126,4 +126,25 @@ public class ComboType extends Type {
 			return new TypeRef(combo);
 		}
 	}
+	
+	@Override
+	public String prettyPrint() {
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append('(');
+		if (!getTypes().isEmpty()) {
+			for (TypeRef arg : getTypes()) {
+				sb.append(arg.prettyPrint());
+				sb.append(" && ");
+			}
+			
+			sb.deleteCharAt(sb.length()-1);
+			sb.deleteCharAt(sb.length()-1);
+			sb.deleteCharAt(sb.length()-1);
+			sb.deleteCharAt(sb.length()-1);
+		}
+		sb.append(')');
+		
+		return sb.toString();
+	}
 }

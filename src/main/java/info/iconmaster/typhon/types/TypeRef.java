@@ -244,4 +244,21 @@ public class TypeRef extends TyphonModelEntity implements MemberAccess {
 		
 		return a.canCastTo(b) ? a : b;
 	}
+	
+	@Override
+	public String prettyPrint() {
+		StringBuilder sb = new StringBuilder(type.prettyPrint());
+		
+		if (!getTemplateArgs().isEmpty()) {
+			sb.append('<');
+			for (TemplateArgument arg : getTemplateArgs()) {
+				sb.append(arg.prettyPrint());
+				sb.append(',');
+			}
+			sb.deleteCharAt(sb.length()-1);
+			sb.append('>');
+		}
+		
+		return sb.toString();
+	}
 }

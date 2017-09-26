@@ -53,4 +53,26 @@ public interface MemberAccess {
 	public default Map<TemplateType, TypeRef> getTemplateMap(Map<TemplateType, TypeRef> templateMap) {
 		return null;
 	}
+	
+	/**
+	 * @return A string, suitable for output to the user, that can be reconstructed to find this object's location.
+	 */
+	public default String getPathString() {
+		StringBuilder sb = new StringBuilder();
+		
+		MemberAccess base = getMemberParent();
+		while (base != null) {
+			String name = base.getName();
+			if (name != null) {
+				sb.append(name);
+				sb.append('.');
+			}
+			base = base.getMemberParent();
+		}
+		
+		if (sb.length() > 0) {
+			sb.deleteCharAt(sb.length()-1);
+		}
+		return sb.toString();
+	}
 }

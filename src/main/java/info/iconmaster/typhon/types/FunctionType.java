@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.model.Package;
+import info.iconmaster.typhon.model.TemplateArgument;
 import info.iconmaster.typhon.util.SourceInfo;
 import info.iconmaster.typhon.util.TemplateUtils;
 
@@ -174,5 +175,30 @@ public class FunctionType extends Type {
 		getTemplate().addAll(Arrays.asList(templates));
 		
 		markAsLibrary();
+	}
+	
+	@Override
+	public String prettyPrint() {
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append('(');
+		if (!getArgTypes().isEmpty()) {
+			for (TypeRef arg : getArgTypes()) {
+				sb.append(arg.prettyPrint());
+				sb.append(',');
+			}
+			sb.deleteCharAt(sb.length()-1);
+		}
+		sb.append(") -> (");
+		if (!getRetTypes().isEmpty()) {
+			for (TypeRef arg : getRetTypes()) {
+				sb.append(arg.prettyPrint());
+				sb.append(',');
+			}
+			sb.deleteCharAt(sb.length()-1);
+		}
+		sb.append(')');
+		
+		return sb.toString();
 	}
 }

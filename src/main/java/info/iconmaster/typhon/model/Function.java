@@ -357,4 +357,28 @@ public class Function extends TyphonModelEntity implements MemberAccess {
 		
 		return this;
 	}
+	
+	@Override
+	public String prettyPrint() {
+		StringBuilder sb = new StringBuilder();
+		
+		String path = getPathString();
+		if (!path.isEmpty()) {
+			sb.append(path);
+			sb.append('.');
+		}
+		sb.append(getName());
+		
+		sb.append('(');
+		if (!params.isEmpty()) {
+			for (Parameter param : getParams()) {
+				sb.append(param.getType().prettyPrint());
+				sb.append(',');
+			}
+			sb.deleteCharAt(sb.length()-1);
+		}
+		sb.append(')');
+		
+		return sb.toString();
+	}
 }

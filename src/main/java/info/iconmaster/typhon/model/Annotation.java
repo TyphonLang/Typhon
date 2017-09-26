@@ -97,4 +97,30 @@ public class Annotation extends TyphonModelEntity {
 		super.setRawData();
 		this.rawDefinition = rawDefinition;
 	}
+	
+	@Override
+	public String prettyPrint() {
+		StringBuilder sb = new StringBuilder("@");
+		
+		String path = definition.getPathString();
+		if (!path.isEmpty()) {
+			sb.append(path);
+			sb.append('.');
+		}
+		sb.append(definition.getName());
+		
+		if (!args.isEmpty()) {
+			sb.append('(');
+			
+			for (Argument arg : getArgs()) {
+				sb.append(arg.prettyPrint());
+				sb.append(',');
+			}
+			sb.deleteCharAt(sb.length()-1);
+			
+			sb.append(')');
+		}
+		
+		return sb.toString();
+	}
 }

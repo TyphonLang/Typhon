@@ -314,4 +314,18 @@ public class Field extends TyphonModelEntity implements MemberAccess {
 	public boolean isActualField() {
 		return getter == null && setter == null;
 	}
+
+	@Override
+	public String prettyPrint() {
+		StringBuilder sb = new StringBuilder();
+		
+		String path = getPathString();
+		if (!path.isEmpty()) {
+			sb.append(path);
+			sb.append('.');
+		}
+		sb.append(getName());
+		
+		return sb.toString();
+	}
 }

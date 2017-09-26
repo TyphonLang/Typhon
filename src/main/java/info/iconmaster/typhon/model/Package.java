@@ -525,4 +525,18 @@ public class Package extends TyphonModelEntity implements MemberAccess {
 	public String toString() {
 		return "Package("+name+")";
 	}
+
+	@Override
+	public String prettyPrint() {
+		StringBuilder sb = new StringBuilder();
+		
+		String path = getPathString();
+		if (!path.isEmpty()) {
+			sb.append(path);
+			sb.append('.');
+		}
+		sb.append(getName());
+		
+		return sb.toString();
+	}
 }

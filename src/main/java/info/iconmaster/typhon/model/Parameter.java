@@ -183,4 +183,18 @@ public class Parameter extends TyphonModelEntity {
 		this.var = var;
 	}
 	
+	@Override
+	public String prettyPrint() {
+		StringBuilder sb = new StringBuilder(type.prettyPrint());
+		
+		sb.append(' ');
+		sb.append(getName());
+		
+		if (rawDefaultValue != null) {
+			sb.append(" = ");
+			sb.append(rawDefaultValue.getText());
+		}
+		
+		return sb.toString();
+	}
 }

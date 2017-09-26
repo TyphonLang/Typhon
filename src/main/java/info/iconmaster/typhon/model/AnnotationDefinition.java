@@ -100,4 +100,30 @@ public class AnnotationDefinition extends TyphonModelEntity implements MemberAcc
 	public MemberAccess getMemberParent() {
 		return getParent();
 	}
+	
+	@Override
+	public String prettyPrint() {
+		StringBuilder sb = new StringBuilder("@");
+		
+		String path = getPathString();
+		if (!path.isEmpty()) {
+			sb.append(path);
+			sb.append('.');
+		}
+		sb.append(getName());
+		
+		if (!params.isEmpty()) {
+			sb.append('(');
+			
+			for (Parameter param : getParams()) {
+				sb.append(param.prettyPrint());
+				sb.append(',');
+			}
+			sb.deleteCharAt(sb.length()-1);
+			
+			sb.append(')');
+		}
+		
+		return sb.toString();
+	}
 }

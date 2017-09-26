@@ -83,6 +83,11 @@ public class EnumType extends UserType {
 		public MemberAccess getMemberParent() {
 			return parent;
 		}
+
+		@Override
+		public String prettyPrint() {
+			return parent.prettyPrint()+"."+getName();
+		}
 	}
 	
 	/**

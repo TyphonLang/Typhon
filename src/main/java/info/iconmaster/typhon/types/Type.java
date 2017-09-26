@@ -11,6 +11,7 @@ import info.iconmaster.typhon.model.AnnotationDefinition;
 import info.iconmaster.typhon.model.Function;
 import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.model.Package;
+import info.iconmaster.typhon.model.Parameter;
 import info.iconmaster.typhon.model.TyphonModelEntity;
 import info.iconmaster.typhon.util.SourceInfo;
 import info.iconmaster.typhon.util.TemplateUtils;
@@ -201,5 +202,19 @@ public abstract class Type extends TyphonModelEntity implements MemberAccess {
 		}
 		
 		return new TypeRef(tni.corePackage.TYPE_ANY);
+	}
+	
+	@Override
+	public String prettyPrint() {
+		StringBuilder sb = new StringBuilder();
+		
+		String path = getPathString();
+		if (!path.isEmpty()) {
+			sb.append(path);
+			sb.append('.');
+		}
+		sb.append(getName());
+		
+		return sb.toString();
 	}
 }

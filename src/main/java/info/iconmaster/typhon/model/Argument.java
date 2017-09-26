@@ -82,4 +82,22 @@ public class Argument extends TyphonModelEntity {
 	public ExprContext getRawValue() {
 		return rawValue;
 	}
+	
+	@Override
+	public String prettyPrint() {
+		StringBuilder sb = new StringBuilder();
+		
+		if (getLabel() != null) {
+			sb.append(getLabel());
+			sb.append(": ");
+		}
+		
+		if (rawValue != null) {
+			sb.append(rawValue.getText());
+		} else {
+			sb.append("<unknown>");
+		}
+		
+		return sb.toString();
+	}
 }

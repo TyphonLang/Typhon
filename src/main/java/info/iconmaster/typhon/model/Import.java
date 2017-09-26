@@ -59,6 +59,11 @@ public abstract class Import extends TyphonModelEntity {
 		public List<String> getPackageName() {
 			return packageName;
 		}
+		
+		@Override
+		public String prettyPrint() {
+			return "import "+packageName.stream().reduce((a,b)->a+"."+b).orElse("")+";";
+		}
 	}
 	
 	public static class RawImport extends Import {
@@ -87,6 +92,13 @@ public abstract class Import extends TyphonModelEntity {
 		 */
 		public void setImportData(String importData) {
 			this.importData = importData;
+		}
+		
+
+		
+		@Override
+		public String prettyPrint() {
+			return "import \""+importData+"\";";
 		}
 	}
 

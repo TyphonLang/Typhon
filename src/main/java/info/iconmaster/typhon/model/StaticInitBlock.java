@@ -83,4 +83,19 @@ public class StaticInitBlock extends TyphonModelEntity {
 	public void setParent(Package parent) {
 		this.parent = parent;
 	}
+	
+	@Override
+	public String prettyPrint() {
+		StringBuilder sb = new StringBuilder();
+		
+		String path = getParent().getPathString();
+		if (!path.isEmpty()) {
+			sb.append(path);
+			sb.append('.');
+		}
+		sb.append(getParent().getName());
+		sb.append(".(static init block)");
+		
+		return sb.toString();
+	}
 }

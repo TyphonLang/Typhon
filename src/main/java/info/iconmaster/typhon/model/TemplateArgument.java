@@ -102,4 +102,18 @@ public class TemplateArgument extends TyphonModelEntity {
 		t.value = value.copy();
 		return t;
 	}
+	
+	@Override
+	public String prettyPrint() {
+		StringBuilder sb = new StringBuilder();
+		
+		if (getLabel() != null) {
+			sb.append(getLabel());
+			sb.append(": ");
+		}
+		
+		sb.append(value.prettyPrint());
+		
+		return sb.toString();
+	}
 }

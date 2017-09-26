@@ -14,7 +14,7 @@ import info.iconmaster.typhon.util.SourceInfo;
  * @author iconmaster
  *
  */
-public class TyphonModelEntity {
+public abstract class TyphonModelEntity {
 	/**
 	 * The compilation options used to produce this object. Cannot be null.
 	 */
@@ -142,11 +142,24 @@ public class TyphonModelEntity {
 	public boolean needsAnnotsChecked() {
 		return needsAnnotsChecked;
 	}
-
+	
 	/**
 	 * @param needsTypesResolved True if we have raw data, and need our our annotations checked.
 	 */
 	public void needsAnnotsChecked(boolean needsTypesResolved) {
 		this.needsAnnotsChecked = needsTypesResolved;
+	}
+	
+	/**
+	 * @return A string to display to the user, suitable for reconstruction in some manner.
+	 * May be null if this object isn't meant to be shown to users.
+	 */
+	public String prettyPrint() {
+		return null;
+	}
+	
+	@Override
+	public String toString() {
+		return prettyPrint();
 	}
 }

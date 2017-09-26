@@ -202,8 +202,13 @@ public class Field extends TyphonModelEntity implements MemberAccess {
 	public void setGetter(Function f) {
 		getter = f;
 		hasGetter = (f != null);
+		
 		if (setter == null) {
 			hasSetter = false;
+		}
+		
+		if (!f.hasAnnot(tni.corePackage.ANNOT_GETTER)) {
+			f.getAnnots().add(new Annotation(tni.corePackage.ANNOT_GETTER));
 		}
 	}
 	
@@ -252,8 +257,13 @@ public class Field extends TyphonModelEntity implements MemberAccess {
 	public void setSetter(Function f) {
 		setter = f;
 		hasSetter = (f != null);
+		
 		if (getter == null) {
 			hasGetter = false;
+		}
+		
+		if (!f.hasAnnot(tni.corePackage.ANNOT_SETTER)) {
+			f.getAnnots().add(new Annotation(tni.corePackage.ANNOT_SETTER));
 		}
 	}
 	

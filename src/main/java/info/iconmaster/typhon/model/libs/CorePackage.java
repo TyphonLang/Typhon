@@ -32,7 +32,12 @@ public class CorePackage extends Package {
 	/**
 	 * Constants for built-in types.
 	 */
-	public UserType TYPE_NUMBER, TYPE_INTEGER, TYPE_REAL, TYPE_LIST, TYPE_MAP;
+	public UserType TYPE_NUMBER, TYPE_INTEGER, TYPE_REAL, TYPE_MAP;
+	
+	/**
+	 * Constants for built-in types.
+	 */
+	public CoreTypeList TYPE_LIST;
 	
 	/**
 	 * Constants for built-in types.
@@ -138,9 +143,7 @@ public class CorePackage extends Package {
 		addType(TYPE_ERROR = new CoreTypeErrorBase(tni));
 		addType(TYPE_ITERABLE = new CoreTypeIterable(tni));
 		addType(TYPE_ITERATOR = new CoreTypeIterator(tni));
-		
-		TYPE_LIST = makeUserType("List", TYPE_ANY);
-		TYPE_LIST.getTemplates().add(new TemplateType(tni, "T"));
+		addType(TYPE_LIST = new CoreTypeList(tni));
 		
 		TYPE_MAP = makeUserType("Map", TYPE_ANY);
 		TYPE_MAP.getTemplates().add(new TemplateType(tni, "K"));
@@ -198,6 +201,7 @@ public class CorePackage extends Package {
 		TYPE_ERROR.addMembers();
 		TYPE_ITERABLE.addMembers();
 		TYPE_ITERATOR.addMembers();
+		TYPE_LIST.addMembers();
 		
 		TYPE_ERROR_INTERNAL.addMembers();
 		TYPE_ERROR_CAST.addMembers();

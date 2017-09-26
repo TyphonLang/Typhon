@@ -886,6 +886,8 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(2).op);
 			Assert.assertEquals(OpCode.MOV, code.ops.get(3).op);
 			Assert.assertEquals(OpCode.CALL, code.ops.get(4).op);
+		}),new TestCase("int g(int x, int y) {} void f() {int y = g(g(1,2),g(3,4));}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
 		}));
 	}
     

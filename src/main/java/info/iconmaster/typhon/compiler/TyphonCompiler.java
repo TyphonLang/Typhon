@@ -2189,6 +2189,52 @@ public class TyphonCompiler {
 			public List<TypeRef> visitThrowExpr(ThrowExprContext ctx) {
 				return Arrays.asList(TypeRef.var(core.tni));
 			}
+			
+			@Override
+			public List<TypeRef> visitFuncCallExpr(FuncCallExprContext ctx) {
+				// TODO: This is a HORRIBLE hack. Make this use a method that does not involve compilation of an expression THREE TIMES.
+				
+				// save state
+				List<Instruction> ops = scope.getCodeBlock().ops;
+				Scope newScope = new Scope(scope.getCodeBlock(), scope);
+				
+				// first pass: get number of args
+				int n = compileExpr(newScope, rule, Arrays.asList());
+				
+				// second pass: get arg types
+				List<Variable> vars = new ArrayList<>();
+				for (int i = 0; i < n; i++) {
+					vars.add(newScope.addTempVar(TypeRef.var(core.tni), new SourceInfo(rule)));
+				}
+				compileExpr(newScope, rule, vars);
+				
+				// restore state
+				scope.getCodeBlock().ops = ops;
+				return vars.stream().map(v->v.type).collect(Collectors.toList());
+			}
+			
+			@Override
+			public List<TypeRef> visitIndexCallExpr(IndexCallExprContext ctx) {
+				// TODO: This is a HORRIBLE hack. Make this use a method that does not involve compilation of an expression THREE TIMES.
+				
+				// save state
+				List<Instruction> ops = scope.getCodeBlock().ops;
+				Scope newScope = new Scope(scope.getCodeBlock(), scope);
+				
+				// first pass: get number of args
+				int n = compileExpr(newScope, rule, Arrays.asList());
+				
+				// second pass: get arg types
+				List<Variable> vars = new ArrayList<>();
+				for (int i = 0; i < n; i++) {
+					vars.add(newScope.addTempVar(TypeRef.var(core.tni), new SourceInfo(rule)));
+				}
+				compileExpr(newScope, rule, vars);
+				
+				// restore state
+				scope.getCodeBlock().ops = ops;
+				return vars.stream().map(v->v.type).collect(Collectors.toList());
+			}
 		};
 		
 		List<TypeRef> result = visitor.visit(rule);
@@ -2677,7 +2723,7 @@ public class TyphonCompiler {
 		Map<TemplateType, TypeRef> funcTempMap = TemplateUtils.inferTemplatesFromArguments(core.tni, params, args2, f.getFuncTemplateMap());
 		
 		Subject finalSub = sub;
-		List<TypeRef> retType = f.getRetType().subList(0, outputVars.size()).stream().map(t->TemplateUtils.replaceTemplates(TemplateUtils.replaceTemplates(t, funcTempMap), finalSub == null ? new HashMap<>() : finalSub.typeMap)).collect(Collectors.toList());
+		List<TypeRef> retType = f.getRetType().stream().map(t->TemplateUtils.replaceTemplates(TemplateUtils.replaceTemplates(t, funcTempMap), finalSub == null ? new HashMap<>() : finalSub.typeMap)).collect(Collectors.toList());
 		return retType;
 	}
 }

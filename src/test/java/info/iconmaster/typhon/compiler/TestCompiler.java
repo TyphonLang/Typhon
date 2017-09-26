@@ -186,32 +186,36 @@ public class TestCompiler extends TyphonTest {
 		}),new TestCase("package p {int a;} void f() {p.a = 1;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
-			Assert.assertEquals(2, code.ops.size());
-			
-			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
-			Assert.assertEquals(1, (int) code.ops.get(0).arg(1));
-			
-			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(1).op);
-			Assert.assertEquals(0, code.ops.get(1).<List<Variable>>arg(0).size());
-			Assert.assertEquals("a", code.ops.get(1).<Function>arg(1).getName());
-			Assert.assertEquals(1, code.ops.get(1).<List<Variable>>arg(2).size());
-		}),new TestCase("class a {int y;} a x; void f() {x.y = 1;}", (code)->{
-			Assert.assertEquals(0, code.tni.errors.size());
-			
 			Assert.assertEquals(3, code.ops.size());
 			
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
 			Assert.assertEquals(1, (int) code.ops.get(0).arg(1));
 			
-			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(1).op);
-			Assert.assertEquals(0, code.ops.get(1).<List<Variable>>arg(0).size());
-			Assert.assertEquals("x", code.ops.get(1).<Function>arg(1).getName());
-			Assert.assertEquals(1, code.ops.get(1).<List<Variable>>arg(2).size());
+			Assert.assertEquals(OpCode.MOV, code.ops.get(1).op);
 			
-			Assert.assertEquals(OpCode.CALL, code.ops.get(1).op);
-			Assert.assertEquals(0, code.ops.get(1).<List<Variable>>arg(0).size());
-			Assert.assertEquals("y", code.ops.get(1).<Function>arg(2).getName());
-			Assert.assertEquals(1, code.ops.get(1).<List<Variable>>arg(3).size());
+			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(2).op);
+			Assert.assertEquals(0, code.ops.get(2).<List<Variable>>arg(0).size());
+			Assert.assertEquals("a", code.ops.get(2).<Function>arg(1).getName());
+			Assert.assertEquals(1, code.ops.get(2).<List<Variable>>arg(2).size());
+		}),new TestCase("class a {int y;} a x; void f() {x.y = 1;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(4, code.ops.size());
+			
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
+			Assert.assertEquals(1, (int) code.ops.get(0).arg(1));
+			
+			Assert.assertEquals(OpCode.CALLSTATIC, code.ops.get(1).op);
+			Assert.assertEquals(1, code.ops.get(1).<List<Variable>>arg(0).size());
+			Assert.assertEquals("x", code.ops.get(1).<Function>arg(1).getName());
+			Assert.assertEquals(0, code.ops.get(1).<List<Variable>>arg(2).size());
+			
+			Assert.assertEquals(OpCode.MOV, code.ops.get(2).op);
+			
+			Assert.assertEquals(OpCode.CALL, code.ops.get(3).op);
+			Assert.assertEquals(0, code.ops.get(3).<List<Variable>>arg(0).size());
+			Assert.assertEquals("y", code.ops.get(3).<Function>arg(2).getName());
+			Assert.assertEquals(1, code.ops.get(3).<List<Variable>>arg(3).size());
 		}),new TestCase("int g() {} void f() {int x = g();}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
@@ -301,7 +305,7 @@ public class TestCompiler extends TyphonTest {
 		}),new TestCase("class a {int b;} void f() {a a; int x = a?.b;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
-			Assert.assertEquals(4, code.ops.size());
+			Assert.assertEquals(5, code.ops.size());
 			
 			Assert.assertEquals(OpCode.ISNULL, code.ops.get(0).op);
 			Assert.assertEquals(OpCode.JUMPTRUE, code.ops.get(1).op);
@@ -312,6 +316,7 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(0, code.ops.get(2).<List<Variable>>arg(3).size());
 			
 			Assert.assertEquals(OpCode.LABEL, code.ops.get(3).op);
+			Assert.assertEquals(OpCode.MOV, code.ops.get(4).op);
 		}),new TestCase("class a {float b; int c;} void f() {a a; int x = a..b.c;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
@@ -507,12 +512,13 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(OpCode.NOT, code.ops.get(2).op);
 		}),new TestCase("void f() {int x = 1 is int;}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
-		}),new TestCase("void f() {var v; int x = v is List<List<Number>>;}", (code)->{
+		}),new TestCase("void f() {var v; bool x = v is List<List<Number>>;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
-			Assert.assertEquals(1, code.ops.size());
+			Assert.assertEquals(2, code.ops.size());
 			
-			Assert.assertEquals(OpCode.INSTANCEOF, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.MOV, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.INSTANCEOF, code.ops.get(1).op);
 		}),new TestCase("void f() {int x = 1 ?? 2;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
@@ -783,8 +789,6 @@ public class TestCompiler extends TyphonTest {
 			CodeBlock code2 = ((Package) code.lookup.getMemberParent()).getType("a").getTypePackage().getFunctionsWithName("new").get(0).getCode();
 			Assert.assertEquals(1, code2.ops.size());
 			Assert.assertEquals(OpCode.CALL, code2.ops.get(0).op);
-		}),new TestCase("class a {@static void g() {}} void f() {a b; b.g();}", (code)->{
-			Assert.assertEquals(1, code.tni.errors.size());
 		}),new TestCase("class a {int @static x;} void f() {a b; int x = b.x;}", (code)->{
 			Assert.assertEquals(2, code.tni.errors.size());
 		}),new TestCase("class a {void g() {}} class b : a {@override void g() {}} void f() {b b; b.g();}", (code)->{

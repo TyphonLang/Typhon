@@ -1338,7 +1338,7 @@ public class TyphonCompiler {
 				if (!insertInto.isEmpty()) {
 					scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.INSTANCEOF, new Object[] {insertInto.get(0), lhs, rhs}));
 					
-					if (ctx.tnOp.equals("!")) {
+					if (ctx.tnOp.getText().equals("!")) {
 						scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.NOT, new Object[] {insertInto.get(0), insertInto.get(0)}));
 					}
 				}

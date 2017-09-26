@@ -19,6 +19,6 @@ public class CoreLibraryReflection extends Package {
 	public CoreLibraryReflection(TyphonInput tni) {
 		super(tni, "reflect");
 		
-		TYPE_TYPE = new SystemType(tni, "type");
+		addType(TYPE_TYPE = new SystemType(tni, "type"));
 	}
 }

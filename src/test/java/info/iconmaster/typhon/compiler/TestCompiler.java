@@ -789,6 +789,8 @@ public class TestCompiler extends TyphonTest {
 			CodeBlock code2 = ((Package) code.lookup.getMemberParent()).getType("a").getTypePackage().getFunctionsWithName("new").get(0).getCode();
 			Assert.assertEquals(1, code2.ops.size());
 			Assert.assertEquals(OpCode.CALL, code2.ops.get(0).op);
+		}),new TestCase("class a {@static void g() {}} void f() {a b; b.g();}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
 		}),new TestCase("class a {int @static x;} void f() {a b; int x = b.x;}", (code)->{
 			Assert.assertEquals(2, code.tni.errors.size());
 		}),new TestCase("class a {void g() {}} class b : a {@override void g() {}} void f() {b b; b.g();}", (code)->{

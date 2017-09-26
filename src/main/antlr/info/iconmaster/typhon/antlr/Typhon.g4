@@ -55,6 +55,7 @@ expr:
 |	tnAnnots+=annotation* 'throw' tnArg=expr																								#throwExpr
 |	'if' tnIf=expr ':' tnThen=expr ('elseif' tnElseIf+=expr ':' tnElseThen+=expr)* 'else' ':' tnElse=expr									#terneryOpExpr
 |	'match' tnMatch=expr '{' (tnCases+=caseExpr)* 'default' ':' tnDefault=expr '}'															#matchExpr
+|	'for' tnLvals+=forLvalue (',' tnLvals+=forLvalue)* ':' tnExpr=expr ':' tnThen=expr														#forExpr
 |	tnAnnots+=annotation* 'class' tnType=type																								#typeConstExpr
 |	tnAnnots+=annotation* 'null'																											#nullConstExpr
 |	tnAnnots+=annotation* 'true'																											#trueConstExpr

@@ -269,6 +269,10 @@ public class TestGrammar extends TyphonTest {
 			new CaseInvalid("match 0 {case 0: 1 case 1: 2}", (parser)->{parser.expr();}),
 			new CaseInvalid("match 0 case 0: 1", (parser)->{parser.expr();}),
 			new CaseInvalid("match 0 {case: 1}", (parser)->{parser.expr();}),
+			//forExpr
+			new CaseValid("for int i: a: i", (parser)->{parser.expr();}),
+			new CaseValid("for int x, int y: a: x", (parser)->{parser.expr();}),
+			new CaseInvalid("for int i: i", (parser)->{parser.expr();}),
 			//typeConstExpr
 			new CaseValid("class var", (parser)->{parser.expr();}),
 			new CaseValid("class int", (parser)->{parser.expr();}),

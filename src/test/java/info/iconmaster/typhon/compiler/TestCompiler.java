@@ -183,7 +183,7 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(1, code.ops.get(0).<List<Variable>>arg(0).size());
 			Assert.assertEquals("x", code.ops.get(0).<Function>arg(2).getName());
 			Assert.assertEquals(0, code.ops.get(0).<List<Variable>>arg(3).size());
-		}),new TestCase("package p {int a;} void f() {p.a = 1}", (code)->{
+		}),new TestCase("package p {int a;} void f() {p.a = 1;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
 			Assert.assertEquals(2, code.ops.size());
@@ -195,7 +195,7 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(0, code.ops.get(1).<List<Variable>>arg(0).size());
 			Assert.assertEquals("a", code.ops.get(1).<Function>arg(1).getName());
 			Assert.assertEquals(1, code.ops.get(1).<List<Variable>>arg(2).size());
-		}),new TestCase("class a {int y;} a x; void f() {x.y = 1}", (code)->{
+		}),new TestCase("class a {int y;} a x; void f() {x.y = 1;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
 			Assert.assertEquals(3, code.ops.size());
@@ -298,7 +298,7 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(0, code.tni.errors.size());
 		}),new TestCase("import operator; class a {@add int g(a other) {}} void f() {a b, c; int x = b + c;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
-		}),new TestCase("class a {int b;} void f() {a a; int x = a.?b;}", (code)->{
+		}),new TestCase("class a {int b;} void f() {a a; int x = a?.b;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
 			Assert.assertEquals(4, code.ops.size());
@@ -346,17 +346,17 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(OpCode.MOV, code.ops.get(2).op);
 		}),new TestCase("class a {float b; int c;} void f() {a a; a x = a..b..c..b;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
-		}),new TestCase("class y {int c;} class a {y b;} void f() {a a; int x = a.?b.?c;}", (code)->{
+		}),new TestCase("class y {int c;} class a {y b;} void f() {a a; int x = a?.b?.c;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 		}),new TestCase("class a {int g(); int h();} void f() {a a; a b = a..g()..h();}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
-		}),new TestCase("class a {int b} void f() {a a; a.?b = 3;}", (code)->{
+		}),new TestCase("class a {int b;} void f() {a a; a?.b = 3;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
-		}),new TestCase("class a {int b} void f() {a a; a..b..b = a;}", (code)->{
+		}),new TestCase("class a {int b;} void f() {a a; a..b..b = a;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 		}),new TestCase("class a {int g() {}} void f() {a a; a = a..g()..g();}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
-		}),new TestCase("class a {int g() {}} void f() {a a; int x = a.?g();}", (code)->{
+		}),new TestCase("class a {int g() {}} void f() {a a; int x = a?.g();}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 		}),new TestCase("void f() {string s = \"Hello!\";}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
@@ -490,14 +490,14 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(OpCode.NOT, code.ops.get(3).op);
 		}),new TestCase("void f() {int x = 1 == 2;}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
-		}),new TestCase("void f() {bool x = 1 is int}", (code)->{
+		}),new TestCase("void f() {bool x = 1 is int;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
 			Assert.assertEquals(2, code.ops.size());
 			
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
 			Assert.assertEquals(OpCode.INSTANCEOF, code.ops.get(1).op);
-		}),new TestCase("void f() {bool x = 1 !is int}", (code)->{
+		}),new TestCase("void f() {bool x = 1 !is int;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
 			Assert.assertEquals(3, code.ops.size());
@@ -505,9 +505,9 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(OpCode.MOVINT, code.ops.get(0).op);
 			Assert.assertEquals(OpCode.INSTANCEOF, code.ops.get(1).op);
 			Assert.assertEquals(OpCode.NOT, code.ops.get(2).op);
-		}),new TestCase("void f() {int x = 1 is int}", (code)->{
+		}),new TestCase("void f() {int x = 1 is int;}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
-		}),new TestCase("void f() {var v; int x = v is List<List<Number>>}", (code)->{
+		}),new TestCase("void f() {var v; int x = v is List<List<Number>>;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
 			Assert.assertEquals(1, code.ops.size());
@@ -688,35 +688,35 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(0, code.tni.errors.size());
 		}),new TestCase("void f() {int x = match 1 {case 0: 1 case 1, 2: 2.0 default: 'd'};}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
-		}),new TestCase("import reflect; void f() {type t = class int;};}", (code)->{
+		}),new TestCase("import reflect; void f() {type t = class int;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 			
 			Assert.assertEquals(1, code.ops.size());
 			
 			Assert.assertEquals(OpCode.MOVTYPE, code.ops.get(0).op);
-		}),new TestCase("void g(int x, [int] @vararg y) {} void f() {g(1);};}", (code)->{
+		}),new TestCase("void g(int x, [int] @vararg y) {} void f() {g(1);}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
-		}),new TestCase("void g(int x, [int] @vararg y) {} void f() {g(1, 2, 3);};}", (code)->{
+		}),new TestCase("void g(int x, [int] @vararg y) {} void f() {g(1, 2, 3);}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
-		}),new TestCase("void g(int x, [int] @vararg y) {} void f() {g(1, 'c');};}", (code)->{
+		}),new TestCase("void g(int x, [int] @vararg y) {} void f() {g(1, 'c');}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
-		}),new TestCase("void g(int x, [int] @vararg y) {} void f() {g(1, 2, 'c', 3);};}", (code)->{
+		}),new TestCase("void g(int x, [int] @vararg y) {} void f() {g(1, 2, 'c', 3);}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
-		}),new TestCase("void g(int x, {string:int} @varflag y) {} void f() {g(1);};}", (code)->{
+		}),new TestCase("void g(int x, {string:int} @varflag y) {} void f() {g(1);}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
-		}),new TestCase("void g(int x, {string:int} @varflag y) {} void f() {g(1, a: 2, b: 3);};}", (code)->{
+		}),new TestCase("void g(int x, {string:int} @varflag y) {} void f() {g(1, a: 2, b: 3);}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
-		}),new TestCase("void g(int x, {string:int} @varflag y) {} void f() {g(1, a: 'c');};}", (code)->{
+		}),new TestCase("void g(int x, {string:int} @varflag y) {} void f() {g(1, a: 'c');}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
-		}),new TestCase("void g(int x, {string:int} @varflag y) {} void f() {g(1, a: 2, b: 'c', d: 3);};}", (code)->{
+		}),new TestCase("void g(int x, {string:int} @varflag y) {} void f() {g(1, a: 2, b: 'c', d: 3);}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
-		}),new TestCase("void g([int] @vararg args, {string:int} @varflag flags) {} void f() {g();};}", (code)->{
+		}),new TestCase("void g([int] @vararg args, {string:int} @varflag flags) {} void f() {g();}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
-		}),new TestCase("void g([int] @vararg args, {string:int} @varflag flags) {} void f() {g(1, b:2, 3);};}", (code)->{
+		}),new TestCase("void g([int] @vararg args, {string:int} @varflag flags) {} void f() {g(1, b:2, 3);}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
-		}),new TestCase("void g([int] @vararg args, {string:int} @varflag flags) {} void f() {g(1, b:2, 'c');};}", (code)->{
+		}),new TestCase("void g([int] @vararg args, {string:int} @varflag flags) {} void f() {g(1, b:2, 'c');}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
-		}),new TestCase("void g([int] @vararg args, {string:int} @varflag flags) {} void f() {g(1, b:'c', 3);};}", (code)->{
+		}),new TestCase("void g([int] @vararg args, {string:int} @varflag flags) {} void f() {g(1, b:'c', 3);}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
 		}),new TestCase("class a {new() {}} void f() {a a = new a();}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
@@ -783,7 +783,7 @@ public class TestCompiler extends TyphonTest {
 			CodeBlock code2 = ((Package) code.lookup.getMemberParent()).getType("a").getTypePackage().getFunctionsWithName("new").get(0).getCode();
 			Assert.assertEquals(1, code2.ops.size());
 			Assert.assertEquals(OpCode.CALL, code2.ops.get(0).op);
-		}),new TestCase("class a {@static void g()} void f() {a b; b.g();}", (code)->{
+		}),new TestCase("class a {@static void g() {}} void f() {a b; b.g();}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
 		}),new TestCase("class a {int @static x;} void f() {a b; int x = b.x;}", (code)->{
 			Assert.assertEquals(2, code.tni.errors.size());
@@ -793,7 +793,7 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(OpCode.CALL, code.ops.get(0).op);
 			
 			Assert.assertTrue(!((Function)code.ops.get(0).args[2]).getVirtualOverrides().isEmpty());
-		}),new TestCase("@getter int x() {} void f() {int y = x}", (code)->{
+		}),new TestCase("@getter int x() {} void f() {int y = x;}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
 		}),new TestCase("class a {int x;} void f() {a a = new a(); a.x = 5; print(a.x);}", (code)->{
 			Assert.assertEquals(0, code.tni.errors.size());
@@ -849,7 +849,7 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(0, code.tni.errors.size());
 		}),new TestCase("import operator; class a : Iterable<int> {@override Iterator<int> iterator() {} @loop (int,int) g(Iterator<int> iter) {}} void f() {a a = new a(); for int x, int y, int z : a {}}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
-		}),new TestCase("class a : Iterable<int> {} void f() {@override Iterator<int> iterator() {} a a = new a(); for int x, int y : a {}}", (code)->{
+		}),new TestCase("class a : Iterable<int> {@override Iterator<int> iterator() {}} void f() {a a = new a(); for int x, int y : a {}}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
 		}),new TestCase("import operator; class a : Iterable<int> {@override Iterator<int> iterator() {} @loop (int,int) g(Iterator<int> iter) {}} void f() {a a = new a(); for int x, float y : a {}}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());

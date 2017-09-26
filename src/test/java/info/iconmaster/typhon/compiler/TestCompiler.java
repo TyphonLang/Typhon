@@ -855,6 +855,21 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(1, code.tni.errors.size());
 		}),new TestCase("void f() {Iterator i = new Iterator();}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("import operator; class a {@index.get getty(int x) {}} void f() {a a = new a(); a[0];}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(4, code.ops.size());
+			
+			Assert.assertEquals(OpCode.ALLOC, code.ops.get(0).op);
+			Assert.assertEquals(OpCode.CALL, code.ops.get(1).op);
+			Assert.assertEquals(OpCode.MOVINT, code.ops.get(2).op);
+			Assert.assertEquals(OpCode.CALL, code.ops.get(3).op);
+		}),new TestCase("import operator; class a {@index.get getty(int x) {}} void f() {a a = new a(); a[];}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("import operator; class a {@index.get getty(int x) {}} void f() {a a = new a(); a[1,2];}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("import operator; class a {@index.get getty(int x) {}} void f() {a a = new a(); a['c'];}", (code)->{
+			Assert.assertEquals(1, code.tni.errors.size());
 		}));
 	}
     

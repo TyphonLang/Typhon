@@ -34,6 +34,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.ForLvalueContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ForStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.FuncCallExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.IfStatContext;
+import info.iconmaster.typhon.antlr.TyphonParser.IndexCallExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.IsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.LogicOpsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.LvalueContext;
@@ -1704,6 +1705,103 @@ public class TyphonCompiler {
 				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.THROW, new Object[] {errorVar}));
 				
 				return Arrays.asList(TypeRef.var(core.tni));
+			}
+			
+			@Override
+			public List<TypeRef> visitIndexCallExpr(IndexCallExprContext ctx) {
+				// turn the rule into a list of member accesses
+				List<LookupElement> names = new ArrayList<>();
+				ExprContext expr = ctx.tnCallee;
+				
+				while (true) {
+					if (expr instanceof MemberExprContext) {
+						names.add(0, new LookupElement(((MemberExprContext) expr).tnValue.getText(), new SourceInfo(expr), AccessType.get(((MemberExprContext) expr).tnOp.getText())));
+						
+						names.addAll(0, ((MemberExprContext) expr).tnLookup.stream().map((e)->{
+							List<TemplateArgument> template = TyphonTypeResolver.readTemplateArgs(core.tni, e.tnTemplate.tnArgs, scope);
+							return new LookupElement(e.tnName.getText(), new SourceInfo(e), AccessType.get(e.tnOp.getText()), template);
+						}).collect(Collectors.toList()));
+						
+						expr = ((MemberExprContext) expr).tnLhs;
+					} else if (expr instanceof VarExprContext) {
+						names.add(0, new LookupElement(((VarExprContext) expr).tnValue.getText(), new SourceInfo(expr), null));
+						
+						expr = null;
+						break;
+					} else {
+						break;
+					}
+				}
+				
+				// create a list of possible member access routes
+				MemberAccess base = scope;
+				if (expr != null) {
+					Variable exprVar = scope.addTempVar(TypeRef.var(core.tni), null);
+					base = exprVar;
+					
+					compileExpr(scope, expr, Arrays.asList(exprVar));
+				}
+				
+				List<LookupPath> paths = LookupUtils.findPaths(scope, base, names);
+				
+				List<LookupArgument> args = new ArrayList<>();
+				List<Variable> vars = new ArrayList<>();
+				
+				Map<Variable, ExprContext> argMap = new HashMap<>();
+				TyphonModelReader.readArgs(core.tni, ctx.tnArgs.tnArgs).stream().forEach((arg)->{
+					Variable var = scope.addTempVar(TypeRef.var(core.tni), arg.source);
+					vars.add(var);
+					
+					args.add(new LookupArgument(var, arg.getLabel()));
+					
+					argMap.put(var, arg.getRawValue());
+				});
+				
+				paths.removeIf((path)->{
+					Subject sub = path.returnedSubject();
+					
+					if (!(sub.member instanceof Field || sub.member instanceof Variable)) {
+						return true;
+					}
+					return false;
+				});
+				
+				if (paths.isEmpty()) {
+					// error, no path found
+					core.tni.errors.add(new UndefinedVariableError(new SourceInfo(ctx), ctx.tnCallee.getText()));
+					return Arrays.asList(TypeRef.var(core.tni));
+				}
+				
+				paths.removeIf((path)->{
+					Subject sub = path.returnedSubject();
+					
+					List<Function> handlers = sub.type.getType().getOperatorHandlers(core.LIB_OPS.ANNOT_INDEX_GET);
+					handlers.removeIf(h->!LookupUtils.areFuncArgsCompatibleWith(scope, h, args, sub.type.getTemplateMap(path.returnedTypeMap()), argMap));
+					
+					if (handlers.isEmpty()) {
+						return true;
+					}
+					
+					return false;
+				});
+				
+				if (paths.isEmpty()) {
+					// error, no handler found
+					core.tni.errors.add(new UndefinedOperatorError(new SourceInfo(ctx), "[]"));
+					return Arrays.asList(TypeRef.var(core.tni));
+				}
+				
+				// process the chosen path
+				LookupPath path = paths.get(0);
+				Subject sub = path.popSubject();
+				
+				List<Function> handlers = sub.type.getType().getOperatorHandlers(core.LIB_OPS.ANNOT_INDEX_GET);
+				handlers.removeIf(h->!LookupUtils.areFuncArgsCompatibleWith(scope, h, args, sub.type.getTemplateMap(path.returnedTypeMap()), argMap));
+				Function handler = handlers.get(0);
+				
+				Variable instanceVar = LookupUtils.getSubjectOfPath(scope, sub.path);
+				
+				return compileCall(scope, sub.source, new Option<>(instanceVar, Option.IS_B), handler, args, argMap, insertInto);
 			}
 		};
 		

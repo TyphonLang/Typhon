@@ -29,7 +29,7 @@ public class CoreLibraryOperators extends Package {
 	ANNOT_BAND, ANNOT_BOR, ANNOT_XOR, ANNOT_SHL, ANNOT_SHR,
 	ANNOT_LT, ANNOT_LE, ANNOT_GT, ANNOT_GE,
 	ANNOT_NEG, ANNOT_POS, ANNOT_BNOT,
-	ANNOT_EQ, ANNOT_LOOP;
+	ANNOT_EQ, ANNOT_LOOP, ANNOT_INDEX_GET, ANNOT_INDEX_SET;
 	
 	/**
 	 * A list of various operator functions.
@@ -204,6 +204,10 @@ public class CoreLibraryOperators extends Package {
 		
 		ANNOT_EQ = makeAnnotDef("eq");
 		ANNOT_LOOP = makeAnnotDef("loop");
+		
+		Package indexPkg = new Package("index", this); indexPkg.markAsLibrary();
+		indexPkg.addAnnotDef(ANNOT_INDEX_GET = new AnnotationDefinition(tni, "get", new Parameter[0]));
+		indexPkg.addAnnotDef(ANNOT_INDEX_SET = new AnnotationDefinition(tni, "set", new Parameter[0]));
 		
 		// add the operator functions
 		addBinOpFunc(ANNOT_ADD);

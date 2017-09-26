@@ -20,6 +20,11 @@ public class UndefinedOperatorError extends TyphonError {
 	 */
 	public String op;
 	
+	public UndefinedOperatorError(SourceInfo source, String op) {
+		super(source);
+		this.op = op;
+	}
+	
 	public UndefinedOperatorError(SourceInfo source, String op, TypeRef a, TypeRef b) {
 		super(source);
 		this.op = op;
@@ -29,6 +34,10 @@ public class UndefinedOperatorError extends TyphonError {
 	
 	@Override
 	public String getMessage() {
-		return "Operator "+op+" undefined between types "+a.prettyPrint()+" and "+b.prettyPrint();
+		if (a == null || b == null) {
+			return "Operator "+op+" undefined for this type";
+		} else {
+			return "Operator "+op+" undefined between types "+a.prettyPrint()+" and "+b.prettyPrint();
+		}
 	}
 }

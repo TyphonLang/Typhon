@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import info.iconmaster.typhon.model.libs.CorePackage;
 import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.types.TypeRef;
 
@@ -62,11 +63,14 @@ public interface MemberAccess {
 		
 		MemberAccess base = getMemberParent();
 		while (base != null) {
-			String name = base.getName();
-			if (name != null) {
-				sb.append(name);
-				sb.append('.');
+			if (!(base instanceof CorePackage)) {
+				String name = base.getName();
+				if (name != null) {
+					sb.append(name);
+					sb.append('.');
+				}
 			}
+			
 			base = base.getMemberParent();
 		}
 		

@@ -6,9 +6,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import info.iconmaster.typhon.TyphonInput;
+import info.iconmaster.typhon.model.Function;
 import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.model.Package;
-import info.iconmaster.typhon.model.TemplateArgument;
+import info.iconmaster.typhon.model.Parameter;
 import info.iconmaster.typhon.util.SourceInfo;
 import info.iconmaster.typhon.util.TemplateUtils;
 
@@ -200,5 +201,19 @@ public class FunctionType extends Type {
 		sb.append(')');
 		
 		return sb.toString();
+	}
+	
+	public Function asFunction() {
+		Function f = new Function(tni, source, null);
+		
+		for (TypeRef arg : getArgTypes()) {
+			f.getParams().add(new Parameter(tni, null, arg, false));
+		}
+		
+		for (TypeRef ret : getRetTypes()) {
+			f.getRetType().add(ret);
+		}
+		
+		return f;
 	}
 }

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import org.antlr.v4.codegen.model.chunk.RetValueRef;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 import info.iconmaster.typhon.antlr.TyphonBaseVisitor;
@@ -29,10 +30,12 @@ import info.iconmaster.typhon.antlr.TyphonParser.DefStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.EqOpsExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ExprStatContext;
+import info.iconmaster.typhon.antlr.TyphonParser.ExprsContext;
 import info.iconmaster.typhon.antlr.TyphonParser.FalseConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ForLvalueContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ForStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.FuncCallExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.FuncConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.IfStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.IndexCallExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.IndexLvalueContext;
@@ -47,6 +50,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.NewExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.NullCoalesceExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.NullConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.NumConstExprContext;
+import info.iconmaster.typhon.antlr.TyphonParser.ParamDeclContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ParamNameContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ParensExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.RelOpsExprContext;
@@ -1848,6 +1852,66 @@ public class TyphonCompiler {
 				Variable instanceVar = LookupUtils.getSubjectOfPath(scope, sub.path);
 				
 				return compileCall(scope, sub.source, new Option<>(instanceVar, Option.IS_B), handler, args, argMap, insertInto);
+			}
+			
+			@Override
+			public List<TypeRef> visitFuncConstExpr(FuncConstExprContext ctx) {
+				Function f = new Function(core.tni, new SourceInfo(ctx), null) {
+					@Override
+					public MemberAccess getMemberParent() {
+						return scope;
+					}
+				};
+				
+				CodeBlock newBlock = new CodeBlock(core.tni, f.source, scope);
+				Scope newScope = new Scope(newBlock, scope);
+				f.setCode(newBlock);
+				
+				for (ParamDeclContext rawArg : ctx.tnFuncArgs.tnArgs) {
+					Parameter p = new Parameter(core.tni, new SourceInfo(rawArg));
+					p.setName(rawArg.tnName.getText());
+					p.setType(TyphonTypeResolver.readType(core.tni, rawArg.tnType, newScope));
+					p.setVar(newScope.addVar(p.getName(), p.getType(), p.source));
+					
+					f.getParams().add(p);
+					
+					if (rawArg.tnDefaultValue != null) {
+						// error; optional anonymous params not allowed
+						core.tni.errors.add(new NotAllowedHereError(new SourceInfo(rawArg), "optional parameters"));
+					}
+				}
+				
+				if (ctx.tnExprForm == null) {
+					// block form
+					for (StatContext stat : ctx.tnBlockForm) {
+						// TODO: determine the correct return type for this function
+						compileStat(newScope, stat, Arrays.asList());
+					}
+				} else {
+					// expression form
+					List<Variable> retVars = new ArrayList<>();
+					
+					for (ExprContext expr : ctx.tnExprForm.tnExprs) {
+						List<Variable> theseRetVars = new ArrayList<>();
+						for (TypeRef retType : getExprType(newScope, expr, Arrays.asList())) {
+							Variable var = newScope.addTempVar(retType, new SourceInfo(expr));
+							
+							retVars.add(var);
+							theseRetVars.add(var);
+						}
+						compileExpr(newScope, expr, theseRetVars);
+					}
+					
+					newBlock.ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnExprForm), OpCode.RET, new Object[] {retVars}));
+					
+					for (Variable var : retVars) {
+						f.getRetType().add(var.type);
+					}
+				}
+				
+				if (!insertInto.isEmpty()) scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx), OpCode.LAMBDA, new Object[] {insertInto.get(0), f}));
+				
+				return Arrays.asList(new TypeRef(f.asType()));
 			}
 		};
 		

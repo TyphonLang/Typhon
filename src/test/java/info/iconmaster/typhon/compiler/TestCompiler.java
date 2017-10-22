@@ -904,6 +904,46 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(0, code.tni.errors.size());
 		}),new TestCase("{int a = true; print(a);} void f() {}", (code)->{
 			Assert.assertEquals(1, code.tni.errors.size());
+		}),new TestCase("void f() {(int) -> int f = (int i) => i;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			
+			Assert.assertEquals(OpCode.LAMBDA, code.ops.get(0).op);
+			
+			Function f = code.ops.get(0).<Function>arg(1);
+			Assert.assertNotNull(f.getCode());
+			Assert.assertEquals(2, f.getCode().ops.size());
+			
+			Assert.assertEquals(OpCode.MOV, f.getCode().ops.get(0).op);
+			Assert.assertEquals(OpCode.RET, f.getCode().ops.get(1).op);
+		}),new TestCase("void f() {int x; (int) -> int f = (int i) => x;}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			
+			Assert.assertEquals(OpCode.LAMBDA, code.ops.get(0).op);
+			
+			Function f = code.ops.get(0).<Function>arg(1);
+			Assert.assertNotNull(f.getCode());
+			Assert.assertEquals(2, f.getCode().ops.size());
+			
+			Assert.assertEquals(OpCode.MOV, f.getCode().ops.get(0).op);
+			Assert.assertEquals(OpCode.RET, f.getCode().ops.get(1).op);
+		}),new TestCase("void f() {int x; (int) -> (int, int) f = (int i) => (i, x);}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			Assert.assertEquals(1, code.ops.size());
+			
+			Assert.assertEquals(OpCode.LAMBDA, code.ops.get(0).op);
+			
+			Function f = code.ops.get(0).<Function>arg(1);
+			Assert.assertNotNull(f.getCode());
+			Assert.assertEquals(3, f.getCode().ops.size());
+			
+			Assert.assertEquals(OpCode.MOV, f.getCode().ops.get(0).op);
+			Assert.assertEquals(OpCode.MOV, f.getCode().ops.get(1).op);
+			Assert.assertEquals(OpCode.RET, f.getCode().ops.get(2).op);
 		}));
 	}
     

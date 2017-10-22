@@ -12,6 +12,7 @@ import info.iconmaster.typhon.antlr.TyphonParser.ExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.StatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.TypeContext;
 import info.iconmaster.typhon.compiler.CodeBlock;
+import info.iconmaster.typhon.types.FunctionType;
 import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
@@ -380,5 +381,19 @@ public class Function extends TyphonModelEntity implements MemberAccess {
 		sb.append(')');
 		
 		return sb.toString();
+	}
+	
+	public FunctionType asType() {
+		FunctionType type = new FunctionType(tni, source);
+		
+		for (Parameter param : getParams()) {
+			type.getArgTypes().add(param.getType());
+		}
+		
+		for (TypeRef ret : getRetType()) {
+			type.getRetTypes().add(ret);
+		}
+		
+		return type;
 	}
 }

@@ -12,6 +12,7 @@ import org.antlr.v4.codegen.model.chunk.RetValueRef;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 import info.iconmaster.typhon.antlr.TyphonBaseVisitor;
+import info.iconmaster.typhon.antlr.TyphonParser.AnonFuncParamContext;
 import info.iconmaster.typhon.antlr.TyphonParser.ArrayConstExprContext;
 import info.iconmaster.typhon.antlr.TyphonParser.AssignStatContext;
 import info.iconmaster.typhon.antlr.TyphonParser.BinOps1ExprContext;
@@ -1867,18 +1868,15 @@ public class TyphonCompiler {
 				Scope newScope = new Scope(newBlock, scope);
 				f.setCode(newBlock);
 				
-				for (ParamDeclContext rawArg : ctx.tnFuncArgs.tnArgs) {
+				for (AnonFuncParamContext rawArg : ctx.tnFuncArgs.tnParams) {
 					Parameter p = new Parameter(core.tni, new SourceInfo(rawArg));
 					p.setName(rawArg.tnName.getText());
-					p.setType(TyphonTypeResolver.readType(core.tni, rawArg.tnType, newScope));
+					p.setType(rawArg.tnType == null ? TypeRef.var(core.tni) : TyphonTypeResolver.readType(core.tni, rawArg.tnType, newScope));
 					p.setVar(newScope.addVar(p.getName(), p.getType(), p.source));
 					
-					f.getParams().add(p);
+					// TODO: type inference for when they leave out the param types
 					
-					if (rawArg.tnDefaultValue != null) {
-						// error; optional anonymous params not allowed
-						core.tni.errors.add(new NotAllowedHereError(new SourceInfo(rawArg), "optional parameters"));
-					}
+					f.getParams().add(p);
 				}
 				
 				if (ctx.tnExprForm == null) {

@@ -65,7 +65,7 @@ expr:
 |	tnAnnots+=annotation* tnValue=NUMBER																									#numConstExpr
 |	tnAnnots+=annotation* tnValue=STRING																									#stringConstExpr
 |	tnAnnots+=annotation* tnValue=CHAR																										#charConstExpr
-|	tnAnnots+=annotation* tnFuncTemplate=templateDecls? '(' tnFuncArgs=paramsDecl ')' ('=>' tnExprForm=exprs | '{' tnBlockForm+=stat* '}')	#funcConstExpr
+|	tnAnnots+=annotation* tnFuncTemplate=templateDecls? tnFuncArgs=anonFuncParams ('=>' tnExprForm=exprs | '{' tnBlockForm+=stat* '}')		#funcConstExpr
 |	tnAnnots+=annotation* '[' (tnValues+=expr (',' tnValues+=expr)*)? ','? ']'																#arrayConstExpr
 |	tnAnnots+=annotation* '{' (tnKeys+=expr ':' tnValues+=expr (',' tnKeys+=expr ':' tnValues+=expr)*)? ','? '}'							#mapConstExpr
 |	tnAnnots+=annotation* '(' tnExpr=expr ')'																								#parensExpr
@@ -73,6 +73,8 @@ expr:
 exprs: tnExprs+=expr | '(' (tnExprs+=expr (',' tnExprs+=expr)*)? ')';
 memberItem: (tnOp='.'|tnOp='?.'|tnOp='..') tnAnnots+=annotation* tnName=WORD tnTemplate=templateArgs?;
 caseExpr: 'case' tnIf+=expr (',' tnIf+=expr)* ':' tnThen=expr;
+anonFuncParam: tnAnnots+=annotation* (tnType=type tnName=WORD | tnName=WORD);
+anonFuncParams: tnParams+=anonFuncParam | '(' (tnParams+=anonFuncParam (',' tnParams+=anonFuncParam)*)? ','? ')';
 
 stat:
 	tnAnnots+=annotation* 'return' (tnValues+=expr (',' tnValues+=expr)*)? ';'																							#retStat

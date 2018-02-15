@@ -1053,7 +1053,13 @@ public class TyphonCompiler {
 						names.add(0, new LookupElement(((MemberExprContext) expr).tnValue.getText(), new SourceInfo(expr), AccessType.get(((MemberExprContext) expr).tnOp.getText())));
 						
 						names.addAll(0, ((MemberExprContext) expr).tnLookup.stream().map((e)->{
-							List<TemplateArgument> template = TyphonTypeResolver.readTemplateArgs(core.tni, e.tnTemplate.tnArgs, scope);
+							List<TemplateArgument> template;
+							if (e.tnTemplate != null && e.tnTemplate.tnArgs != null) {
+								template = TyphonTypeResolver.readTemplateArgs(core.tni, e.tnTemplate.tnArgs, scope);
+							} else {
+								template = Arrays.asList();
+							}
+							
 							return new LookupElement(e.tnName.getText(), new SourceInfo(e), AccessType.get(e.tnOp.getText()), template);
 						}).collect(Collectors.toList()));
 						

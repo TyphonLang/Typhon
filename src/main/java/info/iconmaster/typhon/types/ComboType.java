@@ -12,12 +12,7 @@ import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.util.SourceInfo;
 import info.iconmaster.typhon.util.TemplateUtils;
 
-public class ComboType extends Type {
-	/**
-	 * The list of types that this type must conform to.
-	 */
-	private List<TypeRef> types = new ArrayList<>();
-	
+public class ComboType extends ExtendableType {
 	public ComboType(TyphonInput input, SourceInfo source) {
 		super(input, source);
 	}
@@ -29,20 +24,13 @@ public class ComboType extends Type {
 	public ComboType(TyphonInput input, Type... types) {
 		super(input);
 		
-		getTypes().addAll(Arrays.asList(types).stream().map(t->new TypeRef(t)).collect(Collectors.toList()));
+		getParentTypes().addAll(Arrays.asList(types).stream().map(t->new TypeRef(t)).collect(Collectors.toList()));
 	}
 	
 	public ComboType(TyphonInput input, TypeRef... types) {
 		super(input);
 		
-		getTypes().addAll(Arrays.asList(types));
-	}
-
-	/**
-	 * @return The list of types that this type must conform to.
-	 */
-	public List<TypeRef> getTypes() {
-		return types;
+		getParentTypes().addAll(Arrays.asList(types));
 	}
 	
 	@Override
@@ -50,11 +38,11 @@ public class ComboType extends Type {
 		if (!(o instanceof ComboType)) return false;
 		ComboType other = (ComboType) o;
 		
-		if (getTypes().size() != other.getTypes().size()) return false;
+		if (getParentTypes().size() != other.getParentTypes().size()) return false;
 		
 		int i = 0;
-		for (TypeRef type : getTypes()) {
-			if (!type.equals(other.getTypes().get(i))) return false;
+		for (TypeRef type : getParentTypes()) {
+			if (!type.equals(other.getParentTypes().get(i))) return false;
 			i++;
 		}
 		
@@ -63,12 +51,12 @@ public class ComboType extends Type {
 	
 	@Override
 	public List<MemberAccess> getMembers(Map<TemplateType, TypeRef> templateMap) {
-		return getTypes().stream().flatMap(t->t.getMembers(templateMap).stream()).collect(Collectors.toList());
+		return getParentTypes().stream().flatMap(t->t.getMembers(templateMap).stream()).collect(Collectors.toList());
 	}
 	
 	@Override
 	public Map<TemplateType, TypeRef> getTemplateMap(Map<TemplateType, TypeRef> templateMap) {
-		return getTypes().stream().map(t->t.getTemplateMap(templateMap)).reduce(new HashMap<>(), (a,b)->{
+		return getParentTypes().stream().map(t->t.getTemplateMap(templateMap)).reduce(new HashMap<>(), (a,b)->{
 			a.putAll(b);
 			return a;
 		});
@@ -76,7 +64,7 @@ public class ComboType extends Type {
 	
 	@Override
 	public boolean canCastTo(TypeRef a, TypeRef b) {
-		for (TypeRef type : getTypes()) {
+		for (TypeRef type : getParentTypes()) {
 			if (type.canCastTo(b)) {
 				return true;
 			}
@@ -102,7 +90,7 @@ public class ComboType extends Type {
 		
 		// the only possibility left: Neither a nor b can cast to each other directly
 		List<TypeRef> commons = new ArrayList<>();
-		for (TypeRef parent : ((ComboType)a.getType()).getTypes()) {
+		for (TypeRef parent : ((ComboType)a.getType()).getParentTypes()) {
 			TypeRef trueParent = TemplateUtils.replaceTemplates(parent, TemplateUtils.matchAllTemplateArgs(a));
 			
 			if (trueParent.equals(b)) {
@@ -122,7 +110,7 @@ public class ComboType extends Type {
 			return commons2.get(0);
 		} else {
 			ComboType combo = new ComboType(tni);
-			combo.getTypes().addAll(commons2);
+			combo.getParentTypes().addAll(commons2);
 			return new TypeRef(combo);
 		}
 	}
@@ -132,8 +120,8 @@ public class ComboType extends Type {
 		StringBuilder sb = new StringBuilder();
 		
 		sb.append('(');
-		if (!getTypes().isEmpty()) {
-			for (TypeRef arg : getTypes()) {
+		if (!getParentTypes().isEmpty()) {
+			for (TypeRef arg : getParentTypes()) {
 				sb.append(arg.prettyPrint());
 				sb.append(" && ");
 			}

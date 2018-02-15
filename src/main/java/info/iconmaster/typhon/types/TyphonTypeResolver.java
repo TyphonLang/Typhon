@@ -282,7 +282,7 @@ public class TyphonTypeResolver {
 			ComboType type = new ComboType(tni, new SourceInfo(rule));
 			
 			for (TypeContext subtype : ((ComboTypeContext) rule).tnTypes) {
-				type.getTypes().add(readType(tni, subtype, lookup));
+				type.getParentTypes().add(readType(tni, subtype, lookup));
 			}
 			
 			TypeRef ref = new TypeRef(new SourceInfo(rule), type);

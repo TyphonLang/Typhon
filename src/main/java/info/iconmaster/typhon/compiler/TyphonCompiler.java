@@ -808,6 +808,7 @@ public class TyphonCompiler {
 					ForLvalueContext lval = ctx.tnLvals.get(0);
 					Variable loopVar = newScope.addVar(lval.tnName.getText(), TyphonTypeResolver.readType(core.tni, lval.tnType, newScope), new SourceInfo(lval.tnName));
 					
+					// TODO: this is a bad hack- Find exactly how iterableVar extends Iterable, and use that template argument, instantiated with the correct type map
 					TypeRef retType = core.TYPE_ITERATOR.FUNC_NEXT.getVirtualOverride(core.TYPE_ITERABLE.FUNC_ITERATOR.getVirtualOverride(iterableVar.type.getType()).getRetType().get(0).getType()).getRetType().get(0);
 					if (loopVar.type.isVar()) {
 						loopVar.type.isVar(false);

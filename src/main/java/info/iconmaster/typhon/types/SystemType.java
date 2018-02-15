@@ -18,12 +18,7 @@ import info.iconmaster.typhon.util.TemplateUtils;
  * @author iconmaster
  *
  */
-public class SystemType extends Type {
-	/**
-	 * The parent type. Cannot be null.
-	 */
-	private List<TypeRef> parentTypes = new ArrayList<>();
-	
+public class SystemType extends ExtendableType {
 	/**
 	 * The name of this type.
 	 */
@@ -39,9 +34,7 @@ public class SystemType extends Type {
 	 * @param parentType One or more parent types.
 	 */
 	public SystemType(String name, Type parentType, Type... otherParentTypes) {
-		super(parentType.tni);
-		this.parentTypes.add(new TypeRef(parentType));
-		this.parentTypes.addAll(Arrays.asList(otherParentTypes).stream().map((t)->new TypeRef(t)).collect(Collectors.toList()));
+		super(parentType, otherParentTypes);
 		this.name = name;
 	}
 	
@@ -50,22 +43,13 @@ public class SystemType extends Type {
 	 * @param parentType One or more parent types.
 	 */
 	public SystemType(String name, TypeRef parentType, TypeRef... otherParentTypes) {
-		super(parentType.tni);
-		this.parentTypes.add(parentType);
-		this.parentTypes.addAll(Arrays.asList(otherParentTypes));
+		super(parentType, otherParentTypes);
 		this.name = name;
 	}
 	
 	@Override
 	public String getName() {
 		return name;
-	}
-	
-	/**
-	 * @return The parent type. Cannot be null.
-	 */
-	public List<TypeRef> getParentTypes() {
-		return parentTypes;
 	}
 	
 	@Override
@@ -134,7 +118,7 @@ public class SystemType extends Type {
 			return commons2.get(0);
 		} else {
 			ComboType combo = new ComboType(tni);
-			combo.getTypes().addAll(commons2);
+			combo.getParentTypes().addAll(commons2);
 			return new TypeRef(combo);
 		}
 	}

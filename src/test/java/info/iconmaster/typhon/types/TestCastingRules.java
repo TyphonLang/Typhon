@@ -31,12 +31,12 @@ public class TestCastingRules extends TyphonTest {
     	TemplateType f2 = new TemplateType(tni, "F2");
     	
     	ComboType c = new ComboType(tni);
-    	c.getTypes().add(new TypeRef(p.TYPE_INT));
-    	c.getTypes().add(new TypeRef(p.TYPE_FLOAT));
+    	c.getParentTypes().add(new TypeRef(p.TYPE_INT));
+    	c.getParentTypes().add(new TypeRef(p.TYPE_FLOAT));
     	
     	ComboType d = new ComboType(tni);
-    	d.getTypes().add(new TypeRef(p.TYPE_LIST, new TemplateArgument(p.TYPE_ANY)));
-    	d.getTypes().add(new TypeRef(p.TYPE_NUMBER));
+    	d.getParentTypes().add(new TypeRef(p.TYPE_LIST, new TemplateArgument(p.TYPE_ANY)));
+    	d.getParentTypes().add(new TypeRef(p.TYPE_NUMBER));
     	
     	UserType b = new UserType(tni, "b");
     	b.getParentTypes().add(new TypeRef(p.TYPE_LIST, new TemplateArgument(p.TYPE_ANY)));

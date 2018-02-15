@@ -117,7 +117,7 @@ public abstract class Type extends TyphonModelEntity implements MemberAccess {
 		}
 		
 		if (b.getType() instanceof ComboType) {
-			for (TypeRef type : ((ComboType)b.getType()).getTypes()) {
+			for (TypeRef type : ((ComboType)b.getType()).getParentTypes()) {
 				if (!a.canCastTo(type)) {
 					return false;
 				}

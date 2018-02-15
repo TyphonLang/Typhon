@@ -20,12 +20,7 @@ import info.iconmaster.typhon.util.TemplateUtils;
  * @author iconmaster
  *
  */
-public class UserType extends Type {
-	/**
-	 * The parent type. Cannot be null.
-	 */
-	private List<TypeRef> parentTypes = new ArrayList<>();
-	
+public class UserType extends ExtendableType {
 	/**
 	 * The name of this type.
 	 */
@@ -56,9 +51,7 @@ public class UserType extends Type {
 	 * @param parentType One or more parent types.
 	 */
 	public UserType(String name, Type parentType, Type... otherParentTypes) {
-		super(parentType.tni);
-		this.parentTypes.add(new TypeRef(parentType));
-		this.parentTypes.addAll(Arrays.asList(otherParentTypes).stream().map((t)->new TypeRef(t)).collect(Collectors.toList()));
+		super(parentType, otherParentTypes);
 		this.name = name;
 	}
 	
@@ -67,22 +60,13 @@ public class UserType extends Type {
 	 * @param parentType One or more parent types.
 	 */
 	public UserType(String name, TypeRef parentType, TypeRef... otherParentTypes) {
-		super(parentType.tni);
-		this.parentTypes.add(parentType);
-		this.parentTypes.addAll(Arrays.asList(otherParentTypes));
+		super(parentType, otherParentTypes);
 		this.name = name;
 	}
 	
 	@Override
 	public String getName() {
 		return name;
-	}
-
-	/**
-	 * @return The parent types of this type.
-	 */
-	public List<TypeRef> getParentTypes() {
-		return parentTypes;
 	}
 
 	/**
@@ -193,7 +177,7 @@ public class UserType extends Type {
 			return commons2.get(0);
 		} else {
 			ComboType combo = new ComboType(tni);
-			combo.getTypes().addAll(commons2);
+			combo.getParentTypes().addAll(commons2);
 			return new TypeRef(combo);
 		}
 	}
@@ -212,44 +196,5 @@ public class UserType extends Type {
 			sb.append('>');
 		}
 		return sb.toString();
-	}
-	
-	public List<TypeRef> getAllParents() {
-		List<TypeRef> result = new ArrayList<>();
-		result.addAll(getParentTypes());
-		
-		boolean addedToResult = true;
-		while (addedToResult) {
-			if (addedToResult) {
-				addedToResult = false;
-			}
-			
-			for (TypeRef type : new ArrayList<>(result)) {
-				if (type.getType() instanceof UserType) {
-					for (TypeRef parentType : ((UserType)type.getType()).getParentTypes()) {
-						if (!result.contains(parentType)) {
-							result.add(parentType);
-							addedToResult = true;
-						}
-					}
-				} else if (type.getType() instanceof SystemType) {
-					for (TypeRef parentType : ((SystemType)type.getType()).getParentTypes()) {
-						if (!result.contains(parentType)) {
-							result.add(parentType);
-							addedToResult = true;
-						}
-					}
-				} else if (type.getType() instanceof ComboType) {
-					for (TypeRef parentType : ((ComboType)type.getType()).getTypes()) {
-						if (!result.contains(parentType)) {
-							result.add(parentType);
-							addedToResult = true;
-						}
-					}
-				}
-			}
-		}
-		
-		return result;
 	}
 }

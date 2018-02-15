@@ -82,8 +82,8 @@ public class CoreTypeMap extends UserType {
 				
 		}, new Parameter[] {
 				
-		}, new Type[] {
-				tni.corePackage.TYPE_INT
+		}, new TypeRef[] {
+				FIELD_KEYS.getType()
 		}));
 		FUNC_KEYS.getAnnots().add(new Annotation(tni.corePackage.ANNOT_ABSTRACT));
 		FIELD_KEYS.setGetter(FUNC_KEYS);

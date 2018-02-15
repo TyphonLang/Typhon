@@ -98,6 +98,7 @@ import info.iconmaster.typhon.model.TemplateArgument;
 import info.iconmaster.typhon.model.TyphonModelReader;
 import info.iconmaster.typhon.model.libs.CorePackage;
 import info.iconmaster.typhon.types.AnyType;
+import info.iconmaster.typhon.types.ExtendableType;
 import info.iconmaster.typhon.types.SystemType;
 import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.types.Type;
@@ -784,11 +785,6 @@ public class TyphonCompiler {
 				Variable iterableVar = newScope.addTempVar(TypeRef.var(new TypeRef(core.TYPE_ITERABLE)), new SourceInfo(ctx.tnExpr));
 				compileExpr(newScope, ctx.tnExpr, Arrays.asList(iterableVar));
 				
-				if (!iterableVar.type.canCastTo(new TypeRef(core.TYPE_ITERABLE))) {
-					// error; iterator must be iterable
-					core.tni.errors.add(new TypeError(new SourceInfo(ctx.tnExpr), iterableVar.type, new TypeRef(core.TYPE_ITERABLE)));
-				}
-				
 				Variable iteratorVar = newScope.addTempVar(new TypeRef(core.TYPE_ITERATOR), new SourceInfo(ctx.tnExpr));
 				scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(ctx.tnExpr), OpCode.CALL, new Object[] {Arrays.asList(iteratorVar), iterableVar, core.TYPE_ITERABLE.FUNC_ITERATOR, Arrays.asList()}));
 				
@@ -808,8 +804,15 @@ public class TyphonCompiler {
 					ForLvalueContext lval = ctx.tnLvals.get(0);
 					Variable loopVar = newScope.addVar(lval.tnName.getText(), TyphonTypeResolver.readType(core.tni, lval.tnType, newScope), new SourceInfo(lval.tnName));
 					
-					// TODO: this is a bad hack- Find exactly how iterableVar extends Iterable, and use that template argument, instantiated with the correct type map
-					TypeRef retType = core.TYPE_ITERATOR.FUNC_NEXT.getVirtualOverride(core.TYPE_ITERABLE.FUNC_ITERATOR.getVirtualOverride(iterableVar.type.getType()).getRetType().get(0).getType()).getRetType().get(0);
+					if (!(iterableVar.type.getType() instanceof ExtendableType)) {
+						// error; iterable argument does not extend Iterator
+						core.tni.errors.add(new TypeError(new SourceInfo(ctx.tnExpr), iterableVar.type, new TypeRef(core.TYPE_ITERABLE)));
+						return null;
+					}
+					
+					List<TypeRef> iterTypes = ((ExtendableType) iterableVar.type.getType()).getAllParents().stream().filter(t->t.getType() == core.TYPE_ITERABLE).collect(Collectors.toList());
+					// TODO: What if we have mutliple iterable handlers?
+					TypeRef retType = TemplateUtils.matchAllTemplateArgs(iterTypes.get(0)).get(core.TYPE_ITERABLE.T);
 					if (loopVar.type.isVar()) {
 						loopVar.type.isVar(false);
 						

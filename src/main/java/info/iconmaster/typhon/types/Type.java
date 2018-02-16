@@ -15,6 +15,7 @@ import info.iconmaster.typhon.model.Field;
 import info.iconmaster.typhon.model.Function;
 import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.model.Package;
+import info.iconmaster.typhon.model.StaticInitBlock;
 import info.iconmaster.typhon.model.TyphonModelEntity;
 import info.iconmaster.typhon.util.SourceInfo;
 import info.iconmaster.typhon.util.TemplateUtils;
@@ -230,7 +231,7 @@ public abstract class Type extends TyphonModelEntity implements MemberAccess {
 		while (!mems.isEmpty()) {
 			MemberAccess mem = mems.pop();
 			
-			if (mem instanceof Field && ((Field)mem).getFieldOf() != null && new TypeRef(this).canCastTo(new TypeRef((((Field)mem).getFieldOf())))) {
+			if (mem instanceof Field && !((Field)mem).isStatic() && new TypeRef(this).canCastTo(new TypeRef((((Field)mem).getFieldOf())))) {
 				result.add(((Field)mem));
 			} else if (mem instanceof Package || mem instanceof TypeRef || mem instanceof Type) {
 				for (MemberAccess child : mem.getMembers(new HashMap<>())) {
@@ -251,12 +252,33 @@ public abstract class Type extends TyphonModelEntity implements MemberAccess {
 		while (!mems.isEmpty()) {
 			MemberAccess mem = mems.pop();
 			
-			if (mem instanceof Function && ((Function)mem).getFieldOf() != null && new TypeRef(this).canCastTo(new TypeRef(((Function)mem).getFieldOf()))) {
+			if (mem instanceof Function && !((Function)mem).isStatic() && new TypeRef(this).canCastTo(new TypeRef(((Function)mem).getFieldOf()))) {
 				if (includeVirtualBases) {
 					result.add(((Function)mem));
 				} else {
 					result.add(((Function)mem).getVirtualOverride(this));
 				}
+			} else if (mem instanceof Package || mem instanceof TypeRef || mem instanceof Type) {
+				for (MemberAccess child : mem.getMembers(new HashMap<>())) {
+					mems.push(child);
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	public Set<StaticInitBlock> getAllInstanceInitBlocks() {
+		Set<StaticInitBlock> result = new HashSet<>();
+		
+		Stack<MemberAccess> mems = new Stack<>();
+		mems.add(this);
+		
+		while (!mems.isEmpty()) {
+			MemberAccess mem = mems.pop();
+			
+			if (mem instanceof StaticInitBlock && !((StaticInitBlock)mem).isStatic() && new TypeRef(this).canCastTo(new TypeRef(((StaticInitBlock)mem).getFieldOf()))) {
+				result.add(((StaticInitBlock)mem));
 			} else if (mem instanceof Package || mem instanceof TypeRef || mem instanceof Type) {
 				for (MemberAccess child : mem.getMembers(new HashMap<>())) {
 					mems.push(child);

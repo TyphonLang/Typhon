@@ -14,7 +14,7 @@ import info.iconmaster.typhon.util.SourceInfo;
  * @author iconmaster
  *
  */
-public class StaticInitBlock extends TyphonModelEntity {
+public class StaticInitBlock extends TyphonModelEntity implements MemberAccess {
 	/**
 	 * The code that runs on initialization.
 	 */
@@ -123,5 +123,15 @@ public class StaticInitBlock extends TyphonModelEntity {
 	 */
 	public boolean isStatic() {
 		return getFieldOf() == null;
+	}
+
+	@Override
+	public String getName() {
+		return null;
+	}
+
+	@Override
+	public MemberAccess getMemberParent() {
+		return parent;
 	}
 }

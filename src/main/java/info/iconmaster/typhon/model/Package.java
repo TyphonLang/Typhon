@@ -506,6 +506,7 @@ public class Package extends TyphonModelEntity implements MemberAccess {
 		a.addAll(getFields());
 		a.addAll(getTypes());
 		a.addAll(getAnnotDefs());
+		a.addAll(getStaticInitBlocks());
 		
 		for (Import i : getImports()) {
 			for (Package p : i.getResolvedTo()) {

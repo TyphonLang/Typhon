@@ -2,16 +2,19 @@ package info.iconmaster.typhon.types;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.Stack;
 
 import info.iconmaster.typhon.TyphonInput;
 import info.iconmaster.typhon.model.AnnotationDefinition;
+import info.iconmaster.typhon.model.Field;
 import info.iconmaster.typhon.model.Function;
 import info.iconmaster.typhon.model.MemberAccess;
 import info.iconmaster.typhon.model.Package;
-import info.iconmaster.typhon.model.Parameter;
 import info.iconmaster.typhon.model.TyphonModelEntity;
 import info.iconmaster.typhon.util.SourceInfo;
 import info.iconmaster.typhon.util.TemplateUtils;
@@ -216,5 +219,51 @@ public abstract class Type extends TyphonModelEntity implements MemberAccess {
 		sb.append(getName());
 		
 		return sb.toString();
+	}
+	
+	public Set<Field> getAllFields() {
+		Set<Field> result = new HashSet<>();
+		
+		Stack<MemberAccess> mems = new Stack<>();
+		mems.add(this);
+		
+		while (!mems.isEmpty()) {
+			MemberAccess mem = mems.pop();
+			
+			if (mem instanceof Field && ((Field)mem).getFieldOf() != null && new TypeRef(this).canCastTo(new TypeRef((((Field)mem).getFieldOf())))) {
+				result.add(((Field)mem));
+			} else if (mem instanceof Package || mem instanceof TypeRef || mem instanceof Type) {
+				for (MemberAccess child : mem.getMembers(new HashMap<>())) {
+					mems.push(child);
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	public Set<Function> getAllMethods(boolean includeVirtualBases) {
+		Set<Function> result = new HashSet<>();
+		
+		Stack<MemberAccess> mems = new Stack<>();
+		mems.add(this);
+		
+		while (!mems.isEmpty()) {
+			MemberAccess mem = mems.pop();
+			
+			if (mem instanceof Function && ((Function)mem).getFieldOf() != null && new TypeRef(this).canCastTo(new TypeRef(((Function)mem).getFieldOf()))) {
+				if (includeVirtualBases) {
+					result.add(((Function)mem));
+				} else {
+					result.add(((Function)mem).getVirtualOverride(this));
+				}
+			} else if (mem instanceof Package || mem instanceof TypeRef || mem instanceof Type) {
+				for (MemberAccess child : mem.getMembers(new HashMap<>())) {
+					mems.push(child);
+				}
+			}
+		}
+		
+		return result;
 	}
 }

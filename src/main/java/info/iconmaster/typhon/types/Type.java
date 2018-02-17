@@ -171,7 +171,7 @@ public abstract class Type extends TyphonModelEntity implements MemberAccess {
 				if (this.canCastTo(new TypeRef(this), new TypeRef(f.getFieldOf())) && f.hasAnnot(op)) {
 					result.add(f);
 				}
- 			} else {
+ 			} else if (member instanceof Package || member instanceof TypeRef || member instanceof Type) {
 				members.addAll(member.getMembers(new HashMap<>()));
 			}
 		}

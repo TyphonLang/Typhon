@@ -26,7 +26,6 @@ import info.iconmaster.typhon.model.libs.CorePackage;
 import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
-import info.iconmaster.typhon.util.LookupUtils.FuncArgMap;
 import info.iconmaster.typhon.util.LookupUtils.LookupElement.AccessType;
 import info.iconmaster.typhon.util.LookupUtils.LookupPath.Subject;
 

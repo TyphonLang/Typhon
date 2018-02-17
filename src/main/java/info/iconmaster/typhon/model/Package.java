@@ -2,10 +2,14 @@ package info.iconmaster.typhon.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
 
 import info.iconmaster.typhon.TyphonInput;
+import info.iconmaster.typhon.model.libs.CorePackage;
 import info.iconmaster.typhon.types.TemplateType;
 import info.iconmaster.typhon.types.Type;
 import info.iconmaster.typhon.types.TypeRef;
@@ -539,5 +543,86 @@ public class Package extends TyphonModelEntity implements MemberAccess {
 		sb.append(getName());
 		
 		return sb.toString();
+	}
+	
+	public Set<Field> getAllGlobals() {
+		Set<Field> result = new HashSet<>();
+		
+		Stack<MemberAccess> mems = new Stack<>();
+		mems.push(this);
+		
+		while (!mems.isEmpty()) {
+			MemberAccess mem = mems.pop();
+			
+			if (mem instanceof Field && ((Field)mem).isStatic()) {
+				result.add(((Field)mem));
+			} else if (mem instanceof CorePackage) {
+				for (MemberAccess child : ((CorePackage)mem).getCoreSubpackages()) {
+					mems.push(child);
+				}
+			}
+			
+			if (mem instanceof Package || mem instanceof TypeRef || mem instanceof Type) {
+				for (MemberAccess child : mem.getMembers(new HashMap<>())) {
+					mems.push(child);
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	public Set<Function> getAllFunctions() {
+		Set<Function> result = new HashSet<>();
+		
+		Stack<MemberAccess> mems = new Stack<>();
+		mems.push(this);
+		
+		while (!mems.isEmpty()) {
+			MemberAccess mem = mems.pop();
+			
+			if (mem instanceof Function && ((Function)mem).isStatic()) {
+				result.add(((Function)mem));
+			} else if (mem instanceof CorePackage) {
+				for (MemberAccess child : ((CorePackage)mem).getCoreSubpackages()) {
+					mems.push(child);
+				}
+			}
+			
+			if (mem instanceof Package || mem instanceof TypeRef || mem instanceof Type) {
+				for (MemberAccess child : mem.getMembers(new HashMap<>())) {
+					mems.push(child);
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	public Set<StaticInitBlock> getAllStaticInitBlocks() {
+		Set<StaticInitBlock> result = new HashSet<>();
+		
+		Stack<MemberAccess> mems = new Stack<>();
+		mems.push(this);
+		
+		while (!mems.isEmpty()) {
+			MemberAccess mem = mems.pop();
+			
+			if (mem instanceof StaticInitBlock && ((StaticInitBlock)mem).isStatic()) {
+				result.add(((StaticInitBlock)mem));
+			} else if (mem instanceof CorePackage) {
+				for (MemberAccess child : ((CorePackage)mem).getCoreSubpackages()) {
+					mems.push(child);
+				}
+			}
+			
+			if (mem instanceof Package || mem instanceof TypeRef || mem instanceof Type) {
+				for (MemberAccess child : mem.getMembers(new HashMap<>())) {
+					mems.push(child);
+				}
+			}
+		}
+		
+		return result;
 	}
 }

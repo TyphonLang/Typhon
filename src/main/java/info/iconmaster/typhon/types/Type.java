@@ -226,7 +226,7 @@ public abstract class Type extends TyphonModelEntity implements MemberAccess {
 		Set<Field> result = new HashSet<>();
 		
 		Stack<MemberAccess> mems = new Stack<>();
-		mems.add(this);
+		mems.push(this);
 		
 		while (!mems.isEmpty()) {
 			MemberAccess mem = mems.pop();
@@ -247,7 +247,7 @@ public abstract class Type extends TyphonModelEntity implements MemberAccess {
 		Set<Function> result = new HashSet<>();
 		
 		Stack<MemberAccess> mems = new Stack<>();
-		mems.add(this);
+		mems.push(this);
 		
 		while (!mems.isEmpty()) {
 			MemberAccess mem = mems.pop();
@@ -272,7 +272,7 @@ public abstract class Type extends TyphonModelEntity implements MemberAccess {
 		Set<StaticInitBlock> result = new HashSet<>();
 		
 		Stack<MemberAccess> mems = new Stack<>();
-		mems.add(this);
+		mems.push(this);
 		
 		while (!mems.isEmpty()) {
 			MemberAccess mem = mems.pop();

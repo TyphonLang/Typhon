@@ -113,7 +113,7 @@ public class TemplateUtils {
 		int i = 0;
 		for (TypeRef param : params) {
 			TypeRef arg = args.get(i);
-			
+
 			if (param.getType() instanceof TemplateType) {
 				// we have a match
 				TemplateType t = (TemplateType) param.getType();

@@ -80,6 +80,7 @@ public class Constructor extends Function {
 			p.isField = true;
 			p.markAsLibrary();
 			p.setName(f.getName());
+			p.setType(f.getType());
 			
 			return p;
 		}

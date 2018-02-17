@@ -961,6 +961,8 @@ public class TestCompiler extends TyphonTest {
 			}
 			
 			Assert.assertEquals(1, nCalls);
+		}),new TestCase("void f() {throw new Error(\"test\");}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
 		}));
 	}
     

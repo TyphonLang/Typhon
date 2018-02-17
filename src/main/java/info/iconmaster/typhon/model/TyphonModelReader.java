@@ -84,7 +84,6 @@ public class TyphonModelReader {
 			TyphonLexer lexer = new TyphonLexer(new ANTLRFileStream(file.getPath()));
 			TyphonParser parser = new TyphonParser(new CommonTokenStream(lexer));
 			
-			parser.setErrorHandler(new BailErrorStrategy());
 			parser.removeErrorListeners();
 			parser.addErrorListener(new BaseErrorListener() {
 				@Override

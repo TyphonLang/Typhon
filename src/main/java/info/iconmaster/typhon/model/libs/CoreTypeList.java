@@ -16,7 +16,7 @@ public class CoreTypeList extends UserType {
 	
 	public Field FIELD_SIZE;
 	
-	public Function FUNC_GET, FUNC_SET, FUNC_SIZE;
+	public Function FUNC_GET, FUNC_SET, FUNC_SIZE, FUNC_ADD, FUNC_REMOVE;
 	
 	public CoreTypeList(TyphonInput input) {
 		super(input, "List"); markAsLibrary();
@@ -64,6 +64,25 @@ public class CoreTypeList extends UserType {
 		}));
 		FUNC_SIZE.getAnnots().add(new Annotation(tni.corePackage.ANNOT_ABSTRACT));
 		FIELD_SIZE.setGetter(FUNC_SIZE);
+		
+		getTypePackage().addFunction(FUNC_ADD = new Function(tni, "add", new TemplateType[] {
+				
+		}, new Parameter[] {
+				new Parameter(tni, "v", T, false),
+				new Parameter(tni, "i", tni.corePackage.TYPE_INT, true),
+		}, new Type[] {
+				
+		}));
+		FUNC_ADD.getAnnots().add(new Annotation(tni.corePackage.ANNOT_ABSTRACT));
+		
+		getTypePackage().addFunction(FUNC_REMOVE = new Function(tni, "remove", new TemplateType[] {
+				
+		}, new Parameter[] {
+				new Parameter(tni, "i", tni.corePackage.TYPE_INT, true),
+		}, new Type[] {
+				T
+		}));
+		FUNC_REMOVE.getAnnots().add(new Annotation(tni.corePackage.ANNOT_ABSTRACT));
 		
 		// add concrete methods
 		// TODO

@@ -950,6 +950,17 @@ public class TestCompiler extends TyphonTest {
 			Assert.assertEquals(OpCode.MOV, f.getCode().ops.get(0).op);
 			Assert.assertEquals(OpCode.MOV, f.getCode().ops.get(1).op);
 			Assert.assertEquals(OpCode.RET, f.getCode().ops.get(2).op);
+		}),new TestCase("void f() {var a = []; print(a.remove());}", (code)->{
+			Assert.assertEquals(0, code.tni.errors.size());
+			
+			int nCalls = 0;
+			for (Instruction inst : code.ops) {
+				if (inst.op == Instruction.OpCode.CALL && inst.<Function>arg(2).getName().equals("remove")) {
+					nCalls++;
+				}
+			}
+			
+			Assert.assertEquals(1, nCalls);
 		}));
 	}
     

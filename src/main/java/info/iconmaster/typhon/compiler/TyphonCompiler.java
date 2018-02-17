@@ -2313,6 +2313,8 @@ public class TyphonCompiler {
 				
 				// save state
 				List<Instruction> ops = scope.getCodeBlock().ops;
+				scope.getCodeBlock().ops = new ArrayList<>();
+				
 				Scope newScope = new Scope(scope.getCodeBlock(), scope);
 				
 				// first pass: get number of args
@@ -2336,6 +2338,8 @@ public class TyphonCompiler {
 				
 				// save state
 				List<Instruction> ops = scope.getCodeBlock().ops;
+				scope.getCodeBlock().ops = new ArrayList<>();
+				
 				Scope newScope = new Scope(scope.getCodeBlock(), scope);
 				
 				// first pass: get number of args

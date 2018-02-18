@@ -191,9 +191,10 @@ public class TyphonCompiler {
 			}
 			
 			// TODO: if we don't return void, check if all paths end in a RET
-		} else {
-			// expr form
+		} else if (f.getForm() == Function.Form.EXPR) {
 			List<Variable> vars = new ArrayList<>();
+			List<Variable> allVars = vars;
+			
 			for (TypeRef retType : f.getRetType()) {
 				vars.add(scope.addTempVar(retType, new SourceInfo((List) f.getRawCode())));
 			}
@@ -203,7 +204,7 @@ public class TyphonCompiler {
 				vars = vars.subList(used, vars.size());
 			}
 			
-			block.ops.add(new Instruction(f.tni, new SourceInfo((List) f.getRawCode()), OpCode.RET, new Object[] {vars}));
+			block.ops.add(new Instruction(f.tni, new SourceInfo((List) f.getRawCode()), OpCode.RET, new Object[] {allVars}));
 		}
 	}
 	

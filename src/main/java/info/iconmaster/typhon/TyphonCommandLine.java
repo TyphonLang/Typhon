@@ -22,17 +22,24 @@ import info.iconmaster.typhon.util.CommandLineHelper.Option;
 public class TyphonCommandLine {
 	private TyphonCommandLine() {}
 	
-	public static final Option OPTION_HELP = new Option(new String[] {"help"}, new String[] {"h"}, false, "Produces this help message.");
-	public static final Option OPTION_VERSION = new Option(new String[] {"version"}, new String[] {"v"}, false, "Prints the version and exits.");
-	public static final Option OPTION_PATH = new Option(new String[] {"path"}, new String[] {"p"}, true, "Specifies a location where raw file imports look. Defaults to the CWD.");
-	public static final Option OPTION_LIBS = new Option(new String[] {"include"}, new String[] {"i"}, true, "Specifies a file or directory of Typhon libraries.");
+	public static Option OPTION_HELP;
+	public static Option OPTION_VERSION;
+	public static Option OPTION_PATH;
+	public static Option OPTION_LIBS;
 	
-	public static final Command COMMAND_CHECK = new Command("check", new String[] {"ch"}, "Checks the provided files for compilation errors.", Typhon.onRunCheck);
+	public static Command COMMAND_CHECK;
 	
 	/**
 	 * The command line parser Typhon uses.
 	 */
 	public static CommandLineHelper getCommandLineHelper() {
+		OPTION_HELP = new Option(new String[] {"help"}, new String[] {"h"}, false, "Produces this help message.");
+		OPTION_VERSION = new Option(new String[] {"version"}, new String[] {"v"}, false, "Prints the version and exits.");
+		OPTION_PATH = new Option(new String[] {"path"}, new String[] {"p"}, true, "Specifies a location where raw file imports look. Defaults to the CWD.");
+		OPTION_LIBS = new Option(new String[] {"include"}, new String[] {"i"}, true, "Specifies a file or directory of Typhon libraries.");
+		
+		COMMAND_CHECK = new Command("check", new String[] {"ch"}, "Checks the provided files for compilation errors.", Typhon.onRunCheck);
+		
 		List<Object> options = new ArrayList<Object>() {{
 			add(COMMAND_CHECK);
 			

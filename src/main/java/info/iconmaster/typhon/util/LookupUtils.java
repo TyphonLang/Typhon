@@ -728,7 +728,7 @@ public class LookupUtils {
 		List<TypeRef> params = f.getParams().stream().filter(p->map.args.containsKey(p)).map(p->p.getType()).collect(Collectors.toList());
 		List<TypeRef> args2 = f.getParams().stream().filter(p->map.args.containsKey(p)).map(p->map.args.get(p).type).collect(Collectors.toList());
 
-		Map<TemplateType, TypeRef> funcTempMap = TemplateUtils.inferTemplatesFromArguments(core.tni, params, args2, f.getFuncTemplateMap());
+		Map<TemplateType, TypeRef> funcTempMap = TemplateUtils.inferTemplatesFromArguments(core.tni, params, args2, f.getFuncTemplateMap(typeMap));
 		
 		// check if the types match up to the signature
 		for (Entry<Parameter, Variable> entry : map.args.entrySet()) {

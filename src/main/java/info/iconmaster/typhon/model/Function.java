@@ -272,8 +272,9 @@ public class Function extends TyphonModelEntity implements MemberAccess {
 		return "Function("+getRetType()+" "+name+getParams()+")";
 	}
 	
-	public Map<TemplateType, TypeRef> getFuncTemplateMap() {
+	public Map<TemplateType, TypeRef> getFuncTemplateMap(Map<TemplateType, TypeRef> typeMap) {
 		Map<TemplateType, TypeRef> result = new HashMap<>();
+		result.putAll(typeMap);
 		for (TemplateType t : getTemplate()) {
 			result.put(t, t.getDefaultValue() == null ? t.getBaseType() : t.getDefaultValue());
 		}

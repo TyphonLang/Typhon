@@ -2842,7 +2842,7 @@ public class TyphonCompiler {
 		List<TypeRef> params = f.getParams().stream().filter(p->map.args.containsKey(p)).map(p->p.getType()).collect(Collectors.toList());
 		List<TypeRef> args2 = f.getParams().stream().filter(p->map.args.containsKey(p)).map(p->map.args.get(p).type).collect(Collectors.toList());
 		
-		Map<TemplateType, TypeRef> funcTempMap = TemplateUtils.inferTemplatesFromArguments(core.tni, params, args2, f.getFuncTemplateMap());
+		Map<TemplateType, TypeRef> funcTempMap = TemplateUtils.inferTemplatesFromArguments(core.tni, params, args2, f.getFuncTemplateMap(sub == null ? instanceVar.getTemplateMap(new HashMap<>()) : sub.typeMap));
 		
 		Subject finalSub = sub;
 		List<TypeRef> retType = f.getRetType().stream().map(t->TemplateUtils.replaceTemplates(TemplateUtils.replaceTemplates(t, funcTempMap), finalSub == null ? new HashMap<>() : finalSub.typeMap)).collect(Collectors.toList());

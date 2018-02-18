@@ -8,7 +8,7 @@ class MyIterator : Iterator<int> {
 	
 	@override
 	int next() {
-		x += 1;
+		x = x + 1;
 		return x;
 	}
 	

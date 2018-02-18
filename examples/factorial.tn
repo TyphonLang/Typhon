@@ -17,8 +17,8 @@ int factorialIter(int n) {
 	int i = n;
 	
 	while i > 1 {
-		product *= i;
-		i -= 1;
+		product = product * i;
+		i = i - 1;
 	}
 	
 	return product;
@@ -33,6 +33,6 @@ void testFactorial() {
 		print(") = ");
 		println(factorialShort(i));
 		
-		i += 1;
+		i = i + 1;
 	}
 }

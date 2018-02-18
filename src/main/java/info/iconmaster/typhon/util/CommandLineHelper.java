@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import info.iconmaster.typhon.TyphonInput;
+
 /**
  * This class parses command line arguments in a standard fashion.
  * 
@@ -64,6 +66,10 @@ public class CommandLineHelper {
 	 *
 	 */
 	public static class Command {
+		public static interface OnRun {
+			public void onRun(TyphonInput tni, CommandLineHelper claHelper, Result result);
+		}
+		
 		/**
 		 * The official name for this command.
 		 */
@@ -80,14 +86,21 @@ public class CommandLineHelper {
 		public String description;
 		
 		/**
+		 * What to do when this command is specified.
+		 */
+		public OnRun onRun;
+		
+		/**
 		 * @param longName The official name for this command.
 		 * @param shortNames A list of shorter shortcut names for this command.
 		 * @param description A short description of what running this command does.
+		 * @param onRun What to do when this command is specified.
 		 */
-		public Command(String longName, String[] shortNames, String description) {
+		public Command(String longName, String[] shortNames, String description, OnRun onRun) {
 			this.longName = longName;
 			this.shortNames = shortNames;
 			this.description = description;
+			this.onRun = onRun;
 		}
 	}
 	

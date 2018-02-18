@@ -14,6 +14,7 @@ import info.iconmaster.typhon.plugins.TyphonPlugin;
 import info.iconmaster.typhon.types.TyphonAnnotChecker;
 import info.iconmaster.typhon.types.TyphonTypeResolver;
 import info.iconmaster.typhon.util.CommandLineHelper;
+import info.iconmaster.typhon.util.CommandLineHelper.Command;
 import info.iconmaster.typhon.util.CommandLineHelper.Result;
 import info.iconmaster.typhon.util.CommandLineHelper.UnknownCommandException;
 import info.iconmaster.typhon.util.CommandLineHelper.UnknownOptionException;
@@ -196,18 +197,15 @@ public class Typhon {
 						}
 					}
 				}
-				
-				if (options.commands.contains(TyphonCommandLine.COMMAND_CHECK)) {
-					System.out.println(tni.errors.size()+" compilation errors found.");
-				}
-				return;
 			}
 			
-			if (options.commands.contains(TyphonCommandLine.COMMAND_CHECK)) {
-				System.out.println("0 compilation errors found.");
-			}
+			// run any commands (even if there were errors!)
 			
 			PluginLoader.runHook(TyphonPlugin.OnCompilationComplete.class, claHelper, options, tni);
+			
+			for (Command c : options.commands) {
+				c.onRun.onRun(tni, claHelper, options);
+			}
 		} catch (UnknownOptionException | UnknownCommandException e) {
 			System.err.println("error: "+e.getMessage());
 			System.err.println();
@@ -215,4 +213,8 @@ public class Typhon {
 			return;
 		}
 	}
+	
+	public static final Command.OnRun onRunCheck = (tni, claHelper, result) -> {
+		System.out.println(tni.errors.size()+" compilation errors found.");
+	};
 }

@@ -27,7 +27,7 @@ public class TyphonCommandLine {
 	public static final Option OPTION_PATH = new Option(new String[] {"path"}, new String[] {"p"}, true, "Specifies a location where raw file imports look. Defaults to the CWD.");
 	public static final Option OPTION_LIBS = new Option(new String[] {"include"}, new String[] {"i"}, true, "Specifies a file or directory of Typhon libraries.");
 	
-	public static final Command COMMAND_CHECK = new Command("check", new String[] {"ch"}, "Checks the provided files for compilation errors.");
+	public static final Command COMMAND_CHECK = new Command("check", new String[] {"ch"}, "Checks the provided files for compilation errors.", Typhon.onRunCheck);
 	
 	/**
 	 * The command line parser Typhon uses.

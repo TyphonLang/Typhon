@@ -12,10 +12,10 @@ Alternately, you can set up a dedicated launch configuration for yourself. Go to
 
 ## Running from the command line
 
-You will need [TnBox](https://github.com/TyphonLang/TnBox) to run Typhon programs. Get the JAR, and run:
+You will need [TnBox](https://github.com/TyphonLang/TnBox) to run Typhon programs. Get the complete JAR, and run:
 
 ```
-java -jar tnbox.jar <your file>.tn
+java -jar tnbox-complete.jar <your file>.tn
 ```
 
 to run an example.

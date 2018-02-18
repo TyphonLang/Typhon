@@ -22,16 +22,16 @@ Check out the `examples` directory for example Typhon programs.
 
 ## Running
 
-To run Typhon, first download the JAR from [Bintray](https://bintray.com/iconmaster5326/maven/typhon/_latestVersion), our Maven repository and download provider. Then invoke it like so:
+To run Typhon, first download the complete JAR from [Bintray](https://bintray.com/iconmaster5326/maven/typhon/_latestVersion), our Maven repository and download provider. Note that there are three JARs to download per version; to get the one you can run from the command line, look for the one with `-complete` at the end of the file name. Then invoke it like so:
 
 ```
-java -jar typhon.jar
+java -jar typhon-complete.jar
 ```
 
 This will print the basic Typhon usage, showing you what subcommands and options you can specify. The most basic use of Typhon is to check programs for compilation errors; to do this, run the `check` subcommand as follows:
 
 ```
-java -jar typhon.jar check your_file.tn
+java -jar typhon-complete.jar check your_file.tn
 ```
 
 To run Typhon programs, check out [TnBox](https://github.com/TyphonLang/TnBox), the official Typhon VM. You can also check and run programs from Eclipse using [TnClipse](https://github.com/TyphonLang/TnClipse).
@@ -46,7 +46,7 @@ This project uses [Gradle](http://gradle.org) to build. To build this repository
 
 This will compile Typhon, downloading all the needed dependencies from Maven.
 
-There are other Gradle tasks to run as well, such as `jar`, `sourcesJar`, `compileJava`, `generateGrammarSource`, and `test`. Run `./gradlew help` for more options.
+There are other Gradle tasks to run as well, such as `jar`, `sourcesJar`, `completeJar`, `compileJava`, `generateGrammarSource`, and `test`. Run `./gradlew help` for more options.
 
 ## Contributing
 

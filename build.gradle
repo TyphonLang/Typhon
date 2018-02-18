@@ -77,9 +77,6 @@ jar {
     manifest {
         attributes 'Main-Class': mainClass
     }
-    
-    // uncomment the next line if you want a standalone jar
-    // from configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) }
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -91,7 +88,19 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     from sourceSets.main.allSource
 }
 
+task completeJar(type: Jar, dependsOn: classes) {
+    manifest {
+        attributes 'Main-Class': mainClass
+    }
+    
+    classifier = 'complete'
+    
+    from configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) }
+    with jar
+}
+
 artifacts {
 	archives jar
     archives sourcesJar
+    archives completeJar
 }

@@ -1,0 +1,10 @@
+/*
+	This is the classic Hello, World program... In Typhon!
+	
+	To run this code in TnClipse, right-click this file in the Project Explorer, go to "Run As", and select "TnBox".
+*/
+
+@main
+void helloWorld() {
+	println("Hello, World!");
+}

@@ -1,0 +1,49 @@
+/*
+	This file demonstrates how iterators and for loops currently work in Typhon.
+*/
+
+// The Iterator class requires two methods in order to step through all of its template type:
+class MyIterator : Iterator<int> {
+	int x = 0;
+	
+	@override
+	int next() {
+		x += 1;
+		return x;
+	}
+	
+	@override
+	bool done() {
+		return x > 10;
+	}
+}
+
+// The Iterable class represents something that can produce an iterator.
+class MyIterable : Iterable<int> {
+	@override
+	Iterator<int> iterator() {
+		return new MyIterator();
+	}
+}
+
+@main
+void testIterator() {
+	// You can use your own iterators in for loops:
+	println("Custom iterable:");
+	for var i : new MyIterable() {
+		println(i);
+	}
+	
+	// Alternately, the List and Map classes have thier own implementation of iterators:
+	println("List iterable:");
+	for var i : [1,2,3,4,5,6,7,8,9,10] {
+		println(i);
+	}
+	
+	println("Map iterable:");
+	for var i : {1:2, 2:3, 3:4, 4:5} {
+		print(i.key);
+		print(" = ");
+		println(i.value);
+	}
+}

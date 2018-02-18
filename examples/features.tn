@@ -1,0 +1,67 @@
+// this file demonstrates some syntax features of Typhon.
+
+void demonstrateListsAndMaps() {
+	// List and map constants!
+	List<int> ints = [1,2,3];
+	
+	// These constants are smart about thier type, too:
+	List<Number> nums = [1,2.0,3 as byte];
+	
+	// Type inference! use 'var' in local variable declarations.
+	// The type below will be assumed to be 'List<Map<string,int>>':
+	var listMap = [{"a":1},{"b":2}];
+	
+	// Use [] syntax everywhere! Typhon has full support for operator overloading.
+	var a = listMap[0]["a"];
+}
+
+// Typhon is object-oriented, supports templates, and supports full multiple inheritance...
+// Or at least it will soon. Something something solving the diamond problem.
+class Cons<T> {
+	T value;
+	Cons<T> next;
+	
+	// Constructors have a short-hand form for setting fields:
+	new(this.value, this.next);
+	
+	// We support multiple returns as part of the language:
+	(Cons,T) getLast() {
+		var currentCons = this;
+		
+		while currentCons.next != null {
+			currentCons = currentCons.next;
+		}
+		
+		return currentCons, currentCons.value;
+	}
+}
+
+void manipulateCons() {
+	var cons = new Cons<int>(1, new Cons<int>(2, new Cons<int>(3, null)));
+	
+	// Features for dealing with nulls! a?.b returns a.b if a isn't null, and null otherwise.
+	int valueOrNull = cons?.next?.next?.value;
+	
+	// If you want to provide default values, use the short-circuiting ?? operator:
+	int valueOrOne = cons.value ?? 1;
+}
+
+List<int> manipulateLists() {
+	var list = [1,2,3,4];
+	
+	// the method 'List.add' returns void, but we can chain multiple adds together with the .. operator!
+	// a..b evaluates a.b, but returns a, like so:
+	list..add(5)..add(6).add(7);
+}
+
+// Here's the above example, turned into a re-usable function!
+// 'f() => r' is fully equivalent to 'f() {return r;}'.
+List<int> addThreeItems(List<int> list) => list..add(5)..add(6)..add(7)
+
+// Here's a function, like above, that takes a template.
+List<T> addThreeTimes<T>(List<T> list, T item) => list..add(item)..add(item)..add(item)
+
+/*
+	And there you have it. A short tour of some Typhon features!
+	Look in the other files in this directory for more examples.
+*/

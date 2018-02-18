@@ -1,0 +1,33 @@
+/*
+	This file demonstrates Typhon's error-handling features.
+*/
+
+// Error is the base class for all Typhon errors. You can extend it!
+class MyError : Error {
+	new() {
+		this.message = "An error occured!";
+	}
+}
+
+// throw errors like so:
+void throwError() {
+	throw new MyError();
+}
+
+// and catch them like so:
+void catchError() {
+	try {
+		throwError();
+	} catch MyError e {
+		println(e.message);
+	}
+}
+
+// Or just let them go uncaught:
+@main
+void testErrors() {
+	println("Caught:");
+	catchError();
+	println("Uncaught:");
+	throwError();
+}

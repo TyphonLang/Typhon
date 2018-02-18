@@ -1,0 +1,37 @@
+/*
+	This file demonstrates Typhon's parameter/argument features.
+*/
+
+// All functions can have default values for arguments, making them optional:
+int f(int required, int optional = 0) => required + optional
+
+// Functions can be overloaded based on arguments:
+string f(string required, string optional = "") => required ?? optional
+
+// Functions can be called, both implicitly and explicitly naming parameters:
+void callF() {
+	f(1);
+	f(1, 2);
+	f(required: 1, optional: 2);
+	f(optional: 2, 1);
+	f("Hello");
+}
+
+// Typhon has varargs! This function takes one or more ints:
+int giveInts(int first, List<int> @vararg more) => more.size+1
+
+void callGiveInts() {
+	giveInts(1);
+	giveInts(1, 2);
+	giveInts(1, 2, 3);
+	giveInts(1, more: [2, 3]);
+}
+
+// We also have varflags: like varargs, but collecting the keyword arguments.
+int giveKeyword(string word, Map<string, int> @varflag ints) => ints[word]
+
+void callGiveKeyword() {
+	giveKeyword("n", n: 100);
+	giveKeyword("x", y: 7, x: 8);
+	giveKeyword(a: 1, b: 2, c: 3, word: "b");
+}

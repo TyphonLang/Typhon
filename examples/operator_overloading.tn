@@ -1,0 +1,54 @@
+/*
+	This file demonstrates how operator overloading works in Typhon.
+*/
+
+import operator;
+
+class MyList {
+	// this operator, 'operator.index.get', implements a[b] sorta syntax.
+	// The arguments can be of any number and any type!
+	@index.get
+	int iget(int index, int defaultValue) {
+		switch index {
+			case 1 {
+				return 0;
+			}
+			case 2 {
+				return 24;
+			}
+			default {
+				return defaultValue;
+			}
+		}
+	}
+	
+	// You can set indices as well:
+	@index.set
+	void iset(int value, int index) {
+		print("You tried to set ");
+		print(index);
+		print(" to ");
+		print(value);
+		println("!");
+	}
+	
+	// Most of the math operators have overloads, too:
+	@add
+	string addThem(MyList other) => "You tried to add together 2 lists!"
+	
+	@eq
+	bool equals(MyList other) => true
+}
+
+@main
+void testOperatorOverloads() {
+	MyList mine = new MyList();
+	
+	println(mine[1, null as int]);
+	println(mine[7, 11]);
+	
+	mine[999] = 666;
+	
+	println(mine + mine);
+	println(mine == mine);
+}

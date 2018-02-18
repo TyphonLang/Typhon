@@ -1,0 +1,67 @@
+/*
+	This file shows off some features of Typhon's class system.
+*/
+
+// Here are some basic class definitions, defining fields and methods.
+class Printable {
+	string prefix;
+	
+	void print() {
+		println("<unknown>");
+	}
+}
+
+class Exportable {
+	bool exact;
+}
+
+// Full multiple inheritance! Classes can derive fields and methods from multiple superclasses.
+class Report : Printable, Exportable {
+	// Here is a constructor definition.
+	// Parameters to a constructor with 'this.' prefixed simply set the field on startup, such that
+	// 'int x; new(this.x) {...}' is equivalent to 'int x; new(int x) {this.x = x; ...}'.
+	new(/*this.prefix, this.exact*/) {
+		println("New report created!");
+	}
+	
+	// with getters and setters, you can make methods that look and feel just like fields!
+	@getter
+	bool hasPrefix() => prefix != null
+	
+	void setPrefix(string newPrefix) {
+		if (hasPrefix) {
+			prefix = newPrefix;
+		}
+	}
+	
+	// and, of course, methods can be overriden:
+	@override
+	void print() {
+		println("Report!");
+	}
+}
+
+// Classes and functions can have templates! Templates can have both a base class and a default value.
+class BiFunction<A : Number = int, B : Number = int> {
+	T add<T : Number = int>(A a, B b) => (a + b) as T
+}
+
+// Classes can be abstract, too:
+@abstract
+class Base {
+	@abstract void doTheThing();
+}
+
+class Derived : Base {
+	// try deleting this method and see the error that results:
+	@override void doTheThing() => println("Thing done!")
+}
+
+// Static methods and fields are a thing, if you want them inside a class:
+class StaticStuff {
+	@static int globalInt;
+	
+	@static void setGlobal(int x) {
+		globalInt = x;
+	}
+}

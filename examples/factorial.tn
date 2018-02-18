@@ -1,0 +1,38 @@
+/*
+	This program implements a simple factorial function in multiple ways.
+*/
+
+int factorialShort(int n) => if n <= 1: n else: n*factorialShort(n-1)
+
+int factorialLong(int n) {
+	if n <= 1 {
+		return n;
+	} else {
+		return n*factorialLong(n-1);
+	}
+}
+
+int factorialIter(int n) {
+	int product = 1;
+	int i = n;
+	
+	while i > 1 {
+		product *= i;
+		i -= 1;
+	}
+	
+	return product;
+}
+
+@main
+void testFactorial() {
+	int i = 1;
+	while i <= 10 {
+		print("factorial(");
+		print(i);
+		print(") = ");
+		println(factorialShort(i));
+		
+		i += 1;
+	}
+}

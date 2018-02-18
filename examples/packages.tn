@@ -1,0 +1,44 @@
+/*
+	Typhon has a system for basic modularization called packages. Here's how they work.
+*/
+
+// A package declaration with a ; at the end marks the rest of the file as being in this package.
+package rootPackage;
+
+// you can also declare packages like this:
+package subPackage1 {
+	int global;
+	
+	class A {
+		@static void f() {}
+	}
+}
+
+// packages can import other packages:
+package subPackage2 {
+	import rootPackage.subPackage1;
+	
+	void doIt() {
+		global = 1;
+		A.f();
+	}
+}
+
+// because these sub-packages are in the same root package, this can also be written as:
+package subPackage3 {
+	import subPackage1;
+	
+	void doIt() {
+		global = 1;
+		A.f();
+	}
+}
+
+// package names can be aliased:
+package subPackage4 {
+	import subPackage1 as theGoodPackage;
+	
+	void doIt() {
+		theGoodPackage.global = 2;
+	}
+}

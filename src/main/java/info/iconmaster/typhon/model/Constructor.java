@@ -109,7 +109,7 @@ public class Constructor extends Function {
 			if (!isField) {
 				return null;
 			} else {
-				return thisType.getTypePackage().getField(getName());
+				return thisType.getAllFields().stream().filter((f)->f.getName().equals(getName())).findFirst().orElse(null);
 			}
 		}
 	}

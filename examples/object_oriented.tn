@@ -59,7 +59,7 @@ class Derived : Base {
 
 // Static methods and fields are a thing, if you want them inside a class:
 class StaticStuff {
-	@static int globalInt;
+	int @static globalInt;
 	
 	@static void setGlobal(int x) {
 		globalInt = x;

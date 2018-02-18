@@ -957,7 +957,7 @@ public class TyphonCompiler {
 								
 								scope.getCodeBlock().ops.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALLSTATIC, new Object[] {Arrays.asList(insertInto.get(0)), f.getGetter(), new ArrayList<>()}));
 								return Arrays.asList(f.type);
-							} else if (scope.getCodeBlock().instance != null && fieldOf.equals(scope.getCodeBlock().instance.type.getType())) {
+							} else if (scope.getCodeBlock().instance != null && scope.getCodeBlock().instance.type.canCastTo(new TypeRef(fieldOf))) {
 								// it's an instance field!
 								if (f.getGetter() == null) {
 									// error; field is write-only
@@ -2398,7 +2398,7 @@ public class TyphonCompiler {
 								
 								postfix.add(new Instruction(core.tni, new SourceInfo(rule), OpCode.CALLSTATIC, new Object[] {Arrays.asList(), f.getSetter(), Arrays.asList(var)}));
 								return var;
-							} else if (scope.getCodeBlock().instance != null && fieldOf.equals(scope.getCodeBlock().instance.type.getType())) {
+							} else if (scope.getCodeBlock().instance != null && scope.getCodeBlock().instance.type.canCastTo(new TypeRef(fieldOf))) {
 								// it's an instance field!
 								if (f.getSetter() == null) {
 									// error; field is read-only

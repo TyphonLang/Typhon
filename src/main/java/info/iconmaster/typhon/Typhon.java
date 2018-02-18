@@ -15,6 +15,7 @@ import info.iconmaster.typhon.types.TyphonAnnotChecker;
 import info.iconmaster.typhon.types.TyphonTypeResolver;
 import info.iconmaster.typhon.util.CommandLineHelper;
 import info.iconmaster.typhon.util.CommandLineHelper.Result;
+import info.iconmaster.typhon.util.CommandLineHelper.UnknownCommandException;
 import info.iconmaster.typhon.util.CommandLineHelper.UnknownOptionException;
 import info.iconmaster.typhon.util.FileUtils;
 
@@ -53,7 +54,12 @@ public class Typhon {
 				return;
 			}
 			
-			PluginLoader.runHook(TyphonPlugin.OnCompilationBegun.class, claHelper, options);
+			if (options.commands.size() == 0) {
+				System.err.println("error: no commands specified");
+				System.err.println();
+				claHelper.printUsage(System.err);
+				return;
+			}
 			
 			if (options.positionalArguments.size() == 0) {
 				System.err.println("error: no input files specified");
@@ -61,6 +67,8 @@ public class Typhon {
 				claHelper.printUsage(System.err);
 				return;
 			}
+			
+			PluginLoader.runHook(TyphonPlugin.OnCompilationBegun.class, claHelper, options);
 			
 			// build the TyphonInput
 			
@@ -188,11 +196,19 @@ public class Typhon {
 						}
 					}
 				}
+				
+				if (options.commands.contains(TyphonCommandLine.COMMAND_CHECK)) {
+					System.out.println(tni.errors.size()+" compilation errors found.");
+				}
 				return;
 			}
 			
+			if (options.commands.contains(TyphonCommandLine.COMMAND_CHECK)) {
+				System.out.println("0 compilation errors found.");
+			}
+			
 			PluginLoader.runHook(TyphonPlugin.OnCompilationComplete.class, claHelper, options, tni);
-		} catch (UnknownOptionException e) {
+		} catch (UnknownOptionException | UnknownCommandException e) {
 			System.err.println("error: "+e.getMessage());
 			System.err.println();
 			claHelper.printUsage(System.err);

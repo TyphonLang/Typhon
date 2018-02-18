@@ -9,6 +9,7 @@ import java.util.Map;
 import info.iconmaster.typhon.plugins.PluginLoader;
 import info.iconmaster.typhon.plugins.TyphonPlugin;
 import info.iconmaster.typhon.util.CommandLineHelper;
+import info.iconmaster.typhon.util.CommandLineHelper.Command;
 import info.iconmaster.typhon.util.CommandLineHelper.Option;
 
 /**
@@ -26,11 +27,15 @@ public class TyphonCommandLine {
 	public static final Option OPTION_PATH = new Option(new String[] {"path"}, new String[] {"p"}, true, "Specifies a location where raw file imports look. Defaults to the CWD.");
 	public static final Option OPTION_LIBS = new Option(new String[] {"include"}, new String[] {"i"}, true, "Specifies a file or directory of Typhon libraries.");
 	
+	public static final Command COMMAND_CHECK = new Command("check", new String[] {"ch"}, "Checks the provided files for compilation errors.");
+	
 	/**
 	 * The command line parser Typhon uses.
 	 */
 	public static CommandLineHelper getCommandLineHelper() {
-		List<Option> options = new ArrayList<Option>() {{
+		List<Object> options = new ArrayList<Object>() {{
+			add(COMMAND_CHECK);
+			
 			add(OPTION_HELP);
 			add(OPTION_VERSION);
 			add(OPTION_PATH);
@@ -39,15 +44,19 @@ public class TyphonCommandLine {
 		
 		Map<Class<?>, Object> additionalOptions = PluginLoader.runHook(TyphonPlugin.AddCommandLineOptions.class);
 		for (Object o : additionalOptions.values()) {
-			if (o instanceof Option) {
-				options.add((Option) o);
-			} else if (o instanceof Option[]) {
+			if (o instanceof Option[]) {
 				options.addAll(Arrays.asList((Option[]) o));
+			} else if (o instanceof Command[]) {
+				options.addAll(Arrays.asList((Command[]) o));
+			} else if (o instanceof Object[]) {
+				options.addAll(Arrays.asList((Object[]) o));
 			} else if (o instanceof Collection) {
-				options.addAll((Collection<? extends Option>) o);
+				options.addAll((Collection) o);
+			} else {
+				options.add(o);
 			}
 		}
 		
-		return new CommandLineHelper("typhon [-options] files...", options.toArray(new Option[0]));
+		return new CommandLineHelper((Object[]) options.toArray(new Object[options.size()]));
 	} 
 }

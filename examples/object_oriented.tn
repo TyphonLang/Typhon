@@ -20,7 +20,7 @@ class Report : Printable, Exportable {
 	// Here is a constructor definition.
 	// Parameters to a constructor with 'this.' prefixed simply set the field on startup, such that
 	// 'int x; new(this.x) {...}' is equivalent to 'int x; new(int x) {this.x = x; ...}'.
-	new(/*this.prefix, this.exact*/) {
+	new(this.prefix, this.exact) {
 		println("New report created!");
 	}
 	

@@ -34,4 +34,5 @@ void callGiveKeyword() {
 	giveKeyword("n", n: 100);
 	giveKeyword("x", y: 7, x: 8);
 	giveKeyword(a: 1, b: 2, c: 3, word: "b");
+	giveKeyword("x", ints: {"x":1, "y":2});
 }
